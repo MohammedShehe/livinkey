@@ -162,7 +162,7 @@ class _LoginScreenState extends State<LoginScreen>
                             child: ScaleTransition(
                               scale: _logoScaleAnimation,
                               child: Image.asset(
-                                'assets/images/white_logo.png',
+                                'assets/images/general_logo.png',
                                 height: 80,
                                 width: 80,
                                 fit: BoxFit.contain,
