@@ -18,14 +18,16 @@ class _SplashScreenState extends State<SplashScreen>
   void initState() {
     super.initState();
 
-    // Slowed further (was 4200ms) for a calmer, more deliberate glide.
+    // Slowed further (was 6000ms) for an even calmer, more deliberate glide
+    // now that the key also tumbles while it travels.
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 6000),
+      duration: const Duration(milliseconds: 7500),
     );
 
-    // 0.0 = key at its starting point above the roof
-    // 1.0 = key at the end of the path, resting next to 'e', straight (like 'Y')
+    // 0.0 = key at its starting point above the roof, upright
+    // 1.0 = key at the end of the path, resting next to 'e', having
+    //       completed a full 360° tumble so it lands straight (like 'Y')
     _keyRotation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeInOutSine),
     );

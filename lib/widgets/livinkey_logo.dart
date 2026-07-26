@@ -58,25 +58,26 @@ const List<Offset> _keyPath = [
   Offset(1125, 322),  // 6: End - key's natural resting position
 ];
 
-/// Rotation values at each waypoint (radians). The key now stays upright
-/// for the entire slide and finishes STRAIGHT (like a 'Y') instead of
-/// flipping upside down — the flip itself now lives in the Get Started
-/// screen's rotation-only animation instead.
-const List<double> _keyRotations = [
-  0.0, // 0: start, upright
-  0.0, // 1: L
-  0.0, // 2: v
-  0.0, // 3: n
-  0.0, // 4: k
-  0.0, // 5: e
-  0.0, // 6: end - straight
+/// Rotation values at each waypoint (radians). The key now does a full,
+/// continuous 360° tumble WHILE it slides through the letters — spinning
+/// as it travels rather than staying flat — and lands back at 2*pi, which
+/// is visually identical to 0 (straight, like a 'Y'), so it still finishes
+/// perfectly upright at the resting spot next to the "e".
+final List<double> _keyRotations = [
+  0.0,             // 0: start, upright
+  math.pi * 0.3,   // 1: L      - spin begins
+  math.pi * 0.8,   // 2: v
+  math.pi * 1.3,   // 3: n      - past halfway through the spin
+  math.pi * 1.7,   // 4: k
+  math.pi * 1.95,  // 5: e      - nearly back around to upright
+  math.pi * 2.0,   // 6: end    - full rotation complete, visually straight
 ];
 
 const double kLogoAspectRatio = _canvasW / _canvasH;
 
 /// Full "Livinkey — A Complete Home" logo with key sliding through letters.
 /// Use this ONLY on the Splash screen — it drives both the key's position
-/// and (now flat) rotation along the letter path.
+/// and its tumbling rotation along the letter path.
 class LivinkeyLogo extends StatelessWidget {
   final Animation<double> keyAnimation;
   final double width;
@@ -190,7 +191,7 @@ class LivinkeyLogo extends StatelessWidget {
             },
           ),
 
-          // Animated key (slides, stays upright, ends straight)
+          // Animated key (slides + tumbles, lands straight)
           AnimatedBuilder(
             animation: keyAnimation,
             builder: (context, child) {
@@ -419,7 +420,7 @@ class _LivinkeyLogoExampleState extends State<LivinkeyLogoExample>
   void initState() {
     super.initState();
     _controller = AnimationController(
-      duration: const Duration(milliseconds: 6000),
+      duration: const Duration(milliseconds: 7500),
       vsync: this,
     )..addStatusListener((status) {
         if (status == AnimationStatus.completed) {
