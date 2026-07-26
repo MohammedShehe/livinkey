@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/gestures.dart';
 import '../widgets/livinkey_logo.dart';
+import 'login_screen.dart';
 
 /// Modern animated "Get Started" screen with smooth transitions
 class GetStartedScreen extends StatefulWidget {
@@ -109,11 +110,6 @@ class _GetStartedScreenState extends State<GetStartedScreen>
         body: SafeArea(
           child: FadeTransition(
             opacity: _fadeAnimation,
-            // AnimatedBuilder makes sure everything below actually rebuilds
-            // on every tick of _mainController, instead of freezing at the
-            // very first (begin) value of _slideAnimation/_scaleAnimation.
-            // That frozen offset was what caused the header and subtitle
-            // boxes to visually overlap ("interfere with each other").
             child: AnimatedBuilder(
               animation: _mainController,
               builder: (context, _) {
@@ -317,7 +313,26 @@ class _GetStartedScreenState extends State<GetStartedScreen>
           ),
           onPressed: () {
             HapticFeedback.lightImpact();
-            // TODO: navigate to your login / signup screen
+            // Navigate to Login Screen with smooth transition
+            Navigator.of(context).push(
+              PageRouteBuilder(
+                pageBuilder: (context, animation, secondaryAnimation) =>
+                    const LoginScreen(),
+                transitionsBuilder:
+                    (context, animation, secondaryAnimation, child) {
+                  const begin = Offset(1.0, 0.0);
+                  const end = Offset.zero;
+                  const curve = Curves.easeInOutCubic;
+                  var tween = Tween(begin: begin, end: end)
+                      .chain(CurveTween(curve: curve));
+                  var offsetAnimation = animation.drive(tween);
+                  return SlideTransition(
+                    position: offsetAnimation,
+                    child: child,
+                  );
+                },
+              ),
+            );
           },
           child: const Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -345,10 +360,6 @@ class _GetStartedScreenState extends State<GetStartedScreen>
   }
 
   Widget _buildTermsText() {
-    // Base style all spans share so link text renders at the SAME size
-    // as the surrounding copy. Previously the links were WidgetSpan +
-    // Text widgets with no fontSize set, so they fell back to the
-    // ambient theme size instead of inheriting the 12px base style.
     const baseStyle = TextStyle(
       fontSize: 12,
       height: 1.6,
