@@ -18,15 +18,16 @@ class _SplashScreenState extends State<SplashScreen>
   void initState() {
     super.initState();
 
+    // Slowed further (was 4200ms) for a calmer, more deliberate glide.
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1300),
+      duration: const Duration(milliseconds: 6000),
     );
 
-    // 1.0 = key "straight up" (starting position)
-    // 0.0 = key "facing down", matching the final logo artwork
-    _keyRotation = Tween<double>(begin: 1.0, end: 0.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOutBack),
+    // 0.0 = key at its starting point above the roof
+    // 1.0 = key at the end of the path, resting next to 'e', straight (like 'Y')
+    _keyRotation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOutSine),
     );
 
     _startSequence();
@@ -34,7 +35,7 @@ class _SplashScreenState extends State<SplashScreen>
 
   Future<void> _startSequence() async {
     // small pause so the "straight" key is visible for a beat before it moves
-    await Future.delayed(const Duration(milliseconds: 400));
+    await Future.delayed(const Duration(milliseconds: 500));
     if (!mounted) return;
     await _controller.forward();
 

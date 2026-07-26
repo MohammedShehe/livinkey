@@ -61,6 +61,9 @@ class _GetStartedScreenState extends State<GetStartedScreen>
       ),
     );
 
+    // Drives the ROTATION-ONLY key flip (straight -> upside down) on this
+    // screen, via LivinkeyLogoKeyFlip below. This does NOT use the
+    // slide-through-letters path logic — that's Splash-screen only.
     _keyRotationAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
         parent: _logoController,
@@ -120,7 +123,7 @@ class _GetStartedScreenState extends State<GetStartedScreen>
                     children: [
                       const Spacer(flex: 1),
 
-                      // Animated Logo with Scale Transition
+                      // Animated Logo — rotation only (straight -> upside down)
                       ScaleTransition(
                         scale: _scaleAnimation,
                         child: Container(
@@ -144,7 +147,7 @@ class _GetStartedScreenState extends State<GetStartedScreen>
                               width: 1,
                             ),
                           ),
-                          child: LivinkeyLogo(
+                          child: LivinkeyLogoKeyFlip(
                             keyAnimation: _keyRotationAnimation,
                             width: 280,
                           ),
