@@ -38,8 +38,8 @@ class _SplashScreenState extends State<SplashScreen>
     if (!mounted) return;
     await _controller.forward();
 
-    // hold the final logo on screen briefly, then move on
-    await Future.delayed(const Duration(milliseconds: 700));
+    // hold the final logo on screen for 3 seconds before moving on
+    await Future.delayed(const Duration(seconds: 3));
     if (!mounted) return;
 
     Navigator.of(context).pushReplacement(
