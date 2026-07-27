@@ -4,6 +4,7 @@ import 'package:flutter/gestures.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../widgets/livinkey_logo.dart';
+import 'forgot_password_screen.dart'; // Add this import
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -80,7 +81,26 @@ class _LoginScreenState extends State<LoginScreen>
     _forgotPasswordRecognizer = TapGestureRecognizer()
       ..onTap = () {
         HapticFeedback.selectionClick();
-        // TODO: Navigate to Forgot Password Screen
+        // Navigate to Forgot Password Screen with smooth transition
+        Navigator.of(context).push(
+          PageRouteBuilder(
+            pageBuilder: (context, animation, secondaryAnimation) =>
+                const ForgotPasswordScreen(),
+            transitionsBuilder:
+                (context, animation, secondaryAnimation, child) {
+              const begin = Offset(1.0, 0.0);
+              const end = Offset.zero;
+              const curve = Curves.easeInOutCubic;
+              var tween = Tween(begin: begin, end: end)
+                  .chain(CurveTween(curve: curve));
+              var offsetAnimation = animation.drive(tween);
+              return SlideTransition(
+                position: offsetAnimation,
+                child: child,
+              );
+            },
+          ),
+        );
       };
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
