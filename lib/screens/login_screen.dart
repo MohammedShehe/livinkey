@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/gestures.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../widgets/livinkey_logo.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -27,6 +28,11 @@ class _LoginScreenState extends State<LoginScreen>
 
   late final TapGestureRecognizer _signUpRecognizer;
   late final TapGestureRecognizer _forgotPasswordRecognizer;
+
+  // Social Media URLs
+  static const String _googleUrl = 'https://share.google/ktGKY5w8NCakvEo6u';
+  static const String _instagramUrl = 'https://www.instagram.com/livinkey';
+  static const String _facebookUrl = 'https://www.facebook.com/livin.key.9';
 
   @override
   void initState() {
@@ -94,11 +100,48 @@ class _LoginScreenState extends State<LoginScreen>
     super.dispose();
   }
 
+  // Email validation function
+  bool _isValidEmail(String email) {
+    // Basic email format validation using regex
+    final emailRegex = RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
+    return emailRegex.hasMatch(email);
+  }
+
   void _handleLogin() async {
-    if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
+    final String email = _emailController.text.trim();
+    final String password = _passwordController.text.trim();
+
+    // Check if email is empty
+    if (email.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Text('Please fill in all fields'),
+          content: const Text('Please enter your email address'),
+          backgroundColor: Colors.red.shade800,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        ),
+      );
+      return;
+    }
+
+    // Check if email format is valid
+    if (!_isValidEmail(email)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Please enter a valid email address'),
+          backgroundColor: Colors.red.shade800,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        ),
+      );
+      return;
+    }
+
+    // Check if password is empty
+    if (password.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Please enter your password'),
           backgroundColor: Colors.red.shade800,
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -124,6 +167,39 @@ class _LoginScreenState extends State<LoginScreen>
         ),
       );
       // TODO: Navigate to Home Screen
+    }
+  }
+
+  Future<void> _launchUrl(String url) async {
+    try {
+      final Uri uri = Uri.parse(url);
+      
+      // Try to launch with external application first
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(
+          uri,
+          mode: LaunchMode.externalApplication,
+        );
+      } else {
+        // If canLaunchUrl fails, try launching with in-app web view
+        // This will work even if the native app is not installed
+        await launchUrl(
+          uri,
+          mode: LaunchMode.inAppWebView,
+        );
+      }
+    } catch (e) {
+      // If all else fails, show error
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Could not open the link. Please try again.'),
+            backgroundColor: Colors.red.shade800,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          ),
+        );
+      }
     }
   }
 
@@ -526,7 +602,7 @@ class _LoginScreenState extends State<LoginScreen>
                                       color: const Color(0xFF1877F2),
                                       onTap: () {
                                         HapticFeedback.lightImpact();
-                                        // TODO: Facebook login
+                                        _launchUrl(_facebookUrl);
                                       },
                                     ),
                                     const SizedBox(width: 16),
@@ -535,16 +611,7 @@ class _LoginScreenState extends State<LoginScreen>
                                       color: const Color(0xFFE4405F),
                                       onTap: () {
                                         HapticFeedback.lightImpact();
-                                        // TODO: Instagram login
-                                      },
-                                    ),
-                                    const SizedBox(width: 16),
-                                    _buildSocialButton(
-                                      icon: FontAwesomeIcons.xTwitter,
-                                      color: Colors.white,
-                                      onTap: () {
-                                        HapticFeedback.lightImpact();
-                                        // TODO: X (Twitter) login
+                                        _launchUrl(_instagramUrl);
                                       },
                                     ),
                                     const SizedBox(width: 16),
@@ -553,16 +620,7 @@ class _LoginScreenState extends State<LoginScreen>
                                       color: const Color(0xFFEA4335),
                                       onTap: () {
                                         HapticFeedback.lightImpact();
-                                        // TODO: Google login
-                                      },
-                                    ),
-                                    const SizedBox(width: 16),
-                                    _buildSocialButton(
-                                      icon: FontAwesomeIcons.apple,
-                                      color: Colors.white,
-                                      onTap: () {
-                                        HapticFeedback.lightImpact();
-                                        // TODO: Apple login
+                                        _launchUrl(_googleUrl);
                                       },
                                     ),
                                   ],
