@@ -6,6 +6,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../widgets/livinkey_logo.dart';
 import 'forgot_password_screen.dart';
 import 'signup_screen.dart';
+import '../services/audio_service.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -35,10 +36,15 @@ class _LoginScreenState extends State<LoginScreen>
   static const String _googleUrl = 'https://share.google/ktGKY5w8NCakvEo6u';
   static const String _instagramUrl = 'https://www.instagram.com/livinkey';
   static const String _facebookUrl = 'https://www.facebook.com/livin.key.9';
+  static const String _whatsappNumber = '919878383497'; // Without + for URL
 
   @override
   void initState() {
     super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      AudioService.stopBackgroundMusic();
+    });
 
     _fadeController = AnimationController(
       duration: const Duration(milliseconds: 1200),
@@ -65,7 +71,6 @@ class _LoginScreenState extends State<LoginScreen>
       CurvedAnimation(parent: _fadeController, curve: Curves.easeOutBack),
     );
 
-    // Logo entrance animation - scale up with bounce
     _logoScaleAnimation = Tween<double>(begin: 0.5, end: 1.0).animate(
       CurvedAnimation(
         parent: _fadeController,
@@ -76,7 +81,6 @@ class _LoginScreenState extends State<LoginScreen>
     _signUpRecognizer = TapGestureRecognizer()
     ..onTap = () {
       HapticFeedback.selectionClick();
-      // Navigate to Sign Up Screen with smooth transition
       Navigator.of(context).push(
         PageRouteBuilder(
           pageBuilder: (context, animation, secondaryAnimation) =>
@@ -100,7 +104,6 @@ class _LoginScreenState extends State<LoginScreen>
     _forgotPasswordRecognizer = TapGestureRecognizer()
       ..onTap = () {
         HapticFeedback.selectionClick();
-        // Navigate to Forgot Password Screen with smooth transition
         Navigator.of(context).push(
           PageRouteBuilder(
             pageBuilder: (context, animation, secondaryAnimation) =>
@@ -139,9 +142,7 @@ class _LoginScreenState extends State<LoginScreen>
     super.dispose();
   }
 
-  // Email validation function
   bool _isValidEmail(String email) {
-    // Basic email format validation using regex
     final emailRegex = RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
     return emailRegex.hasMatch(email);
   }
@@ -150,7 +151,6 @@ class _LoginScreenState extends State<LoginScreen>
     final String email = _emailController.text.trim();
     final String password = _passwordController.text.trim();
 
-    // Check if email is empty
     if (email.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -163,7 +163,6 @@ class _LoginScreenState extends State<LoginScreen>
       return;
     }
 
-    // Check if email format is valid
     if (!_isValidEmail(email)) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -176,7 +175,6 @@ class _LoginScreenState extends State<LoginScreen>
       return;
     }
 
-    // Check if password is empty
     if (password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -191,7 +189,6 @@ class _LoginScreenState extends State<LoginScreen>
 
     setState(() => _isLoading = true);
 
-    // Simulate login API call
     await Future.delayed(const Duration(seconds: 2));
 
     setState(() => _isLoading = false);
@@ -213,26 +210,70 @@ class _LoginScreenState extends State<LoginScreen>
     try {
       final Uri uri = Uri.parse(url);
       
-      // Try to launch with external application first
       if (await canLaunchUrl(uri)) {
         await launchUrl(
           uri,
           mode: LaunchMode.externalApplication,
         );
       } else {
-        // If canLaunchUrl fails, try launching with in-app web view
-        // This will work even if the native app is not installed
         await launchUrl(
           uri,
           mode: LaunchMode.inAppWebView,
         );
       }
     } catch (e) {
-      // If all else fails, show error
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Could not open the link. Please try again.'),
+            content: const Text('Could not open the link. Please try again.'),
+            backgroundColor: Colors.red.shade800,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _launchWhatsApp() async {
+    final String phoneNumber = _whatsappNumber;
+    final String url = 'https://wa.me/$phoneNumber';
+    
+    try {
+      final Uri uri = Uri.parse(url);
+      
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(
+          uri,
+          mode: LaunchMode.externalApplication,
+        );
+      } else {
+        // Fallback to web.whatsapp.com
+        final String webUrl = 'https://web.whatsapp.com/send?phone=$phoneNumber';
+        final Uri webUri = Uri.parse(webUrl);
+        if (await canLaunchUrl(webUri)) {
+          await launchUrl(
+            webUri,
+            mode: LaunchMode.externalApplication,
+          );
+        } else {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: const Text('Please install WhatsApp to continue.'),
+                backgroundColor: Colors.red.shade800,
+                behavior: SnackBarBehavior.floating,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+            );
+          }
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('Could not open WhatsApp.'),
             backgroundColor: Colors.red.shade800,
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -271,7 +312,6 @@ class _LoginScreenState extends State<LoginScreen>
                         children: [
                           const SizedBox(height: 20),
 
-                          // Top Row with Logo - NO BOX, just big logo
                           Align(
                             alignment: Alignment.topRight,
                             child: ScaleTransition(
@@ -287,7 +327,6 @@ class _LoginScreenState extends State<LoginScreen>
 
                           const SizedBox(height: 32),
 
-                          // Welcome Text
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -315,7 +354,6 @@ class _LoginScreenState extends State<LoginScreen>
 
                           const SizedBox(height: 40),
 
-                          // Email Field
                           Container(
                             decoration: BoxDecoration(
                               gradient: LinearGradient(
@@ -375,7 +413,6 @@ class _LoginScreenState extends State<LoginScreen>
 
                           const SizedBox(height: 20),
 
-                          // Password Field
                           Container(
                             decoration: BoxDecoration(
                               gradient: LinearGradient(
@@ -451,7 +488,6 @@ class _LoginScreenState extends State<LoginScreen>
 
                           const SizedBox(height: 12),
 
-                          // Forgot Password
                           Align(
                             alignment: Alignment.centerRight,
                             child: Text.rich(
@@ -476,7 +512,6 @@ class _LoginScreenState extends State<LoginScreen>
 
                           const SizedBox(height: 32),
 
-                          // Login Button
                           AnimatedContainer(
                             duration: const Duration(milliseconds: 300),
                             width: double.infinity,
@@ -550,7 +585,6 @@ class _LoginScreenState extends State<LoginScreen>
 
                           const SizedBox(height: 24),
 
-                          // Sign Up Link
                           Center(
                             child: Text.rich(
                               TextSpan(
@@ -579,7 +613,6 @@ class _LoginScreenState extends State<LoginScreen>
 
                           const SizedBox(height: 32),
 
-                          // Social Login Section
                           Container(
                             padding: const EdgeInsets.symmetric(
                               horizontal: 20,
@@ -660,6 +693,15 @@ class _LoginScreenState extends State<LoginScreen>
                                       onTap: () {
                                         HapticFeedback.lightImpact();
                                         _launchUrl(_googleUrl);
+                                      },
+                                    ),
+                                    const SizedBox(width: 16),
+                                    _buildSocialButton(
+                                      icon: FontAwesomeIcons.whatsapp,
+                                      color: const Color(0xFF25D366),
+                                      onTap: () {
+                                        HapticFeedback.lightImpact();
+                                        _launchWhatsApp();
                                       },
                                     ),
                                   ],

@@ -3,8 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter/gestures.dart';
 import '../widgets/livinkey_logo.dart';
 import 'login_screen.dart';
+import '../services/audio_service.dart';
 
-/// Modern animated "Get Started" screen with smooth transitions
 class GetStartedScreen extends StatefulWidget {
   const GetStartedScreen({super.key});
 
@@ -16,19 +16,20 @@ class _GetStartedScreenState extends State<GetStartedScreen>
     with TickerProviderStateMixin {
   late AnimationController _mainController;
   late AnimationController _logoController;
-
   late Animation<double> _fadeAnimation;
   late Animation<double> _slideAnimation;
   late Animation<double> _scaleAnimation;
   late Animation<double> _keyRotationAnimation;
-
-  // Gesture recognizers for the terms/privacy links (must be disposed)
   late final TapGestureRecognizer _termsRecognizer;
   late final TapGestureRecognizer _privacyRecognizer;
 
   @override
   void initState() {
     super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _playBackgroundMusic();
+    });
 
     _mainController = AnimationController(
       duration: const Duration(milliseconds: 1400),
@@ -61,9 +62,6 @@ class _GetStartedScreenState extends State<GetStartedScreen>
       ),
     );
 
-    // Drives the ROTATION-ONLY key flip (straight -> upside down) on this
-    // screen, via LivinkeyLogoKeyFlip below. This does NOT use the
-    // slide-through-letters path logic — that's Splash-screen only.
     _keyRotationAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
         parent: _logoController,
@@ -74,12 +72,10 @@ class _GetStartedScreenState extends State<GetStartedScreen>
     _termsRecognizer = TapGestureRecognizer()
       ..onTap = () {
         HapticFeedback.selectionClick();
-        // TODO: Navigate to Terms of Services
       };
     _privacyRecognizer = TapGestureRecognizer()
       ..onTap = () {
         HapticFeedback.selectionClick();
-        // TODO: Navigate to Privacy Policy
       };
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -90,12 +86,17 @@ class _GetStartedScreenState extends State<GetStartedScreen>
     });
   }
 
+  Future<void> _playBackgroundMusic() async {
+    await AudioService.playBackgroundMusic('get_started.mp3');
+  }
+
   @override
   void dispose() {
     _mainController.dispose();
     _logoController.dispose();
     _termsRecognizer.dispose();
     _privacyRecognizer.dispose();
+    AudioService.stopBackgroundMusic();
     super.dispose();
   }
 
@@ -123,7 +124,6 @@ class _GetStartedScreenState extends State<GetStartedScreen>
                     children: [
                       const Spacer(flex: 1),
 
-                      // Animated Logo — rotation only (straight -> upside down)
                       ScaleTransition(
                         scale: _scaleAnimation,
                         child: Container(
@@ -156,7 +156,6 @@ class _GetStartedScreenState extends State<GetStartedScreen>
 
                       const SizedBox(height: 24),
 
-                      // Animated Header
                       Transform.translate(
                         offset: Offset(0, _slideAnimation.value),
                         child: Container(
@@ -219,7 +218,6 @@ class _GetStartedScreenState extends State<GetStartedScreen>
 
                       const SizedBox(height: 16),
 
-                      // Subtitle with Glassmorphism
                       Transform.translate(
                         offset: Offset(0, _slideAnimation.value * 0.5),
                         child: Container(
@@ -250,7 +248,6 @@ class _GetStartedScreenState extends State<GetStartedScreen>
 
                       const Spacer(flex: 2),
 
-                      // Get Started Button
                       Transform.translate(
                         offset: Offset(0, _slideAnimation.value * 0.3),
                         child: _buildGetStartedButton(),
@@ -258,7 +255,6 @@ class _GetStartedScreenState extends State<GetStartedScreen>
 
                       const SizedBox(height: 24),
 
-                      // Terms and Conditions
                       Transform.translate(
                         offset: Offset(0, _slideAnimation.value * 0.2),
                         child: _buildTermsText(),
@@ -316,7 +312,7 @@ class _GetStartedScreenState extends State<GetStartedScreen>
           ),
           onPressed: () {
             HapticFeedback.lightImpact();
-            // Navigate to Login Screen with smooth transition
+            AudioService.stopBackgroundMusic();
             Navigator.of(context).push(
               PageRouteBuilder(
                 pageBuilder: (context, animation, secondaryAnimation) =>
