@@ -3,8 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter/gestures.dart';
 import '../widgets/livinkey_logo.dart';
 import 'login_screen.dart';
+import 'otp_verification_screen.dart';
 
-/// Complete Sign Up flow with form validation and smooth animations
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
 
@@ -14,17 +14,14 @@ class SignUpScreen extends StatefulWidget {
 
 class _SignUpScreenState extends State<SignUpScreen>
     with TickerProviderStateMixin {
-  // Controllers
   final TextEditingController _fullNameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController = TextEditingController();
 
-  // Form key for validation
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
-  // Dropdown values
   String _selectedNationality = 'Indian';
   String _selectedCountryCode = '+91';
   bool _isLoading = false;
@@ -32,7 +29,6 @@ class _SignUpScreenState extends State<SignUpScreen>
   bool _obscureConfirmPassword = true;
   bool _agreeToTerms = false;
 
-  // Animation controllers
   late AnimationController _fadeController;
   late AnimationController _slideController;
   late Animation<double> _fadeAnimation;
@@ -40,12 +36,10 @@ class _SignUpScreenState extends State<SignUpScreen>
   late Animation<double> _scaleAnimation;
   late Animation<double> _logoScaleAnimation;
 
-  // Gesture recognizers
   late final TapGestureRecognizer _backToLoginRecognizer;
   late final TapGestureRecognizer _termsRecognizer;
   late final TapGestureRecognizer _privacyRecognizer;
 
-  // Nationality data
   final List<String> _nationalities = [
     'Afghan', 'Albanian', 'Algerian', 'American', 'Andorran', 'Angolan',
     'Argentinian', 'Armenian', 'Australian', 'Austrian', 'Azerbaijani',
@@ -83,7 +77,6 @@ class _SignUpScreenState extends State<SignUpScreen>
     'Vietnamese', 'Yemeni', 'Zambian', 'Zimbabwean',
   ];
 
-  // Country codes for phone numbers
   final List<Map<String, String>> _countryCodes = [
     {'code': '+1', 'country': 'USA/Canada'},
     {'code': '+1-242', 'country': 'Bahamas'},
@@ -399,16 +392,42 @@ class _SignUpScreenState extends State<SignUpScreen>
 
     setState(() => _isLoading = true);
 
+    // Simulate API call to send OTP
     await Future.delayed(const Duration(seconds: 2));
 
     setState(() => _isLoading = false);
 
     if (mounted) {
-      _showSnackBar('Account created successfully! 🎉', kLivinkeyGreen);
-      await Future.delayed(const Duration(milliseconds: 500));
-      if (mounted) {
-        _navigateBackToLogin();
-      }
+      _showSnackBar('OTP sent to ${_emailController.text}', kLivinkeyGreen);
+
+      // Navigate to OTP Verification Screen
+      Navigator.of(context).push(
+        PageRouteBuilder(
+          pageBuilder: (context, animation, secondaryAnimation) =>
+              OtpVerificationScreen(
+                email: _emailController.text,
+                userData: {
+                  'fullName': _fullNameController.text,
+                  'email': _emailController.text,
+                  'phone': _phoneController.text,
+                  'nationality': _selectedNationality,
+                  'countryCode': _selectedCountryCode,
+                },
+              ),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            const begin = Offset(1.0, 0.0);
+            const end = Offset.zero;
+            const curve = Curves.easeInOutCubic;
+            var tween = Tween(begin: begin, end: end)
+                .chain(CurveTween(curve: curve));
+            var offsetAnimation = animation.drive(tween);
+            return SlideTransition(
+              position: offsetAnimation,
+              child: child,
+            );
+          },
+        ),
+      );
     }
   }
 
@@ -455,7 +474,6 @@ class _SignUpScreenState extends State<SignUpScreen>
                           children: [
                             const SizedBox(height: 20),
 
-                            // Back Button
                             GestureDetector(
                               onTap: _navigateBackToLogin,
                               child: Container(
@@ -478,7 +496,6 @@ class _SignUpScreenState extends State<SignUpScreen>
 
                             const SizedBox(height: 24),
 
-                            // Logo
                             Align(
                               alignment: Alignment.topRight,
                               child: ScaleTransition(
@@ -494,7 +511,6 @@ class _SignUpScreenState extends State<SignUpScreen>
 
                             const SizedBox(height: 8),
 
-                            // Header
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
@@ -522,7 +538,6 @@ class _SignUpScreenState extends State<SignUpScreen>
 
                             const SizedBox(height: 32),
 
-                            // Full Name Field
                             _buildTextField(
                               controller: _fullNameController,
                               label: 'Full Name',
@@ -542,7 +557,6 @@ class _SignUpScreenState extends State<SignUpScreen>
 
                             const SizedBox(height: 16),
 
-                            // Email Field
                             _buildTextField(
                               controller: _emailController,
                               label: 'Email Address',
@@ -562,7 +576,6 @@ class _SignUpScreenState extends State<SignUpScreen>
 
                             const SizedBox(height: 16),
 
-                            // Nationality Dropdown
                             Container(
                               decoration: BoxDecoration(
                                 gradient: LinearGradient(
@@ -649,11 +662,9 @@ class _SignUpScreenState extends State<SignUpScreen>
 
                             const SizedBox(height: 16),
 
-                            // Phone Field with Country Code
                             Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                // Country Code Dropdown
                                 Expanded(
                                   flex: 3,
                                   child: Container(
@@ -739,7 +750,6 @@ class _SignUpScreenState extends State<SignUpScreen>
                                 ),
                                 const SizedBox(width: 12),
 
-                                // Phone Number Field
                                 Expanded(
                                   flex: 7,
                                   child: Container(
@@ -816,7 +826,6 @@ class _SignUpScreenState extends State<SignUpScreen>
 
                             const SizedBox(height: 16),
 
-                            // Password Field
                             _buildTextField(
                               controller: _passwordController,
                               label: 'Password',
@@ -851,7 +860,6 @@ class _SignUpScreenState extends State<SignUpScreen>
 
                             const SizedBox(height: 16),
 
-                            // Confirm Password Field
                             _buildTextField(
                               controller: _confirmPasswordController,
                               label: 'Confirm Password',
@@ -886,7 +894,6 @@ class _SignUpScreenState extends State<SignUpScreen>
 
                             const SizedBox(height: 8),
 
-                            // Password Hint
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 4),
                               child: Row(
@@ -910,7 +917,6 @@ class _SignUpScreenState extends State<SignUpScreen>
 
                             const SizedBox(height: 20),
 
-                            // Terms and Conditions Checkbox
                             Row(
                               children: [
                                 Theme(
@@ -980,7 +986,6 @@ class _SignUpScreenState extends State<SignUpScreen>
 
                             const SizedBox(height: 24),
 
-                            // Sign Up Button
                             AnimatedContainer(
                               duration: const Duration(milliseconds: 300),
                               width: double.infinity,
@@ -1072,7 +1077,6 @@ class _SignUpScreenState extends State<SignUpScreen>
 
                             const SizedBox(height: 20),
 
-                            // Back to Login Link
                             Center(
                               child: Text.rich(
                                 TextSpan(
