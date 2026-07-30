@@ -21,7 +21,12 @@ class _SignUpScreenState extends State<SignUpScreen>
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _confirmPasswordController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
+  final TextEditingController _searchNationalityController =
+      TextEditingController();
+  final TextEditingController _searchCountryCodeController =
+      TextEditingController();
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
@@ -31,6 +36,10 @@ class _SignUpScreenState extends State<SignUpScreen>
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
   bool _agreeToTerms = false;
+
+  // Dropdown states
+  bool _isNationalityDropdownOpen = false;
+  bool _isCountryCodeDropdownOpen = false;
 
   late AnimationController _fadeController;
   late AnimationController _slideController;
@@ -43,69 +52,401 @@ class _SignUpScreenState extends State<SignUpScreen>
   late final TapGestureRecognizer _termsRecognizer;
   late final TapGestureRecognizer _privacyRecognizer;
 
-  final List<String> _nationalities = [
-    'Afghan', 'Albanian', 'Algerian', 'American', 'Andorran', 'Angolan',
-    'Argentinian', 'Armenian', 'Australian', 'Austrian', 'Azerbaijani',
-    'Bahamian', 'Bahraini', 'Bangladeshi', 'Barbadian', 'Belarusian',
-    'Belgian', 'Belizean', 'Beninese', 'Bhutanese', 'Bolivian', 'Bosnian',
-    'Botswanan', 'Brazilian', 'British', 'Bruneian', 'Bulgarian', 'Burkinabe',
-    'Burmese', 'Burundian', 'Cambodian', 'Cameroonian', 'Canadian',
-    'Cape Verdean', 'Central African', 'Chadian', 'Chilean', 'Chinese',
-    'Colombian', 'Comorian', 'Congolese', 'Costa Rican', 'Croatian',
-    'Cuban', 'Cypriot', 'Czech', 'Danish', 'Djiboutian', 'Dominican',
-    'Dutch', 'Ecuadorian', 'Egyptian', 'Emirati', 'Equatorial Guinean',
-    'Eritrean', 'Estonian', 'Ethiopian', 'Fijian', 'Filipino', 'Finnish',
-    'French', 'Gabonese', 'Gambian', 'Georgian', 'German', 'Ghanaian',
-    'Greek', 'Grenadian', 'Guatemalan', 'Guinean', 'Guyanese', 'Haitian',
-    'Honduran', 'Hungarian', 'Icelandic', 'Indian', 'Indonesian', 'Iranian',
-    'Iraqi', 'Irish', 'Israeli', 'Italian', 'Jamaican', 'Japanese',
-    'Jordanian', 'Kazakh', 'Kenyan', 'Kittitian', 'Kuwaiti', 'Kyrgyz',
-    'Laotian', 'Latvian', 'Lebanese', 'Liberian', 'Libyan', 'Liechtensteiner',
-    'Lithuanian', 'Luxembourgish', 'Malagasy', 'Malawian', 'Malaysian',
-    'Maldivian', 'Malian', 'Maltese', 'Marshallese', 'Mauritanian',
-    'Mauritian', 'Mexican', 'Micronesian', 'Moldovan', 'Monacan',
-    'Mongolian', 'Montenegrin', 'Moroccan', 'Mozambican', 'Namibian',
-    'Nauruan', 'Nepali', 'New Zealander', 'Nicaraguan', 'Nigerian',
-    'North Korean', 'Norwegian', 'Omani', 'Pakistani', 'Palauan',
-    'Panamanian', 'Papua New Guinean', 'Paraguayan', 'Peruvian', 'Polish',
-    'Portuguese', 'Qatari', 'Romanian', 'Russian', 'Rwandan', 'Salvadoran',
-    'Samoan', 'Sao Tomean', 'Saudi', 'Senegalese', 'Serbian', 'Seychellois',
-    'Sierra Leonean', 'Singaporean', 'Slovak', 'Slovenian',
-    'Solomon Islander', 'Somali', 'South African', 'South Korean',
-    'South Sudanese', 'Spanish', 'Sri Lankan', 'Sudanese', 'Surinamese',
-    'Swazi', 'Swedish', 'Swiss', 'Syrian', 'Taiwanese', 'Tajik',
-    'Tanzanian', 'Thai', 'Timorese', 'Togolese', 'Tongan', 'Trinidadian',
-    'Tunisian', 'Turkish', 'Turkmen', 'Tuvaluan', 'Ugandan', 'Ukrainian',
-    'Uruguayan', 'Uzbek', 'Vanuatuan', 'Vatican', 'Venezuelan',
-    'Vietnamese', 'Yemeni', 'Zambian', 'Zimbabwean',
+  // Complete list of nationalities
+  final List<String> _allNationalities = [
+    'Afghan',
+    'Albanian',
+    'Algerian',
+    'American',
+    'Andorran',
+    'Angolan',
+    'Antiguan',
+    'Argentinian',
+    'Armenian',
+    'Australian',
+    'Austrian',
+    'Azerbaijani',
+    'Bahamian',
+    'Bahraini',
+    'Bangladeshi',
+    'Barbadian',
+    'Barbudan',
+    'Belarusian',
+    'Belgian',
+    'Belizean',
+    'Beninese',
+    'Bhutanese',
+    'Bolivian',
+    'Bosnian',
+    'Botswanan',
+    'Brazilian',
+    'British',
+    'Bruneian',
+    'Bulgarian',
+    'Burkinabe',
+    'Burmese',
+    'Burundian',
+    'Cambodian',
+    'Cameroonian',
+    'Canadian',
+    'Cape Verdean',
+    'Central African',
+    'Chadian',
+    'Chilean',
+    'Chinese',
+    'Colombian',
+    'Comorian',
+    'Congolese',
+    'Costa Rican',
+    'Croatian',
+    'Cuban',
+    'Cypriot',
+    'Czech',
+    'Danish',
+    'Djiboutian',
+    'Dominican',
+    'Dutch',
+    'Ecuadorian',
+    'Egyptian',
+    'Emirati',
+    'Equatorial Guinean',
+    'Eritrean',
+    'Estonian',
+    'Ethiopian',
+    'Fijian',
+    'Filipino',
+    'Finnish',
+    'French',
+    'Gabonese',
+    'Gambian',
+    'Georgian',
+    'German',
+    'Ghanaian',
+    'Greek',
+    'Grenadian',
+    'Guatemalan',
+    'Guinean',
+    'Guyanese',
+    'Haitian',
+    'Honduran',
+    'Hungarian',
+    'Icelandic',
+    'Indian',
+    'Indonesian',
+    'Iranian',
+    'Iraqi',
+    'Irish',
+    'Israeli',
+    'Italian',
+    'Jamaican',
+    'Japanese',
+    'Jordanian',
+    'Kazakh',
+    'Kenyan',
+    'Kittitian',
+    'Kuwaiti',
+    'Kyrgyz',
+    'Laotian',
+    'Latvian',
+    'Lebanese',
+    'Liberian',
+    'Libyan',
+    'Liechtensteiner',
+    'Lithuanian',
+    'Luxembourgish',
+    'Malagasy',
+    'Malawian',
+    'Malaysian',
+    'Maldivian',
+    'Malian',
+    'Maltese',
+    'Marshallese',
+    'Mauritanian',
+    'Mauritian',
+    'Mexican',
+    'Micronesian',
+    'Moldovan',
+    'Monacan',
+    'Mongolian',
+    'Montenegrin',
+    'Moroccan',
+    'Mozambican',
+    'Namibian',
+    'Nauruan',
+    'Nepali',
+    'New Zealander',
+    'Nicaraguan',
+    'Nigerian',
+    'North Korean',
+    'Norwegian',
+    'Omani',
+    'Pakistani',
+    'Palauan',
+    'Panamanian',
+    'Papua New Guinean',
+    'Paraguayan',
+    'Peruvian',
+    'Polish',
+    'Portuguese',
+    'Qatari',
+    'Romanian',
+    'Russian',
+    'Rwandan',
+    'Salvadoran',
+    'Samoan',
+    'Sao Tomean',
+    'Saudi',
+    'Senegalese',
+    'Serbian',
+    'Seychellois',
+    'Sierra Leonean',
+    'Singaporean',
+    'Slovak',
+    'Slovenian',
+    'Solomon Islander',
+    'Somali',
+    'South African',
+    'South Korean',
+    'South Sudanese',
+    'Spanish',
+    'Sri Lankan',
+    'Sudanese',
+    'Surinamese',
+    'Swazi',
+    'Swedish',
+    'Swiss',
+    'Syrian',
+    'Taiwanese',
+    'Tajik',
+    'Tanzanian',
+    'Thai',
+    'Timorese',
+    'Togolese',
+    'Tongan',
+    'Trinidadian',
+    'Tunisian',
+    'Turkish',
+    'Turkmen',
+    'Tuvaluan',
+    'Ugandan',
+    'Ukrainian',
+    'Uruguayan',
+    'Uzbek',
+    'Vanuatuan',
+    'Vatican',
+    'Venezuelan',
+    'Vietnamese',
+    'Yemeni',
+    'Zambian',
+    'Zimbabwean',
   ];
 
-  final List<Map<String, String>> _countryCodes = [
-    {'code': '+91', 'country': 'India'},
-    {'code': '+1', 'country': 'USA/Canada'},
-    {'code': '+44', 'country': 'United Kingdom'},
+  List<String> _filteredNationalities = [];
+
+  // Complete list of country codes with flags and country names
+  final List<Map<String, String>> _allCountryCodes = [
+    {'code': '+93', 'country': 'Afghanistan'},
+    {'code': '+355', 'country': 'Albania'},
+    {'code': '+213', 'country': 'Algeria'},
+    {'code': '+376', 'country': 'Andorra'},
+    {'code': '+244', 'country': 'Angola'},
+    {'code': '+1-268', 'country': 'Antigua and Barbuda'},
+    {'code': '+54', 'country': 'Argentina'},
+    {'code': '+374', 'country': 'Armenia'},
     {'code': '+61', 'country': 'Australia'},
-    {'code': '+81', 'country': 'Japan'},
-    {'code': '+86', 'country': 'China'},
-    {'code': '+92', 'country': 'Pakistan'},
-    {'code': '+94', 'country': 'Sri Lanka'},
+    {'code': '+43', 'country': 'Austria'},
+    {'code': '+994', 'country': 'Azerbaijan'},
+    {'code': '+1-242', 'country': 'Bahamas'},
+    {'code': '+973', 'country': 'Bahrain'},
     {'code': '+880', 'country': 'Bangladesh'},
-    {'code': '+977', 'country': 'Nepal'},
-    {'code': '+60', 'country': 'Malaysia'},
-    {'code': '+65', 'country': 'Singapore'},
-    {'code': '+971', 'country': 'UAE'},
-    {'code': '+966', 'country': 'Saudi Arabia'},
-    {'code': '+49', 'country': 'Germany'},
-    {'code': '+33', 'country': 'France'},
-    {'code': '+39', 'country': 'Italy'},
-    {'code': '+34', 'country': 'Spain'},
+    {'code': '+1-246', 'country': 'Barbados'},
+    {'code': '+375', 'country': 'Belarus'},
+    {'code': '+32', 'country': 'Belgium'},
+    {'code': '+501', 'country': 'Belize'},
+    {'code': '+229', 'country': 'Benin'},
+    {'code': '+975', 'country': 'Bhutan'},
+    {'code': '+591', 'country': 'Bolivia'},
+    {'code': '+387', 'country': 'Bosnia and Herzegovina'},
+    {'code': '+267', 'country': 'Botswana'},
     {'code': '+55', 'country': 'Brazil'},
+    {'code': '+673', 'country': 'Brunei'},
+    {'code': '+359', 'country': 'Bulgaria'},
+    {'code': '+226', 'country': 'Burkina Faso'},
+    {'code': '+257', 'country': 'Burundi'},
+    {'code': '+855', 'country': 'Cambodia'},
+    {'code': '+237', 'country': 'Cameroon'},
+    {'code': '+1', 'country': 'Canada'},
+    {'code': '+238', 'country': 'Cape Verde'},
+    {'code': '+236', 'country': 'Central African Republic'},
+    {'code': '+235', 'country': 'Chad'},
+    {'code': '+56', 'country': 'Chile'},
+    {'code': '+86', 'country': 'China'},
+    {'code': '+57', 'country': 'Colombia'},
+    {'code': '+269', 'country': 'Comoros'},
+    {'code': '+242', 'country': 'Congo'},
+    {'code': '+506', 'country': 'Costa Rica'},
+    {'code': '+385', 'country': 'Croatia'},
+    {'code': '+53', 'country': 'Cuba'},
+    {'code': '+357', 'country': 'Cyprus'},
+    {'code': '+420', 'country': 'Czech Republic'},
+    {'code': '+45', 'country': 'Denmark'},
+    {'code': '+253', 'country': 'Djibouti'},
+    {'code': '+1-767', 'country': 'Dominica'},
+    {'code': '+1-809', 'country': 'Dominican Republic'},
+    {'code': '+670', 'country': 'East Timor'},
+    {'code': '+593', 'country': 'Ecuador'},
+    {'code': '+20', 'country': 'Egypt'},
+    {'code': '+503', 'country': 'El Salvador'},
+    {'code': '+240', 'country': 'Equatorial Guinea'},
+    {'code': '+291', 'country': 'Eritrea'},
+    {'code': '+372', 'country': 'Estonia'},
+    {'code': '+251', 'country': 'Ethiopia'},
+    {'code': '+679', 'country': 'Fiji'},
+    {'code': '+358', 'country': 'Finland'},
+    {'code': '+33', 'country': 'France'},
+    {'code': '+241', 'country': 'Gabon'},
+    {'code': '+220', 'country': 'Gambia'},
+    {'code': '+995', 'country': 'Georgia'},
+    {'code': '+49', 'country': 'Germany'},
+    {'code': '+233', 'country': 'Ghana'},
+    {'code': '+30', 'country': 'Greece'},
+    {'code': '+1-473', 'country': 'Grenada'},
+    {'code': '+502', 'country': 'Guatemala'},
+    {'code': '+224', 'country': 'Guinea'},
+    {'code': '+245', 'country': 'Guinea-Bissau'},
+    {'code': '+592', 'country': 'Guyana'},
+    {'code': '+509', 'country': 'Haiti'},
+    {'code': '+504', 'country': 'Honduras'},
+    {'code': '+36', 'country': 'Hungary'},
+    {'code': '+354', 'country': 'Iceland'},
+    {'code': '+91', 'country': 'India'},
+    {'code': '+62', 'country': 'Indonesia'},
+    {'code': '+98', 'country': 'Iran'},
+    {'code': '+964', 'country': 'Iraq'},
+    {'code': '+353', 'country': 'Ireland'},
+    {'code': '+972', 'country': 'Israel'},
+    {'code': '+39', 'country': 'Italy'},
+    {'code': '+1-876', 'country': 'Jamaica'},
+    {'code': '+81', 'country': 'Japan'},
+    {'code': '+962', 'country': 'Jordan'},
+    {'code': '+7', 'country': 'Kazakhstan'},
+    {'code': '+254', 'country': 'Kenya'},
+    {'code': '+686', 'country': 'Kiribati'},
+    {'code': '+82', 'country': 'South Korea'},
+    {'code': '+850', 'country': 'North Korea'},
+    {'code': '+965', 'country': 'Kuwait'},
+    {'code': '+996', 'country': 'Kyrgyzstan'},
+    {'code': '+856', 'country': 'Laos'},
+    {'code': '+371', 'country': 'Latvia'},
+    {'code': '+961', 'country': 'Lebanon'},
+    {'code': '+266', 'country': 'Lesotho'},
+    {'code': '+231', 'country': 'Liberia'},
+    {'code': '+218', 'country': 'Libya'},
+    {'code': '+423', 'country': 'Liechtenstein'},
+    {'code': '+370', 'country': 'Lithuania'},
+    {'code': '+352', 'country': 'Luxembourg'},
+    {'code': '+389', 'country': 'North Macedonia'},
+    {'code': '+261', 'country': 'Madagascar'},
+    {'code': '+265', 'country': 'Malawi'},
+    {'code': '+60', 'country': 'Malaysia'},
+    {'code': '+960', 'country': 'Maldives'},
+    {'code': '+223', 'country': 'Mali'},
+    {'code': '+356', 'country': 'Malta'},
+    {'code': '+692', 'country': 'Marshall Islands'},
+    {'code': '+222', 'country': 'Mauritania'},
+    {'code': '+230', 'country': 'Mauritius'},
     {'code': '+52', 'country': 'Mexico'},
+    {'code': '+691', 'country': 'Micronesia'},
+    {'code': '+373', 'country': 'Moldova'},
+    {'code': '+377', 'country': 'Monaco'},
+    {'code': '+976', 'country': 'Mongolia'},
+    {'code': '+382', 'country': 'Montenegro'},
+    {'code': '+212', 'country': 'Morocco'},
+    {'code': '+258', 'country': 'Mozambique'},
+    {'code': '+95', 'country': 'Myanmar'},
+    {'code': '+264', 'country': 'Namibia'},
+    {'code': '+674', 'country': 'Nauru'},
+    {'code': '+977', 'country': 'Nepal'},
+    {'code': '+31', 'country': 'Netherlands'},
+    {'code': '+64', 'country': 'New Zealand'},
+    {'code': '+505', 'country': 'Nicaragua'},
+    {'code': '+227', 'country': 'Niger'},
+    {'code': '+234', 'country': 'Nigeria'},
+    {'code': '+47', 'country': 'Norway'},
+    {'code': '+968', 'country': 'Oman'},
+    {'code': '+92', 'country': 'Pakistan'},
+    {'code': '+680', 'country': 'Palau'},
+    {'code': '+970', 'country': 'Palestine'},
+    {'code': '+507', 'country': 'Panama'},
+    {'code': '+675', 'country': 'Papua New Guinea'},
+    {'code': '+595', 'country': 'Paraguay'},
+    {'code': '+51', 'country': 'Peru'},
+    {'code': '+63', 'country': 'Philippines'},
+    {'code': '+48', 'country': 'Poland'},
+    {'code': '+351', 'country': 'Portugal'},
+    {'code': '+974', 'country': 'Qatar'},
+    {'code': '+40', 'country': 'Romania'},
+    {'code': '+7', 'country': 'Russia'},
+    {'code': '+250', 'country': 'Rwanda'},
+    {'code': '+1-869', 'country': 'Saint Kitts and Nevis'},
+    {'code': '+1-758', 'country': 'Saint Lucia'},
+    {'code': '+1-784', 'country': 'Saint Vincent'},
+    {'code': '+685', 'country': 'Samoa'},
+    {'code': '+378', 'country': 'San Marino'},
+    {'code': '+239', 'country': 'Sao Tome'},
+    {'code': '+966', 'country': 'Saudi Arabia'},
+    {'code': '+221', 'country': 'Senegal'},
+    {'code': '+381', 'country': 'Serbia'},
+    {'code': '+248', 'country': 'Seychelles'},
+    {'code': '+232', 'country': 'Sierra Leone'},
+    {'code': '+65', 'country': 'Singapore'},
+    {'code': '+421', 'country': 'Slovakia'},
+    {'code': '+386', 'country': 'Slovenia'},
+    {'code': '+677', 'country': 'Solomon Islands'},
+    {'code': '+252', 'country': 'Somalia'},
+    {'code': '+27', 'country': 'South Africa'},
+    {'code': '+211', 'country': 'South Sudan'},
+    {'code': '+34', 'country': 'Spain'},
+    {'code': '+94', 'country': 'Sri Lanka'},
+    {'code': '+249', 'country': 'Sudan'},
+    {'code': '+597', 'country': 'Suriname'},
+    {'code': '+46', 'country': 'Sweden'},
+    {'code': '+41', 'country': 'Switzerland'},
+    {'code': '+963', 'country': 'Syria'},
+    {'code': '+886', 'country': 'Taiwan'},
+    {'code': '+992', 'country': 'Tajikistan'},
+    {'code': '+255', 'country': 'Tanzania'},
+    {'code': '+66', 'country': 'Thailand'},
+    {'code': '+228', 'country': 'Togo'},
+    {'code': '+676', 'country': 'Tonga'},
+    {'code': '+1-868', 'country': 'Trinidad and Tobago'},
+    {'code': '+216', 'country': 'Tunisia'},
+    {'code': '+90', 'country': 'Turkey'},
+    {'code': '+993', 'country': 'Turkmenistan'},
+    {'code': '+688', 'country': 'Tuvalu'},
+    {'code': '+256', 'country': 'Uganda'},
+    {'code': '+380', 'country': 'Ukraine'},
+    {'code': '+971', 'country': 'United Arab Emirates'},
+    {'code': '+44', 'country': 'United Kingdom'},
+    {'code': '+1', 'country': 'United States'},
+    {'code': '+598', 'country': 'Uruguay'},
+    {'code': '+998', 'country': 'Uzbekistan'},
+    {'code': '+678', 'country': 'Vanuatu'},
+    {'code': '+379', 'country': 'Vatican City'},
+    {'code': '+58', 'country': 'Venezuela'},
+    {'code': '+84', 'country': 'Vietnam'},
+    {'code': '+967', 'country': 'Yemen'},
+    {'code': '+260', 'country': 'Zambia'},
+    {'code': '+263', 'country': 'Zimbabwe'},
   ];
+
+  List<Map<String, String>> _filteredCountryCodes = [];
 
   @override
   void initState() {
     super.initState();
+    _filteredNationalities = List.from(_allNationalities);
+    _filteredCountryCodes = List.from(_allCountryCodes);
 
     _fadeController = AnimationController(
       duration: const Duration(milliseconds: 1200),
@@ -172,6 +513,8 @@ class _SignUpScreenState extends State<SignUpScreen>
     _phoneController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
+    _searchNationalityController.dispose();
+    _searchCountryCodeController.dispose();
     _backToLoginRecognizer.dispose();
     _termsRecognizer.dispose();
     _privacyRecognizer.dispose();
@@ -200,12 +543,42 @@ class _SignUpScreenState extends State<SignUpScreen>
   }
 
   bool _isValidEmail(String email) {
-    final emailRegex = RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
+    final emailRegex =
+        RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
     return emailRegex.hasMatch(email);
   }
 
   bool _isValidPhone(String phone) {
     return phone.length >= 5 && RegExp(r'^[0-9]+$').hasMatch(phone);
+  }
+
+  void _filterNationalities(String query) {
+    setState(() {
+      if (query.isEmpty) {
+        _filteredNationalities = List.from(_allNationalities);
+      } else {
+        _filteredNationalities = _allNationalities
+            .where((nationality) =>
+                nationality.toLowerCase().contains(query.toLowerCase()))
+            .toList();
+      }
+    });
+  }
+
+  void _filterCountryCodes(String query) {
+    setState(() {
+      if (query.isEmpty) {
+        _filteredCountryCodes = List.from(_allCountryCodes);
+      } else {
+        _filteredCountryCodes = _allCountryCodes
+            .where((country) =>
+                country['country']!
+                    .toLowerCase()
+                    .contains(query.toLowerCase()) ||
+                country['code']!.contains(query))
+            .toList();
+      }
+    });
   }
 
   void _handleSignUp() async {
@@ -225,22 +598,23 @@ class _SignUpScreenState extends State<SignUpScreen>
     setState(() => _isLoading = false);
 
     if (mounted) {
-      SnackbarHelper.showSuccess(context, 'OTP sent to ${_emailController.text}');
+      SnackbarHelper.showSuccess(
+          context, 'OTP sent to ${_emailController.text}');
 
       Navigator.of(context).push(
         PageRouteBuilder(
           pageBuilder: (context, animation, secondaryAnimation) =>
               OtpVerificationScreen(
-                email: _emailController.text,
-                userData: {
-                  'fullName': _fullNameController.text,
-                  'email': _emailController.text,
-                  'phone': _phoneController.text,
-                  'nationality': _selectedNationality,
-                  'countryCode': _selectedCountryCode,
-                  'role': 'guest',
-                },
-              ),
+            email: _emailController.text,
+            userData: {
+              'fullName': _fullNameController.text,
+              'email': _emailController.text,
+              'phone': _phoneController.text,
+              'nationality': _selectedNationality,
+              'countryCode': _selectedCountryCode,
+              'role': 'guest',
+            },
+          ),
           transitionsBuilder: (context, animation, secondaryAnimation, child) {
             const begin = Offset(1.0, 0.0);
             const end = Offset.zero;
@@ -280,710 +654,774 @@ class _SignUpScreenState extends State<SignUpScreen>
                   position: _slideAnimation,
                   child: SingleChildScrollView(
                     physics: const BouncingScrollPhysics(),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 28),
-                      child: Form(
-                        key: _formKey,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const SizedBox(height: 20),
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    child: Form(
+                      key: _formKey,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const SizedBox(height: 16),
 
-                            GestureDetector(
-                              onTap: _navigateBackToLogin,
-                              child: Container(
-                                padding: const EdgeInsets.all(8),
-                                decoration: BoxDecoration(
-                                  color: Colors.white.withOpacity(0.06),
-                                  borderRadius: BorderRadius.circular(12),
-                                  border: Border.all(
-                                    color: Colors.white.withOpacity(0.08),
-                                    width: 1,
-                                  ),
-                                ),
-                                child: Icon(
-                                  Icons.arrow_back_rounded,
-                                  color: Colors.white.withOpacity(0.7),
-                                  size: 24,
+                          // Back Button
+                          GestureDetector(
+                            onTap: _navigateBackToLogin,
+                            child: Container(
+                              padding: const EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.06),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: Colors.white.withOpacity(0.08),
+                                  width: 1.5,
                                 ),
                               ),
+                              child: Icon(
+                                Icons.arrow_back_rounded,
+                                color: Colors.white.withOpacity(0.7),
+                                size: 22,
+                              ),
                             ),
+                          ),
 
-                            const SizedBox(height: 24),
+                          const SizedBox(height: 20),
 
-                            Align(
-                              alignment: Alignment.topRight,
-                              child: ScaleTransition(
+                          // Header Section
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Create Account',
+                                    style: TextStyle(
+                                      fontSize: 28,
+                                      fontWeight: FontWeight.w700,
+                                      color: Colors.white,
+                                      letterSpacing: -0.5,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    'Join the Livinkey community',
+                                    style: TextStyle(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w400,
+                                      color: Colors.white.withOpacity(0.5),
+                                      letterSpacing: 0.2,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              ScaleTransition(
                                 scale: _logoScaleAnimation,
                                 child: Image.asset(
                                   kGeneralLogo,
-                                  height: 70,
-                                  width: 70,
+                                  height: 60,
+                                  width: 60,
                                   fit: BoxFit.contain,
                                 ),
                               ),
+                            ],
+                          ),
+
+                          const SizedBox(height: 18),
+
+                          // Guest Account Badge
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 14,
+                              vertical: 8,
                             ),
-
-                            const SizedBox(height: 8),
-
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                                colors: [
+                                  const Color(0xFFFF9800).withOpacity(0.12),
+                                  const Color(0xFFFF9800).withOpacity(0.04),
+                                ],
+                              ),
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(
+                                color: const Color(0xFFFF9800).withOpacity(0.15),
+                                width: 1.5,
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
                               children: [
-                                Text(
-                                  'Create Account',
-                                  style: TextStyle(
-                                    fontSize: 32,
-                                    fontWeight: FontWeight.w800,
-                                    color: Colors.white,
-                                    letterSpacing: 0.5,
+                                Container(
+                                  width: 7,
+                                  height: 7,
+                                  decoration: const BoxDecoration(
+                                    color: Color(0xFFFF9800),
+                                    shape: BoxShape.circle,
                                   ),
                                 ),
-                                const SizedBox(height: 8),
+                                const SizedBox(width: 10),
                                 Text(
-                                  'Join the Livinkey community as a Guest',
+                                  'Guest Account',
                                   style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w400,
-                                    color: Colors.white.withOpacity(0.6),
+                                    color: const Color(0xFFFF9800)
+                                        .withOpacity(0.9),
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w600,
                                     letterSpacing: 0.3,
                                   ),
                                 ),
-                              ],
-                            ),
-
-                            const SizedBox(height: 16),
-
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 10,
-                              ),
-                              decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  begin: Alignment.topLeft,
-                                  end: Alignment.bottomRight,
-                                  colors: [
-                                    const Color(0xFFFF9800).withOpacity(0.15),
-                                    const Color(0xFFFF9800).withOpacity(0.05),
-                                  ],
-                                ),
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(
-                                  color: const Color(0xFFFF9800).withOpacity(0.2),
-                                  width: 1,
-                                ),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Container(
-                                    width: 8,
-                                    height: 8,
-                                    decoration: const BoxDecoration(
-                                      color: Color(0xFFFF9800),
-                                      shape: BoxShape.circle,
-                                    ),
+                                const SizedBox(width: 10),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                    vertical: 2,
                                   ),
-                                  const SizedBox(width: 10),
-                                  Text(
-                                    'Guest Account',
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFFF9800)
+                                        .withOpacity(0.1),
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                  child: Text(
+                                    'Fixed Role',
                                     style: TextStyle(
-                                      color: const Color(0xFFFF9800),
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w600,
-                                      letterSpacing: 0.5,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 10),
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 8,
-                                      vertical: 2,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: const Color(0xFFFF9800).withOpacity(0.1),
-                                      borderRadius: BorderRadius.circular(4),
-                                    ),
-                                    child: Text(
-                                      'Fixed',
-                                      style: TextStyle(
-                                        color: const Color(0xFFFF9800).withOpacity(0.6),
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-
-                            const SizedBox(height: 24),
-
-                            _buildTextField(
-                              controller: _fullNameController,
-                              label: 'Full Name',
-                              icon: Icons.person_outline,
-                              keyboardType: TextInputType.name,
-                              textInputAction: TextInputAction.next,
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Please enter your full name';
-                                }
-                                if (value.length < 2) {
-                                  return 'Name must be at least 2 characters';
-                                }
-                                return null;
-                              },
-                            ),
-
-                            const SizedBox(height: 16),
-
-                            _buildTextField(
-                              controller: _emailController,
-                              label: 'Email Address',
-                              icon: Icons.email_outlined,
-                              keyboardType: TextInputType.emailAddress,
-                              textInputAction: TextInputAction.next,
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Please enter your email address';
-                                }
-                                if (!_isValidEmail(value)) {
-                                  return 'Please enter a valid email address';
-                                }
-                                return null;
-                              },
-                            ),
-
-                            const SizedBox(height: 16),
-
-                            Container(
-                              decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  begin: Alignment.topLeft,
-                                  end: Alignment.bottomRight,
-                                  colors: [
-                                    Colors.white.withOpacity(0.05),
-                                    Colors.white.withOpacity(0.02),
-                                  ],
-                                ),
-                                borderRadius: BorderRadius.circular(16),
-                                border: Border.all(
-                                  color: Colors.white.withOpacity(0.1),
-                                  width: 1,
-                                ),
-                              ),
-                              child: DropdownButtonFormField<String>(
-                                value: _selectedNationality,
-                                dropdownColor: Colors.black,
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 16,
-                                ),
-                                isExpanded: true,
-                                decoration: InputDecoration(
-                                  labelText: 'Nationality',
-                                  labelStyle: TextStyle(
-                                    color: Colors.white.withOpacity(0.5),
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                  prefixIcon: Icon(
-                                    Icons.flag_outlined,
-                                    color: const Color(0xFF92C24A).withOpacity(0.7),
-                                    size: 22,
-                                  ),
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(16),
-                                    borderSide: BorderSide.none,
-                                  ),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(16),
-                                    borderSide: BorderSide(
-                                      color: const Color(0xFF92C24A).withOpacity(0.5),
-                                      width: 2,
-                                    ),
-                                  ),
-                                  enabledBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(16),
-                                    borderSide: BorderSide(
-                                      color: Colors.transparent,
-                                    ),
-                                  ),
-                                  contentPadding: const EdgeInsets.symmetric(
-                                    horizontal: 20,
-                                    vertical: 12,
-                                  ),
-                                ),
-                                items: _nationalities.map((nationality) {
-                                  return DropdownMenuItem<String>(
-                                    value: nationality,
-                                    child: Text(
-                                      nationality,
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 14,
-                                      ),
-                                    ),
-                                  );
-                                }).toList(),
-                                onChanged: (value) {
-                                  setState(() {
-                                    _selectedNationality = value!;
-                                  });
-                                  hapticSelection();
-                                },
-                                validator: (value) {
-                                  if (value == null || value.isEmpty) {
-                                    return 'Please select your nationality';
-                                  }
-                                  return null;
-                                },
-                              ),
-                            ),
-
-                            const SizedBox(height: 16),
-
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Expanded(
-                                  flex: 3,
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                      gradient: LinearGradient(
-                                        begin: Alignment.topLeft,
-                                        end: Alignment.bottomRight,
-                                        colors: [
-                                          Colors.white.withOpacity(0.05),
-                                          Colors.white.withOpacity(0.02),
-                                        ],
-                                      ),
-                                      borderRadius: BorderRadius.circular(16),
-                                      border: Border.all(
-                                        color: Colors.white.withOpacity(0.1),
-                                        width: 1,
-                                      ),
-                                    ),
-                                    child: DropdownButtonFormField<String>(
-                                      value: _selectedCountryCode,
-                                      dropdownColor: Colors.black,
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 14,
-                                      ),
-                                      isExpanded: true,
-                                      decoration: InputDecoration(
-                                        labelText: 'Code',
-                                        labelStyle: TextStyle(
-                                          color: Colors.white.withOpacity(0.5),
-                                          fontWeight: FontWeight.w500,
-                                          fontSize: 12,
-                                        ),
-                                        border: OutlineInputBorder(
-                                          borderRadius: BorderRadius.circular(16),
-                                          borderSide: BorderSide.none,
-                                        ),
-                                        focusedBorder: OutlineInputBorder(
-                                          borderRadius: BorderRadius.circular(16),
-                                          borderSide: BorderSide(
-                                            color: const Color(0xFF92C24A).withOpacity(0.5),
-                                            width: 2,
-                                          ),
-                                        ),
-                                        enabledBorder: OutlineInputBorder(
-                                          borderRadius: BorderRadius.circular(16),
-                                          borderSide: BorderSide(
-                                            color: Colors.transparent,
-                                          ),
-                                        ),
-                                        contentPadding: const EdgeInsets.symmetric(
-                                          horizontal: 12,
-                                          vertical: 12,
-                                        ),
-                                      ),
-                                      items: _countryCodes.map((country) {
-                                        return DropdownMenuItem<String>(
-                                          value: country['code'],
-                                          child: Text(
-                                            country['code']!,
-                                            style: const TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 14,
-                                              fontWeight: FontWeight.w600,
-                                            ),
-                                          ),
-                                        );
-                                      }).toList(),
-                                      onChanged: (value) {
-                                        setState(() {
-                                          _selectedCountryCode = value!;
-                                        });
-                                        hapticSelection();
-                                      },
-                                      validator: (value) {
-                                        if (value == null || value.isEmpty) {
-                                          return 'Select code';
-                                        }
-                                        return null;
-                                      },
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(width: 12),
-
-                                Expanded(
-                                  flex: 7,
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                      gradient: LinearGradient(
-                                        begin: Alignment.topLeft,
-                                        end: Alignment.bottomRight,
-                                        colors: [
-                                          Colors.white.withOpacity(0.05),
-                                          Colors.white.withOpacity(0.02),
-                                        ],
-                                      ),
-                                      borderRadius: BorderRadius.circular(16),
-                                      border: Border.all(
-                                        color: Colors.white.withOpacity(0.1),
-                                        width: 1,
-                                      ),
-                                    ),
-                                    child: TextFormField(
-                                      controller: _phoneController,
-                                      style: const TextStyle(color: Colors.white),
-                                      keyboardType: TextInputType.phone,
-                                      textInputAction: TextInputAction.next,
-                                      inputFormatters: [
-                                        FilteringTextInputFormatter.digitsOnly,
-                                      ],
-                                      decoration: InputDecoration(
-                                        labelText: 'Phone Number',
-                                        labelStyle: TextStyle(
-                                          color: Colors.white.withOpacity(0.5),
-                                          fontWeight: FontWeight.w500,
-                                        ),
-                                        prefixIcon: Icon(
-                                          Icons.phone_outlined,
-                                          color: const Color(0xFF92C24A).withOpacity(0.7),
-                                          size: 22,
-                                        ),
-                                        border: OutlineInputBorder(
-                                          borderRadius: BorderRadius.circular(16),
-                                          borderSide: BorderSide.none,
-                                        ),
-                                        focusedBorder: OutlineInputBorder(
-                                          borderRadius: BorderRadius.circular(16),
-                                          borderSide: BorderSide(
-                                            color: const Color(0xFF92C24A).withOpacity(0.5),
-                                            width: 2,
-                                          ),
-                                        ),
-                                        enabledBorder: OutlineInputBorder(
-                                          borderRadius: BorderRadius.circular(16),
-                                          borderSide: BorderSide(
-                                            color: Colors.transparent,
-                                          ),
-                                        ),
-                                        contentPadding: const EdgeInsets.symmetric(
-                                          horizontal: 20,
-                                          vertical: 16,
-                                        ),
-                                      ),
-                                      validator: (value) {
-                                        if (value == null || value.isEmpty) {
-                                          return 'Please enter phone number';
-                                        }
-                                        if (!_isValidPhone(value)) {
-                                          return 'Enter a valid phone number';
-                                        }
-                                        return null;
-                                      },
+                                      color: const Color(0xFFFF9800)
+                                          .withOpacity(0.6),
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w500,
+                                      letterSpacing: 0.3,
                                     ),
                                   ),
                                 ),
                               ],
                             ),
+                          ),
 
-                            const SizedBox(height: 16),
+                          const SizedBox(height: 28),
 
-                            _buildTextField(
-                              controller: _passwordController,
-                              label: 'Password',
-                              icon: Icons.lock_outline,
-                              obscureText: _obscurePassword,
-                              textInputAction: TextInputAction.next,
-                              suffixIcon: IconButton(
-                                icon: Icon(
-                                  _obscurePassword
-                                      ? Icons.visibility_off
-                                      : Icons.visibility,
-                                  color: Colors.white.withOpacity(0.5),
-                                  size: 22,
-                                ),
-                                onPressed: () {
-                                  setState(() {
-                                    _obscurePassword = !_obscurePassword;
-                                  });
-                                  hapticFeedback();
-                                },
-                              ),
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Please enter a password';
+                          // Full Name
+                          _buildTextField(
+                            controller: _fullNameController,
+                            label: 'Full Name',
+                            icon: Icons.person_outline,
+                            keyboardType: TextInputType.name,
+                            textInputAction: TextInputAction.next,
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Please enter your full name';
+                              }
+                              if (value.length < 2) {
+                                return 'Name must be at least 2 characters';
+                              }
+                              return null;
+                            },
+                          ),
+
+                          const SizedBox(height: 18),
+
+                          // Email
+                          _buildTextField(
+                            controller: _emailController,
+                            label: 'Email Address',
+                            icon: Icons.email_outlined,
+                            keyboardType: TextInputType.emailAddress,
+                            textInputAction: TextInputAction.next,
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Please enter your email address';
+                              }
+                              if (!_isValidEmail(value)) {
+                                return 'Please enter a valid email address';
+                              }
+                              return null;
+                            },
+                          ),
+
+                          const SizedBox(height: 18),
+
+                          // Nationality Custom Dropdown with Search
+                          _buildCustomDropdown(
+                            label: 'Nationality',
+                            icon: Icons.flag_outlined,
+                            selectedValue: _selectedNationality,
+                            items: _filteredNationalities,
+                            searchController: _searchNationalityController,
+                            onSearchChanged: _filterNationalities,
+                            onChanged: (value) {
+                              if (value != null) {
+                                setState(() {
+                                  _selectedNationality = value;
+                                  _searchNationalityController.clear();
+                                  _filterNationalities('');
+                                  _isNationalityDropdownOpen = false;
+                                });
+                                hapticSelection();
+                              }
+                            },
+                            isOpen: _isNationalityDropdownOpen,
+                            onToggle: () {
+                              setState(() {
+                                _isNationalityDropdownOpen =
+                                    !_isNationalityDropdownOpen;
+                                if (!_isNationalityDropdownOpen) {
+                                  _searchNationalityController.clear();
+                                  _filterNationalities('');
                                 }
-                                if (value.length < 6) {
-                                  return 'Password must be at least 6 characters';
-                                }
-                                return null;
-                              },
-                            ),
-
-                            const SizedBox(height: 16),
-
-                            _buildTextField(
-                              controller: _confirmPasswordController,
-                              label: 'Confirm Password',
-                              icon: Icons.lock_outline,
-                              obscureText: _obscureConfirmPassword,
-                              textInputAction: TextInputAction.done,
-                              suffixIcon: IconButton(
-                                icon: Icon(
-                                  _obscureConfirmPassword
-                                      ? Icons.visibility_off
-                                      : Icons.visibility,
-                                  color: Colors.white.withOpacity(0.5),
-                                  size: 22,
-                                ),
-                                onPressed: () {
-                                  setState(() {
-                                    _obscureConfirmPassword = !_obscureConfirmPassword;
-                                  });
-                                  hapticFeedback();
-                                },
-                              ),
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Please confirm your password';
-                                }
-                                if (value != _passwordController.text) {
-                                  return 'Passwords do not match';
-                                }
-                                return null;
-                              },
-                            ),
-
-                            const SizedBox(height: 8),
-
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 4),
-                              child: Row(
-                                children: [
-                                  Icon(
-                                    Icons.info_outline,
-                                    color: Colors.white.withOpacity(0.3),
-                                    size: 14,
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    'Password must be at least 6 characters',
-                                    style: TextStyle(
-                                      color: Colors.white.withOpacity(0.3),
-                                      fontSize: 12,
-                                    ),
-                                  ),
-                                ],
+                              });
+                            },
+                            buildItem: (item) => Text(
+                              item,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
                               ),
                             ),
+                            buildSelectedItem: (item) => Text(
+                              item,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Please select your nationality';
+                              }
+                              return null;
+                            },
+                          ),
 
-                            const SizedBox(height: 20),
+                          const SizedBox(height: 18),
 
-                            Row(
-                              children: [
-                                Theme(
-                                  data: ThemeData(
-                                    checkboxTheme: CheckboxThemeData(
-                                      fillColor: WidgetStateProperty.resolveWith(
-                                        (states) => const Color(0xFF92C24A),
-                                      ),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(4),
-                                      ),
-                                    ),
-                                    unselectedWidgetColor:
-                                        Colors.white.withOpacity(0.3),
-                                  ),
-                                  child: Checkbox(
-                                    value: _agreeToTerms,
-                                    onChanged: (value) {
+                          // Phone Number with Country Code
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(
+                                flex: 3,
+                                child: _buildCustomDropdown<String>(
+                                  label: 'Code',
+                                  icon: Icons.phone_outlined,
+                                  selectedValue: _selectedCountryCode,
+                                  items: _filteredCountryCodes
+                                      .map((item) => item['code']!)
+                                      .toList(),
+                                  searchController:
+                                      _searchCountryCodeController,
+                                  onSearchChanged: _filterCountryCodes,
+                                  onChanged: (value) {
+                                    if (value != null) {
                                       setState(() {
-                                        _agreeToTerms = value!;
+                                        _selectedCountryCode = value;
+                                        _searchCountryCodeController.clear();
+                                        _filterCountryCodes('');
+                                        _isCountryCodeDropdownOpen = false;
                                       });
                                       hapticSelection();
-                                    },
-                                    activeColor: const Color(0xFF92C24A),
-                                    checkColor: Colors.black,
-                                  ),
-                                ),
-                                Expanded(
-                                  child: Text.rich(
-                                    TextSpan(
-                                      style: TextStyle(
-                                        color: Colors.white.withOpacity(0.6),
-                                        fontSize: 13,
-                                        fontWeight: FontWeight.w400,
-                                      ),
+                                    }
+                                  },
+                                  isOpen: _isCountryCodeDropdownOpen,
+                                  onToggle: () {
+                                    setState(() {
+                                      _isCountryCodeDropdownOpen =
+                                          !_isCountryCodeDropdownOpen;
+                                      if (!_isCountryCodeDropdownOpen) {
+                                        _searchCountryCodeController.clear();
+                                        _filterCountryCodes('');
+                                      }
+                                    });
+                                  },
+                                  buildItem: (item) {
+                                    final code = item as String;
+                                    final country = _allCountryCodes.firstWhere(
+                                      (c) => c['code'] == code,
+                                      orElse: () =>
+                                          {'code': code, 'country': 'Unknown'},
+                                    );
+                                    return Row(
                                       children: [
-                                        const TextSpan(text: 'I agree to the '),
-                                        TextSpan(
-                                          text: 'Terms of Services',
-                                          style: TextStyle(
-                                            color: const Color(0xFF92C24A).withOpacity(0.8),
-                                            fontWeight: FontWeight.w600,
-                                            decoration: TextDecoration.underline,
-                                            decorationColor:
-                                                const Color(0xFF92C24A).withOpacity(0.3),
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 10,
+                                            vertical: 4,
                                           ),
-                                          recognizer: _termsRecognizer,
+                                          decoration: BoxDecoration(
+                                            color: const Color(0xFF92C24A)
+                                                .withOpacity(0.15),
+                                            borderRadius:
+                                                BorderRadius.circular(6),
+                                          ),
+                                          child: Text(
+                                            code,
+                                            style: const TextStyle(
+                                              color: Color(0xFF92C24A),
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w700,
+                                            ),
+                                          ),
                                         ),
-                                        const TextSpan(text: ' and '),
-                                        TextSpan(
-                                          text: 'Privacy Policy',
-                                          style: TextStyle(
-                                            color: const Color(0xFF92C24A).withOpacity(0.8),
-                                            fontWeight: FontWeight.w600,
-                                            decoration: TextDecoration.underline,
-                                            decorationColor:
-                                                const Color(0xFF92C24A).withOpacity(0.3),
+                                        const SizedBox(width: 12),
+                                        Expanded(
+                                          child: Text(
+                                            country['country']!,
+                                            style: TextStyle(
+                                              color: Colors.white
+                                                  .withOpacity(0.8),
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w400,
+                                            ),
+                                            overflow: TextOverflow.ellipsis,
                                           ),
-                                          recognizer: _privacyRecognizer,
                                         ),
                                       ],
+                                    );
+                                  },
+                                  buildSelectedItem: (item) {
+                                    final code = item as String;
+                                    final country = _allCountryCodes.firstWhere(
+                                      (c) => c['code'] == code,
+                                      orElse: () =>
+                                          {'code': code, 'country': 'Unknown'},
+                                    );
+                                    return Row(
+                                      children: [
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 10,
+                                            vertical: 4,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: const Color(0xFF92C24A)
+                                                .withOpacity(0.15),
+                                            borderRadius:
+                                                BorderRadius.circular(6),
+                                          ),
+                                          child: Text(
+                                            code,
+                                            style: const TextStyle(
+                                              color: Color(0xFF92C24A),
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w700,
+                                            ),
+                                          ),
+                                        ),
+                                        const SizedBox(width: 10),
+                                        Expanded(
+                                          child: Text(
+                                            country['country']!,
+                                            style: TextStyle(
+                                              color: Colors.white
+                                                  .withOpacity(0.8),
+                                              fontSize: 13,
+                                              fontWeight: FontWeight.w400,
+                                            ),
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ),
+                                      ],
+                                    );
+                                  },
+                                  validator: (value) {
+                                    if (value == null || value.isEmpty) {
+                                      return 'Select code';
+                                    }
+                                    return null;
+                                  },
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+
+                              Expanded(
+                                flex: 7,
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    gradient: LinearGradient(
+                                      begin: Alignment.topLeft,
+                                      end: Alignment.bottomRight,
+                                      colors: [
+                                        Colors.white.withOpacity(0.05),
+                                        Colors.white.withOpacity(0.02),
+                                      ],
                                     ),
+                                    borderRadius: BorderRadius.circular(14),
+                                    border: Border.all(
+                                      color: Colors.white.withOpacity(0.08),
+                                      width: 1.5,
+                                    ),
+                                  ),
+                                  child: TextFormField(
+                                    controller: _phoneController,
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                    keyboardType: TextInputType.phone,
+                                    textInputAction: TextInputAction.next,
+                                    inputFormatters: [
+                                      FilteringTextInputFormatter.digitsOnly,
+                                    ],
+                                    decoration: InputDecoration(
+                                      labelText: 'Phone Number',
+                                      labelStyle: TextStyle(
+                                        color: Colors.white.withOpacity(0.4),
+                                        fontWeight: FontWeight.w500,
+                                        fontSize: 14,
+                                      ),
+                                      prefixIcon: Icon(
+                                        Icons.phone_outlined,
+                                        color: const Color(0xFF92C24A)
+                                            .withOpacity(0.8),
+                                        size: 22,
+                                      ),
+                                      border: OutlineInputBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(14),
+                                        borderSide: BorderSide.none,
+                                      ),
+                                      focusedBorder: OutlineInputBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(14),
+                                        borderSide: BorderSide(
+                                          color: const Color(0xFF92C24A)
+                                              .withOpacity(0.5),
+                                          width: 2,
+                                        ),
+                                      ),
+                                      enabledBorder: OutlineInputBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(14),
+                                        borderSide: BorderSide.none,
+                                      ),
+                                      contentPadding:
+                                          const EdgeInsets.symmetric(
+                                        horizontal: 18,
+                                        vertical: 16,
+                                      ),
+                                      isDense: true,
+                                    ),
+                                    validator: (value) {
+                                      if (value == null || value.isEmpty) {
+                                        return 'Please enter phone number';
+                                      }
+                                      if (!_isValidPhone(value)) {
+                                        return 'Enter a valid phone number';
+                                      }
+                                      return null;
+                                    },
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+
+                          const SizedBox(height: 18),
+
+                          // Password
+                          _buildTextField(
+                            controller: _passwordController,
+                            label: 'Password',
+                            icon: Icons.lock_outline,
+                            obscureText: _obscurePassword,
+                            textInputAction: TextInputAction.next,
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                _obscurePassword
+                                    ? Icons.visibility_off_outlined
+                                    : Icons.visibility_outlined,
+                                color: Colors.white.withOpacity(0.4),
+                                size: 22,
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  _obscurePassword = !_obscurePassword;
+                                });
+                                hapticFeedback();
+                              },
+                            ),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Please enter a password';
+                              }
+                              if (value.length < 6) {
+                                return 'Password must be at least 6 characters';
+                              }
+                              return null;
+                            },
+                          ),
+
+                          const SizedBox(height: 18),
+
+                          // Confirm Password
+                          _buildTextField(
+                            controller: _confirmPasswordController,
+                            label: 'Confirm Password',
+                            icon: Icons.lock_outline,
+                            obscureText: _obscureConfirmPassword,
+                            textInputAction: TextInputAction.done,
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                _obscureConfirmPassword
+                                    ? Icons.visibility_off_outlined
+                                    : Icons.visibility_outlined,
+                                color: Colors.white.withOpacity(0.4),
+                                size: 22,
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  _obscureConfirmPassword =
+                                      !_obscureConfirmPassword;
+                                });
+                                hapticFeedback();
+                              },
+                            ),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Please confirm your password';
+                              }
+                              if (value != _passwordController.text) {
+                                return 'Passwords do not match';
+                              }
+                              return null;
+                            },
+                          ),
+
+                          const SizedBox(height: 6),
+
+                          // Password Hint
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 4),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.info_outline_rounded,
+                                  color: Colors.white.withOpacity(0.3),
+                                  size: 14,
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  'Password must be at least 6 characters',
+                                  style: TextStyle(
+                                    color: Colors.white.withOpacity(0.3),
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w400,
                                   ),
                                 ),
                               ],
                             ),
+                          ),
 
-                            const SizedBox(height: 24),
+                          const SizedBox(height: 20),
 
-                            AnimatedContainer(
-                              duration: const Duration(milliseconds: 300),
-                              width: double.infinity,
-                              height: 56,
-                              decoration: BoxDecoration(
-                                gradient: _agreeToTerms
-                                    ? const LinearGradient(
-                                        colors: [Color(0xFF92C24A), Color(0xFF4CAF50)],
-                                      )
-                                    : LinearGradient(
-                                        colors: [
-                                          Colors.white.withOpacity(0.1),
-                                          Colors.white.withOpacity(0.05),
-                                        ],
-                                      ),
-                                borderRadius: BorderRadius.circular(16),
-                                boxShadow: _agreeToTerms
-                                    ? [
-                                        BoxShadow(
-                                          color: const Color(0xFF92C24A).withOpacity(0.3),
-                                          blurRadius: 24,
-                                          offset: const Offset(0, 8),
-                                        ),
-                                        BoxShadow(
-                                          color: const Color(0xFF92C24A).withOpacity(0.1),
-                                          blurRadius: 40,
-                                          offset: const Offset(0, 4),
-                                        ),
-                                      ]
-                                    : null,
-                              ),
-                              child: ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.transparent,
-                                  foregroundColor: _agreeToTerms
-                                      ? Colors.black
-                                      : Colors.white.withOpacity(0.4),
-                                  shadowColor: Colors.transparent,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(16),
+                          // Terms and Conditions
+                          Row(
+                            children: [
+                              Theme(
+                                data: ThemeData(
+                                  checkboxTheme: CheckboxThemeData(
+                                    fillColor: WidgetStateProperty.resolveWith(
+                                      (states) => const Color(0xFF92C24A),
+                                    ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(4),
+                                    ),
                                   ),
-                                  elevation: 0,
+                                  unselectedWidgetColor:
+                                      Colors.white.withOpacity(0.3),
                                 ),
-                                onPressed: _isLoading || !_agreeToTerms
-                                    ? null
-                                    : _handleSignUp,
-                                child: _isLoading
-                                    ? SizedBox(
-                                        height: 24,
-                                        width: 24,
-                                        child: CircularProgressIndicator(
-                                          strokeWidth: 2.5,
-                                          valueColor:
-                                              const AlwaysStoppedAnimation<Color>(
-                                                Colors.black,
-                                              ),
+                                child: Checkbox(
+                                  value: _agreeToTerms,
+                                  onChanged: (value) {
+                                    setState(() {
+                                      _agreeToTerms = value!;
+                                    });
+                                    hapticSelection();
+                                  },
+                                  activeColor: const Color(0xFF92C24A),
+                                  checkColor: Colors.black,
+                                  side: BorderSide(
+                                    color: Colors.white.withOpacity(0.3),
+                                    width: 1.5,
+                                  ),
+                                ),
+                              ),
+                              Expanded(
+                                child: Text.rich(
+                                  TextSpan(
+                                    style: TextStyle(
+                                      color: Colors.white.withOpacity(0.5),
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w400,
+                                    ),
+                                    children: [
+                                      const TextSpan(text: 'I agree to the '),
+                                      TextSpan(
+                                        text: 'Terms of Services',
+                                        style: TextStyle(
+                                          color: const Color(0xFF92C24A)
+                                              .withOpacity(0.9),
+                                          fontWeight: FontWeight.w600,
+                                          decoration: TextDecoration.underline,
+                                          decorationColor: const Color(
+                                                  0xFF92C24A)
+                                              .withOpacity(0.3),
+                                          decorationThickness: 1.5,
                                         ),
-                                      )
-                                    : Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          Text(
-                                            'Sign Up',
-                                            style: TextStyle(
-                                              fontSize: 18,
-                                              fontWeight: FontWeight.w700,
-                                              color: _agreeToTerms
-                                                  ? Colors.black
-                                                  : Colors.white.withOpacity(0.4),
-                                              letterSpacing: 0.5,
-                                            ),
-                                          ),
-                                          const SizedBox(width: 8),
-                                          Icon(
-                                            Icons.arrow_forward_rounded,
+                                        recognizer: _termsRecognizer,
+                                      ),
+                                      const TextSpan(text: ' and '),
+                                      TextSpan(
+                                        text: 'Privacy Policy',
+                                        style: TextStyle(
+                                          color: const Color(0xFF92C24A)
+                                              .withOpacity(0.9),
+                                          fontWeight: FontWeight.w600,
+                                          decoration: TextDecoration.underline,
+                                          decorationColor: const Color(
+                                                  0xFF92C24A)
+                                              .withOpacity(0.3),
+                                          decorationThickness: 1.5,
+                                        ),
+                                        recognizer: _privacyRecognizer,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+
+                          const SizedBox(height: 28),
+
+                          // Sign Up Button
+                          AnimatedContainer(
+                            duration: const Duration(milliseconds: 300),
+                            width: double.infinity,
+                            height: 56,
+                            decoration: BoxDecoration(
+                              gradient: _agreeToTerms
+                                  ? const LinearGradient(
+                                      colors: [
+                                        Color(0xFF92C24A),
+                                        Color(0xFF7CB342),
+                                      ],
+                                      begin: Alignment.topLeft,
+                                      end: Alignment.bottomRight,
+                                    )
+                                  : LinearGradient(
+                                      colors: [
+                                        Colors.white.withOpacity(0.08),
+                                        Colors.white.withOpacity(0.04),
+                                      ],
+                                    ),
+                              borderRadius: BorderRadius.circular(14),
+                              boxShadow: _agreeToTerms
+                                  ? [
+                                      BoxShadow(
+                                        color: const Color(0xFF92C24A)
+                                            .withOpacity(0.35),
+                                        blurRadius: 30,
+                                        offset: const Offset(0, 10),
+                                      ),
+                                      BoxShadow(
+                                        color: const Color(0xFF92C24A)
+                                            .withOpacity(0.15),
+                                        blurRadius: 50,
+                                        offset: const Offset(0, 4),
+                                      ),
+                                    ]
+                                  : null,
+                            ),
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.transparent,
+                                foregroundColor: _agreeToTerms
+                                    ? Colors.black
+                                    : Colors.white.withOpacity(0.3),
+                                shadowColor: Colors.transparent,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(14),
+                                ),
+                                elevation: 0,
+                              ),
+                              onPressed: _isLoading || !_agreeToTerms
+                                  ? null
+                                  : _handleSignUp,
+                              child: _isLoading
+                                  ? SizedBox(
+                                      height: 24,
+                                      width: 24,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2.5,
+                                        valueColor:
+                                            const AlwaysStoppedAnimation<Color>(
+                                          Colors.black,
+                                        ),
+                                      ),
+                                    )
+                                  : Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Text(
+                                          'Sign Up',
+                                          style: TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.w700,
                                             color: _agreeToTerms
                                                 ? Colors.black
-                                                : Colors.white.withOpacity(0.4),
-                                            size: 22,
+                                                : Colors.white
+                                                    .withOpacity(0.3),
+                                            letterSpacing: 0.5,
                                           ),
-                                        ],
-                                      ),
-                              ),
-                            ),
-
-                            const SizedBox(height: 20),
-
-                            Center(
-                              child: Text.rich(
-                                TextSpan(
-                                  style: TextStyle(
-                                    color: Colors.white.withOpacity(0.6),
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.w400,
-                                  ),
-                                  children: [
-                                    const TextSpan(text: 'Already have an account? '),
-                                    TextSpan(
-                                      text: 'Sign In',
-                                      style: TextStyle(
-                                        color: const Color(0xFF92C24A),
-                                        fontWeight: FontWeight.w700,
-                                        decoration: TextDecoration.underline,
-                                        decorationColor:
-                                            const Color(0xFF92C24A).withOpacity(0.3),
-                                      ),
-                                      recognizer: _backToLoginRecognizer,
+                                        ),
+                                        const SizedBox(width: 10),
+                                        Icon(
+                                          Icons.arrow_forward_rounded,
+                                          color: _agreeToTerms
+                                              ? Colors.black
+                                              : Colors.white.withOpacity(0.3),
+                                          size: 22,
+                                        ),
+                                      ],
                                     ),
-                                  ],
+                            ),
+                          ),
+
+                          const SizedBox(height: 20),
+
+                          // Sign In Link
+                          Center(
+                            child: Text.rich(
+                              TextSpan(
+                                style: TextStyle(
+                                  color: Colors.white.withOpacity(0.5),
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w400,
                                 ),
+                                children: [
+                                  const TextSpan(
+                                      text: 'Already have an account? '),
+                                  TextSpan(
+                                    text: 'Sign In',
+                                    style: TextStyle(
+                                      color: const Color(0xFF92C24A),
+                                      fontWeight: FontWeight.w700,
+                                      decoration: TextDecoration.underline,
+                                      decorationColor: const Color(0xFF92C24A)
+                                          .withOpacity(0.3),
+                                      decorationThickness: 1.5,
+                                    ),
+                                    recognizer: _backToLoginRecognizer,
+                                  ),
+                                ],
                               ),
                             ),
+                          ),
 
-                            const SizedBox(height: 32),
-                          ],
-                        ),
+                          const SizedBox(height: 20),
+                        ],
                       ),
                     ),
                   ),
@@ -993,6 +1431,213 @@ class _SignUpScreenState extends State<SignUpScreen>
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildCustomDropdown<T>({
+    required String label,
+    required IconData icon,
+    required T selectedValue,
+    required List<T> items,
+    required TextEditingController searchController,
+    required Function(String) onSearchChanged,
+    required Function(T?) onChanged,
+    required bool isOpen,
+    required VoidCallback onToggle,
+    required Widget Function(T) buildItem,
+    required Widget Function(T) buildSelectedItem,
+    required String? Function(T?) validator,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        GestureDetector(
+          onTap: onToggle,
+          child: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Colors.white.withOpacity(0.05),
+                  Colors.white.withOpacity(0.02),
+                ],
+              ),
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(
+                color: isOpen
+                    ? const Color(0xFF92C24A).withOpacity(0.5)
+                    : Colors.white.withOpacity(0.08),
+                width: isOpen ? 2 : 1.5,
+              ),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 18,
+                vertical: 14,
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    icon,
+                    color: const Color(0xFF92C24A).withOpacity(0.8),
+                    size: 22,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          label,
+                          style: TextStyle(
+                            color: Colors.white.withOpacity(0.4),
+                            fontWeight: FontWeight.w500,
+                            fontSize: 14,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        buildSelectedItem(selectedValue),
+                      ],
+                    ),
+                  ),
+                  Icon(
+                    isOpen
+                        ? Icons.arrow_drop_up_rounded
+                        : Icons.arrow_drop_down_rounded,
+                    color: Colors.white.withOpacity(0.5),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+        if (isOpen)
+          Container(
+            margin: const EdgeInsets.only(top: 4),
+            decoration: BoxDecoration(
+              color: Colors.black,
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(
+                color: Colors.white.withOpacity(0.08),
+                width: 1.5,
+              ),
+            ),
+            child: Column(
+              children: [
+                // Search Field
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  child: TextField(
+                    controller: searchController,
+                    autofocus: true,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 14,
+                    ),
+                    decoration: InputDecoration(
+                      hintText: 'Search ${label.toLowerCase()}...',
+                      hintStyle: TextStyle(
+                        color: Colors.white.withOpacity(0.3),
+                        fontSize: 13,
+                      ),
+                      prefixIcon: Icon(
+                        Icons.search_rounded,
+                        color: const Color(0xFF92C24A).withOpacity(0.6),
+                        size: 20,
+                      ),
+                      filled: true,
+                      fillColor: Colors.white.withOpacity(0.06),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        borderSide: BorderSide.none,
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        borderSide: BorderSide(
+                          color: const Color(0xFF92C24A).withOpacity(0.3),
+                          width: 1.5,
+                        ),
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 10,
+                      ),
+                      isDense: true,
+                    ),
+                    onChanged: onSearchChanged,
+                  ),
+                ),
+                const Divider(
+                  color: Colors.white24,
+                  height: 1,
+                ),
+                // Items List
+                ConstrainedBox(
+                  constraints: BoxConstraints(
+                    maxHeight: 200,
+                  ),
+                  child: items.isEmpty
+                      ? const Padding(
+                          padding: EdgeInsets.all(16.0),
+                          child: Text(
+                            'No results found',
+                            style: TextStyle(
+                              color: Colors.white38,
+                              fontSize: 14,
+                            ),
+                          ),
+                        )
+                      : ListView.builder(
+                          shrinkWrap: true,
+                          itemCount: items.length,
+                          itemBuilder: (context, index) {
+                            final item = items[index];
+                            return InkWell(
+                              onTap: () {
+                                onChanged(item);
+                              },
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 12,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: item == selectedValue
+                                      ? const Color(0xFF92C24A)
+                                          .withOpacity(0.1)
+                                      : Colors.transparent,
+                                  border: Border(
+                                    bottom: BorderSide(
+                                      color: Colors.white.withOpacity(0.05),
+                                      width: 0.5,
+                                    ),
+                                  ),
+                                ),
+                                child: buildItem(item),
+                              ),
+                            );
+                          },
+                        ),
+                ),
+              ],
+            ),
+          ),
+        // Validation error
+        if (validator(selectedValue) != null)
+          Padding(
+            padding: const EdgeInsets.only(top: 6, left: 4),
+            child: Text(
+              validator(selectedValue)!,
+              style: TextStyle(
+                color: Colors.red.shade300,
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+      ],
     );
   }
 
@@ -1016,63 +1661,66 @@ class _SignUpScreenState extends State<SignUpScreen>
             Colors.white.withOpacity(0.02),
           ],
         ),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(14),
         border: Border.all(
-          color: Colors.white.withOpacity(0.1),
-          width: 1,
+          color: Colors.white.withOpacity(0.08),
+          width: 1.5,
         ),
       ),
       child: TextFormField(
         controller: controller,
-        style: const TextStyle(color: Colors.white),
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 15,
+          fontWeight: FontWeight.w500,
+        ),
         keyboardType: keyboardType,
         textInputAction: textInputAction,
         obscureText: obscureText,
         decoration: InputDecoration(
           labelText: label,
           labelStyle: TextStyle(
-            color: Colors.white.withOpacity(0.5),
+            color: Colors.white.withOpacity(0.4),
             fontWeight: FontWeight.w500,
+            fontSize: 14,
           ),
           prefixIcon: Icon(
             icon,
-            color: const Color(0xFF92C24A).withOpacity(0.7),
+            color: const Color(0xFF92C24A).withOpacity(0.8),
             size: 22,
           ),
           suffixIcon: suffixIcon,
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(14),
             borderSide: BorderSide.none,
           ),
           focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(14),
             borderSide: BorderSide(
               color: const Color(0xFF92C24A).withOpacity(0.5),
               width: 2,
             ),
           ),
           enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(16),
-            borderSide: BorderSide(
-              color: Colors.transparent,
-            ),
+            borderRadius: BorderRadius.circular(14),
+            borderSide: BorderSide.none,
           ),
           errorBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(14),
             borderSide: BorderSide(
-              color: Colors.red.withOpacity(0.5),
-              width: 1,
+              color: Colors.red.withOpacity(0.4),
+              width: 1.5,
             ),
           ),
           focusedErrorBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(14),
             borderSide: BorderSide(
               color: Colors.red.withOpacity(0.5),
               width: 2,
             ),
           ),
           contentPadding: const EdgeInsets.symmetric(
-            horizontal: 20,
+            horizontal: 18,
             vertical: 16,
           ),
           errorStyle: TextStyle(

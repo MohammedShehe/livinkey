@@ -303,213 +303,220 @@ class _LoginScreenState extends State<LoginScreen>
                   position: _slideAnimation,
                   child: SingleChildScrollView(
                     physics: const BouncingScrollPhysics(),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 28),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const SizedBox(height: 20),
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const SizedBox(height: 20),
 
-                          Align(
-                            alignment: Alignment.topRight,
-                            child: ScaleTransition(
+                        // Top section with logo
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Welcome Back!',
+                                  style: TextStyle(
+                                    fontSize: 28,
+                                    fontWeight: FontWeight.w700,
+                                    color: Colors.white,
+                                    letterSpacing: -0.5,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  'Sign in to continue your journey',
+                                  style: TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w400,
+                                    color: Colors.white.withOpacity(0.5),
+                                    letterSpacing: 0.2,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            ScaleTransition(
                               scale: _logoScaleAnimation,
                               child: Image.asset(
                                 kGeneralLogo,
-                                height: 80,
-                                width: 80,
+                                height: 60,
+                                width: 60,
                                 fit: BoxFit.contain,
                               ),
                             ),
+                          ],
+                        ),
+
+                        const SizedBox(height: 32),
+
+                        // Demo Credentials Info Box - Improved
+                        Container(
+                          padding: const EdgeInsets.all(14),
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: [
+                                const Color(0xFF92C24A).withOpacity(0.12),
+                                const Color(0xFF92C24A).withOpacity(0.03),
+                              ],
+                            ),
+                            borderRadius: BorderRadius.circular(14),
+                            border: Border.all(
+                              color: const Color(0xFF92C24A).withOpacity(0.15),
+                              width: 1.5,
+                            ),
                           ),
-
-                          const SizedBox(height: 32),
-
-                          Column(
+                          child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
-                                'Welcome Back!',
-                                style: TextStyle(
-                                  fontSize: 32,
-                                  fontWeight: FontWeight.w800,
-                                  color: Colors.white,
-                                  letterSpacing: 0.5,
-                                ),
+                              Row(
+                                children: [
+                                  Icon(
+                                    Icons.info_outline_rounded,
+                                    color: const Color(0xFF92C24A).withOpacity(0.8),
+                                    size: 16,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    'Demo Credentials',
+                                    style: TextStyle(
+                                      color: const Color(0xFF92C24A).withOpacity(0.8),
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
+                                      letterSpacing: 0.3,
+                                    ),
+                                  ),
+                                ],
                               ),
-                              const SizedBox(height: 8),
-                              Text(
-                                'Sign in to continue your journey',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w400,
-                                  color: Colors.white.withOpacity(0.6),
-                                  letterSpacing: 0.3,
-                                ),
+                              const SizedBox(height: 10),
+                              Row(
+                                children: [
+                                  _buildCredentialChip(
+                                    'Tenant',
+                                    kTenantEmail,
+                                    kTenantPassword,
+                                  ),
+                                  const SizedBox(width: 10),
+                                  _buildCredentialChip(
+                                    'Guest',
+                                    kGuestEmail,
+                                    kGuestPassword,
+                                  ),
+                                ],
                               ),
                             ],
                           ),
+                        ),
 
-                          const SizedBox(height: 40),
+                        const SizedBox(height: 28),
 
-                          // Demo Credentials Info Box
-                          Container(
-                            padding: const EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                                colors: [
-                                  Colors.green.withOpacity(0.1),
-                                  Colors.green.withOpacity(0.03),
-                                ],
-                              ),
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                color: Colors.green.withOpacity(0.15),
-                                width: 1,
-                              ),
+                        // Email Field
+                        _buildTextField(
+                          controller: _emailController,
+                          label: 'Email Address',
+                          icon: Icons.email_outlined,
+                          keyboardType: TextInputType.emailAddress,
+                          textInputAction: TextInputAction.next,
+                        ),
+
+                        const SizedBox(height: 18),
+
+                        // Password Field
+                        _buildTextField(
+                          controller: _passwordController,
+                          label: 'Password',
+                          icon: Icons.lock_outline,
+                          obscureText: _obscurePassword,
+                          textInputAction: TextInputAction.done,
+                          onSubmitted: (_) => _handleLogin(),
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              _obscurePassword
+                                  ? Icons.visibility_off_outlined
+                                  : Icons.visibility_outlined,
+                              color: Colors.white.withOpacity(0.4),
+                              size: 22,
                             ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                            onPressed: () {
+                              setState(() {
+                                _obscurePassword = !_obscurePassword;
+                              });
+                              hapticFeedback();
+                            },
+                          ),
+                        ),
+
+                        const SizedBox(height: 10),
+
+                        // Forgot Password
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: Text.rich(
+                            TextSpan(
                               children: [
-                                Row(
-                                  children: [
-                                    Icon(
-                                      Icons.info_outline_rounded,
-                                      color: Colors.green.withOpacity(0.7),
-                                      size: 16,
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Text(
-                                      'Demo Credentials',
-                                      style: TextStyle(
-                                        color: Colors.green.withOpacity(0.8),
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 6),
-                                Row(
-                                  children: [
-                                    _buildCredentialChip(
-                                      'Tenant',
-                                      kTenantEmail,
-                                      kTenantPassword,
-                                    ),
-                                    const SizedBox(width: 8),
-                                    _buildCredentialChip(
-                                      'Guest',
-                                      kGuestEmail,
-                                      kGuestPassword,
-                                    ),
-                                  ],
+                                TextSpan(
+                                  text: 'Forgot Password?',
+                                  style: TextStyle(
+                                    color: const Color(0xFF92C24A).withOpacity(0.9),
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                    decoration: TextDecoration.underline,
+                                    decorationColor:
+                                        const Color(0xFF92C24A).withOpacity(0.3),
+                                    decorationThickness: 1.5,
+                                  ),
+                                  recognizer: _forgotPasswordRecognizer,
                                 ),
                               ],
                             ),
                           ),
+                        ),
 
-                          const SizedBox(height: 24),
+                        const SizedBox(height: 32),
 
-                          _buildTextField(
-                            controller: _emailController,
-                            label: 'Email Address',
-                            icon: Icons.email_outlined,
-                            keyboardType: TextInputType.emailAddress,
-                            textInputAction: TextInputAction.next,
-                          ),
+                        // Login Button
+                        _buildLoginButton(),
 
-                          const SizedBox(height: 20),
+                        const SizedBox(height: 24),
 
-                          _buildTextField(
-                            controller: _passwordController,
-                            label: 'Password',
-                            icon: Icons.lock_outline,
-                            obscureText: _obscurePassword,
-                            textInputAction: TextInputAction.done,
-                            onSubmitted: (_) => _handleLogin(),
-                            suffixIcon: IconButton(
-                              icon: Icon(
-                                _obscurePassword
-                                    ? Icons.visibility_off
-                                    : Icons.visibility,
+                        // Sign Up Link
+                        Center(
+                          child: Text.rich(
+                            TextSpan(
+                              style: TextStyle(
                                 color: Colors.white.withOpacity(0.5),
-                                size: 22,
+                                fontSize: 15,
+                                fontWeight: FontWeight.w400,
                               ),
-                              onPressed: () {
-                                setState(() {
-                                  _obscurePassword = !_obscurePassword;
-                                });
-                                hapticFeedback();
-                              },
-                            ),
-                          ),
-
-                          const SizedBox(height: 12),
-
-                          Align(
-                            alignment: Alignment.centerRight,
-                            child: Text.rich(
-                              TextSpan(
-                                children: [
-                                  TextSpan(
-                                    text: 'Forgot Password?',
-                                    style: TextStyle(
-                                      color: Colors.green.withOpacity(0.8),
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w600,
-                                      decoration: TextDecoration.underline,
-                                      decorationColor:
-                                          Colors.green.withOpacity(0.3),
-                                    ),
-                                    recognizer: _forgotPasswordRecognizer,
+                              children: [
+                                const TextSpan(text: "Don't have an account? "),
+                                TextSpan(
+                                  text: 'Sign Up',
+                                  style: TextStyle(
+                                    color: const Color(0xFF92C24A),
+                                    fontWeight: FontWeight.w700,
+                                    decoration: TextDecoration.underline,
+                                    decorationColor:
+                                        const Color(0xFF92C24A).withOpacity(0.3),
+                                    decorationThickness: 1.5,
                                   ),
-                                ],
-                              ),
-                            ),
-                          ),
-
-                          const SizedBox(height: 32),
-
-                          _buildLoginButton(),
-
-                          const SizedBox(height: 24),
-
-                          Center(
-                            child: Text.rich(
-                              TextSpan(
-                                style: TextStyle(
-                                  color: Colors.white.withOpacity(0.6),
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w400,
+                                  recognizer: _signUpRecognizer,
                                 ),
-                                children: [
-                                  const TextSpan(text: "Don't have an account? "),
-                                  TextSpan(
-                                    text: 'Sign Up',
-                                    style: TextStyle(
-                                      color: Colors.green,
-                                      fontWeight: FontWeight.w700,
-                                      decoration: TextDecoration.underline,
-                                      decorationColor:
-                                          Colors.green.withOpacity(0.3),
-                                    ),
-                                    recognizer: _signUpRecognizer,
-                                  ),
-                                ],
-                              ),
+                              ],
                             ),
                           ),
+                        ),
 
-                          const SizedBox(height: 32),
+                        const SizedBox(height: 36),
 
-                          _buildSocialSection(),
+                        // Social Section - Improved
+                        _buildSocialSection(),
 
-                          const SizedBox(height: 40),
-                        ],
-                      ),
+                        const SizedBox(height: 24),
+                      ],
                     ),
                   ),
                 ),
@@ -523,12 +530,12 @@ class _LoginScreenState extends State<LoginScreen>
 
   Widget _buildCredentialChip(String label, String email, String password) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.05),
-        borderRadius: BorderRadius.circular(6),
+        color: Colors.white.withOpacity(0.06),
+        borderRadius: BorderRadius.circular(8),
         border: Border.all(
-          color: Colors.white.withOpacity(0.06),
+          color: Colors.white.withOpacity(0.08),
           width: 1,
         ),
       ),
@@ -536,22 +543,23 @@ class _LoginScreenState extends State<LoginScreen>
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            width: 6,
-            height: 6,
+            width: 7,
+            height: 7,
             decoration: BoxDecoration(
               color: label == 'Tenant' 
-                  ? const Color(0xFF4CAF50)
-                  : const Color(0xFFFF9800),
+                  ? const Color(0xFF92C24A)
+                  : const Color(0xFFFFA726),
               shape: BoxShape.circle,
             ),
           ),
-          const SizedBox(width: 4),
+          const SizedBox(width: 6),
           Text(
             label,
             style: TextStyle(
-              color: Colors.white.withOpacity(0.6),
-              fontSize: 10,
+              color: Colors.white.withOpacity(0.7),
+              fontSize: 11,
               fontWeight: FontWeight.w600,
+              letterSpacing: 0.3,
             ),
           ),
         ],
@@ -579,15 +587,19 @@ class _LoginScreenState extends State<LoginScreen>
             Colors.white.withOpacity(0.02),
           ],
         ),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(14),
         border: Border.all(
-          color: Colors.white.withOpacity(0.1),
-          width: 1,
+          color: Colors.white.withOpacity(0.08),
+          width: 1.5,
         ),
       ),
       child: TextField(
         controller: controller,
-        style: const TextStyle(color: Colors.white),
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 16,
+          fontWeight: FontWeight.w500,
+        ),
         keyboardType: keyboardType,
         textInputAction: textInputAction,
         obscureText: obscureText,
@@ -595,36 +607,36 @@ class _LoginScreenState extends State<LoginScreen>
         decoration: InputDecoration(
           labelText: label,
           labelStyle: TextStyle(
-            color: Colors.white.withOpacity(0.5),
+            color: Colors.white.withOpacity(0.4),
             fontWeight: FontWeight.w500,
+            fontSize: 14,
           ),
           prefixIcon: Icon(
             icon,
-            color: Colors.green.withOpacity(0.7),
+            color: const Color(0xFF92C24A).withOpacity(0.8),
             size: 22,
           ),
           suffixIcon: suffixIcon,
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(14),
             borderSide: BorderSide.none,
           ),
           focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(14),
             borderSide: BorderSide(
-              color: Colors.green.withOpacity(0.5),
+              color: const Color(0xFF92C24A).withOpacity(0.5),
               width: 2,
             ),
           ),
           enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(16),
-            borderSide: BorderSide(
-              color: Colors.transparent,
-            ),
+            borderRadius: BorderRadius.circular(14),
+            borderSide: BorderSide.none,
           ),
           contentPadding: const EdgeInsets.symmetric(
-            horizontal: 20,
-            vertical: 16,
+            horizontal: 18,
+            vertical: 14,
           ),
+          isDense: true,
         ),
       ),
     );
@@ -639,19 +651,21 @@ class _LoginScreenState extends State<LoginScreen>
         gradient: const LinearGradient(
           colors: [
             Color(0xFF92C24A),
-            Color(0xFF4CAF50),
+            Color(0xFF7CB342),
           ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
         ),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(14),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF92C24A).withOpacity(0.3),
-            blurRadius: 24,
-            offset: const Offset(0, 8),
+            color: const Color(0xFF92C24A).withOpacity(0.35),
+            blurRadius: 30,
+            offset: const Offset(0, 10),
           ),
           BoxShadow(
-            color: const Color(0xFF92C24A).withOpacity(0.1),
-            blurRadius: 40,
+            color: const Color(0xFF92C24A).withOpacity(0.15),
+            blurRadius: 50,
             offset: const Offset(0, 4),
           ),
         ],
@@ -662,7 +676,7 @@ class _LoginScreenState extends State<LoginScreen>
           foregroundColor: Colors.black,
           shadowColor: Colors.transparent,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(14),
           ),
           elevation: 0,
         ),
@@ -673,10 +687,9 @@ class _LoginScreenState extends State<LoginScreen>
                 width: 24,
                 child: CircularProgressIndicator(
                   strokeWidth: 2.5,
-                  valueColor:
-                      const AlwaysStoppedAnimation<Color>(
-                        Colors.black,
-                      ),
+                  valueColor: const AlwaysStoppedAnimation<Color>(
+                    Colors.black,
+                  ),
                 ),
               )
             : const Row(
@@ -691,7 +704,7 @@ class _LoginScreenState extends State<LoginScreen>
                       letterSpacing: 0.5,
                     ),
                   ),
-                  SizedBox(width: 8),
+                  SizedBox(width: 10),
                   Icon(
                     Icons.arrow_forward_rounded,
                     color: Colors.black,
@@ -706,8 +719,8 @@ class _LoginScreenState extends State<LoginScreen>
   Widget _buildSocialSection() {
     return Container(
       padding: const EdgeInsets.symmetric(
-        horizontal: 20,
-        vertical: 16,
+        horizontal: 16,
+        vertical: 18,
       ),
       decoration: BoxDecoration(
         gradient: LinearGradient(
@@ -718,10 +731,10 @@ class _LoginScreenState extends State<LoginScreen>
             Colors.transparent,
           ],
         ),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(14),
         border: Border.all(
           color: Colors.white.withOpacity(0.06),
-          width: 1,
+          width: 1.5,
         ),
       ),
       child: Column(
@@ -730,33 +743,33 @@ class _LoginScreenState extends State<LoginScreen>
             children: [
               Expanded(
                 child: Divider(
-                  color: Colors.white.withOpacity(0.1),
+                  color: Colors.white.withOpacity(0.08),
                   thickness: 1,
                 ),
               ),
               Padding(
                 padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
+                  horizontal: 14,
                 ),
                 child: Text(
                   'Connect with Us',
                   style: TextStyle(
-                    color: Colors.white.withOpacity(0.4),
-                    fontSize: 13,
+                    color: Colors.white.withOpacity(0.35),
+                    fontSize: 12,
                     fontWeight: FontWeight.w500,
-                    letterSpacing: 0.5,
+                    letterSpacing: 0.8,
                   ),
                 ),
               ),
               Expanded(
                 child: Divider(
-                  color: Colors.white.withOpacity(0.1),
+                  color: Colors.white.withOpacity(0.08),
                   thickness: 1,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 18),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -768,7 +781,7 @@ class _LoginScreenState extends State<LoginScreen>
                   _launchUrl(kFacebookUrl);
                 },
               ),
-              const SizedBox(width: 16),
+              const SizedBox(width: 14),
               _buildSocialButton(
                 icon: FontAwesomeIcons.instagram,
                 color: const Color(0xFFE4405F),
@@ -777,7 +790,7 @@ class _LoginScreenState extends State<LoginScreen>
                   _launchUrl(kInstagramUrl);
                 },
               ),
-              const SizedBox(width: 16),
+              const SizedBox(width: 14),
               _buildSocialButton(
                 icon: FontAwesomeIcons.google,
                 color: const Color(0xFFEA4335),
@@ -786,7 +799,7 @@ class _LoginScreenState extends State<LoginScreen>
                   _launchUrl(kGoogleUrl);
                 },
               ),
-              const SizedBox(width: 16),
+              const SizedBox(width: 14),
               _buildSocialButton(
                 icon: FontAwesomeIcons.whatsapp,
                 color: const Color(0xFF25D366),
@@ -812,8 +825,8 @@ class _LoginScreenState extends State<LoginScreen>
       child: GestureDetector(
         onTap: onTap,
         child: Container(
-          width: 52,
-          height: 52,
+          width: 50,
+          height: 50,
           decoration: BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topLeft,
