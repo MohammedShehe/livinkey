@@ -171,7 +171,6 @@ class _LoginScreenState extends State<LoginScreen>
       return;
     }
 
-    // Check credentials against demo accounts
     if (!AuthService.isValidCredentials(email, password)) {
       _showSnackBar(
         'Invalid credentials. Please use the demo accounts.',
@@ -188,13 +187,12 @@ class _LoginScreenState extends State<LoginScreen>
 
     if (mounted) {
       _showSnackBar('Login successful!', kLivinkeyGreen);
-      
+
       await Future.delayed(const Duration(milliseconds: 500));
-      
+
       if (mounted) {
-        // Navigate to role-specific screen with smooth transition
         final String? role = AuthService.getRole(email);
-        
+
         if (role == AuthService.tenantRole) {
           _navigateToScreen(const TenantScreen(), 'Tenant');
         } else if (role == AuthService.guestRole) {
@@ -217,10 +215,10 @@ class _LoginScreenState extends State<LoginScreen>
           var tween = Tween(begin: begin, end: end)
               .chain(CurveTween(curve: curve));
           var offsetAnimation = animation.drive(tween);
-          
+
           var fadeTween = Tween<double>(begin: 0.0, end: 1.0);
           var fadeAnimation = animation.drive(fadeTween);
-          
+
           return FadeTransition(
             opacity: fadeAnimation,
             child: SlideTransition(

@@ -124,9 +124,11 @@ class _GuestScreenState extends State<GuestScreen>
           ),
           actions: [
             IconButton(
-              onPressed: _handleLogout,
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
               icon: const Icon(
-                Icons.logout_rounded,
+                Icons.close_rounded,
                 color: Colors.white70,
               ),
             ),
