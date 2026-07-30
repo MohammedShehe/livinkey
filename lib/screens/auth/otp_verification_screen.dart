@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/gestures.dart';
+import '../../widgets/livinkey_logo.dart';
+import '../../utils/constants.dart';
+import '../../utils/helpers.dart';
+import '../../widgets/common/snackbar_helper.dart';
 import 'login_screen.dart';
-import '../widgets/livinkey_logo.dart';
 
 class OtpVerificationScreen extends StatefulWidget {
   final String email;
@@ -68,7 +71,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen>
 
     _backToLoginRecognizer = TapGestureRecognizer()
       ..onTap = () {
-        HapticFeedback.selectionClick();
+        hapticSelection();
         _navigateBackToLogin();
       };
 
@@ -160,50 +163,31 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen>
     final String otp = _getOtp();
 
     if (otp.length < 6) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text('Please enter the complete 6-digit OTP'),
-          backgroundColor: Colors.red.shade800,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        ),
-      );
+      SnackbarHelper.showError(context, 'Please enter the complete 6-digit OTP');
       return;
     }
 
     setState(() => _isLoading = true);
 
-    // Simulate OTP verification
     await Future.delayed(const Duration(seconds: 2));
 
     setState(() => _isLoading = false);
 
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text('OTP Verified Successfully! 🎉'),
-          backgroundColor: kLivinkeyGreen,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        ),
-      );
+      SnackbarHelper.showSuccess(context, 'OTP Verified Successfully! 🎉');
 
       await Future.delayed(const Duration(milliseconds: 500));
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text('Account created successfully! Please sign in.'),
-            backgroundColor: kLivinkeyGreen,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            duration: const Duration(seconds: 3),
-          ),
+        // FIXED: Use show() instead of showSuccess with duration parameter
+        SnackbarHelper.show(
+          context,
+          'Account created successfully! Please sign in.',
+          duration: const Duration(seconds: 3),
         );
 
         await Future.delayed(const Duration(seconds: 1));
         if (mounted) {
-          // Navigate to login with smooth transition
           Navigator.of(context).pushReplacement(
             PageRouteBuilder(
               pageBuilder: (context, animation, secondaryAnimation) =>
@@ -240,7 +224,6 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen>
 
     setState(() => _isResending = true);
 
-    // Simulate resend OTP
     await Future.delayed(const Duration(seconds: 1));
 
     setState(() {
@@ -249,14 +232,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen>
     });
 
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('OTP resent to ${widget.email}'),
-          backgroundColor: kLivinkeyGreen,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        ),
-      );
+      SnackbarHelper.showSuccess(context, 'OTP resent to ${widget.email}');
     }
   }
 
@@ -266,13 +242,13 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen>
       value: const SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
         statusBarIconBrightness: Brightness.light,
-        systemNavigationBarColor: kLivinkeyBlack,
+        systemNavigationBarColor: Colors.black,
         systemNavigationBarIconBrightness: Brightness.light,
       ),
       child: GestureDetector(
         onTap: () => FocusScope.of(context).unfocus(),
         child: Scaffold(
-          backgroundColor: kLivinkeyBlack,
+          backgroundColor: Colors.black,
           body: SafeArea(
             child: FadeTransition(
               opacity: _fadeAnimation,
@@ -292,10 +268,10 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen>
                           child: Container(
                             padding: const EdgeInsets.all(8),
                             decoration: BoxDecoration(
-                              color: kLivinkeyWhite.withOpacity(0.06),
+                              color: Colors.white.withOpacity(0.06),
                               borderRadius: BorderRadius.circular(12),
                               border: Border.all(
-                                color: kLivinkeyWhite.withOpacity(0.08),
+                                color: Colors.white.withOpacity(0.08),
                                 width: 1,
                               ),
                             ),
@@ -336,7 +312,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen>
                               style: TextStyle(
                                 fontSize: 15,
                                 fontWeight: FontWeight.w600,
-                                color: kLivinkeyGreen,
+                                color: const Color(0xFF92C24A),
                                 letterSpacing: 0.3,
                               ),
                             ),
@@ -370,7 +346,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen>
                                   decoration: InputDecoration(
                                     counterText: '',
                                     filled: true,
-                                    fillColor: kLivinkeyWhite.withOpacity(0.05),
+                                    fillColor: Colors.white.withOpacity(0.05),
                                     border: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(12),
                                       borderSide: BorderSide.none,
@@ -378,14 +354,14 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen>
                                     focusedBorder: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(12),
                                       borderSide: BorderSide(
-                                        color: kLivinkeyGreen.withOpacity(0.7),
+                                        color: const Color(0xFF92C24A).withOpacity(0.7),
                                         width: 2,
                                       ),
                                     ),
                                     enabledBorder: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(12),
                                       borderSide: BorderSide(
-                                        color: kLivinkeyWhite.withOpacity(0.1),
+                                        color: Colors.white.withOpacity(0.1),
                                         width: 1,
                                       ),
                                     ),
@@ -420,11 +396,11 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen>
                                 child: Text(
                                   _isResending ? 'Sending...' : 'Resend',
                                   style: TextStyle(
-                                    color: kLivinkeyGreen,
+                                    color: const Color(0xFF92C24A),
                                     fontSize: 14,
                                     fontWeight: FontWeight.w600,
                                     decoration: TextDecoration.underline,
-                                    decorationColor: kLivinkeyGreen.withOpacity(0.3),
+                                    decorationColor: const Color(0xFF92C24A).withOpacity(0.3),
                                   ),
                                 ),
                               ),
@@ -439,20 +415,17 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen>
                           height: 56,
                           decoration: BoxDecoration(
                             gradient: const LinearGradient(
-                              colors: [
-                                kLivinkeyGreen,
-                                Color(0xFF4CAF50),
-                              ],
+                              colors: [Color(0xFF92C24A), Color(0xFF4CAF50)],
                             ),
                             borderRadius: BorderRadius.circular(16),
                             boxShadow: [
                               BoxShadow(
-                                color: kLivinkeyGreen.withOpacity(0.3),
+                                color: const Color(0xFF92C24A).withOpacity(0.3),
                                 blurRadius: 24,
                                 offset: const Offset(0, 8),
                               ),
                               BoxShadow(
-                                color: kLivinkeyGreen.withOpacity(0.1),
+                                color: const Color(0xFF92C24A).withOpacity(0.1),
                                 blurRadius: 40,
                                 offset: const Offset(0, 4),
                               ),
@@ -519,11 +492,11 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen>
                                 TextSpan(
                                   text: 'Back to Login',
                                   style: TextStyle(
-                                    color: kLivinkeyGreen,
+                                    color: const Color(0xFF92C24A),
                                     fontWeight: FontWeight.w700,
                                     decoration: TextDecoration.underline,
                                     decorationColor:
-                                        kLivinkeyGreen.withOpacity(0.3),
+                                        const Color(0xFF92C24A).withOpacity(0.3),
                                   ),
                                   recognizer: _backToLoginRecognizer,
                                 ),

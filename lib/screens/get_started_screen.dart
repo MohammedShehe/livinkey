@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/gestures.dart';
 import '../widgets/livinkey_logo.dart';
-import 'login_screen.dart';
+import 'auth/login_screen.dart';
 import '../services/audio_service.dart';
 
 class GetStartedScreen extends StatefulWidget {

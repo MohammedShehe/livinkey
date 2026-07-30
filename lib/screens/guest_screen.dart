@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../widgets/livinkey_logo.dart';
+import '../widgets/livinkey_logo.dart';  // This imports kLivinkeyBlack
+// Remove this import since kLivinkeyBlack is already in livinkey_logo.dart
+// import '../utils/constants.dart';
 import '../services/auth_service.dart';
-import 'login_screen.dart';
+import 'auth/login_screen.dart';
 
 class GuestScreen extends StatefulWidget {
   const GuestScreen({super.key});

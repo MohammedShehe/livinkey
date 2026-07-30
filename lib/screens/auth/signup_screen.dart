@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/gestures.dart';
-import '../widgets/livinkey_logo.dart';
+import '../../widgets/livinkey_logo.dart';
+import '../../utils/constants.dart';
+import '../../utils/helpers.dart';
+import '../../widgets/common/snackbar_helper.dart';
 import 'login_screen.dart';
 import 'otp_verification_screen.dart';
 
@@ -78,201 +81,26 @@ class _SignUpScreenState extends State<SignUpScreen>
   ];
 
   final List<Map<String, String>> _countryCodes = [
-    {'code': '+1', 'country': 'USA/Canada'},
-    {'code': '+1-242', 'country': 'Bahamas'},
-    {'code': '+1-246', 'country': 'Barbados'},
-    {'code': '+1-473', 'country': 'Grenada'},
-    {'code': '+1-758', 'country': 'St. Lucia'},
-    {'code': '+1-767', 'country': 'Dominica'},
-    {'code': '+1-784', 'country': 'St. Vincent'},
-    {'code': '+1-809', 'country': 'Dominican Republic'},
-    {'code': '+1-868', 'country': 'Trinidad & Tobago'},
-    {'code': '+1-869', 'country': 'St. Kitts & Nevis'},
-    {'code': '+1-876', 'country': 'Jamaica'},
-    {'code': '+20', 'country': 'Egypt'},
-    {'code': '+27', 'country': 'South Africa'},
-    {'code': '+30', 'country': 'Greece'},
-    {'code': '+31', 'country': 'Netherlands'},
-    {'code': '+32', 'country': 'Belgium'},
-    {'code': '+33', 'country': 'France'},
-    {'code': '+34', 'country': 'Spain'},
-    {'code': '+36', 'country': 'Hungary'},
-    {'code': '+39', 'country': 'Italy'},
-    {'code': '+40', 'country': 'Romania'},
-    {'code': '+41', 'country': 'Switzerland'},
-    {'code': '+42', 'country': 'Czech Republic'},
-    {'code': '+43', 'country': 'Austria'},
-    {'code': '+44', 'country': 'United Kingdom'},
-    {'code': '+45', 'country': 'Denmark'},
-    {'code': '+46', 'country': 'Sweden'},
-    {'code': '+47', 'country': 'Norway'},
-    {'code': '+48', 'country': 'Poland'},
-    {'code': '+49', 'country': 'Germany'},
-    {'code': '+51', 'country': 'Peru'},
-    {'code': '+52', 'country': 'Mexico'},
-    {'code': '+53', 'country': 'Cuba'},
-    {'code': '+54', 'country': 'Argentina'},
-    {'code': '+55', 'country': 'Brazil'},
-    {'code': '+56', 'country': 'Chile'},
-    {'code': '+57', 'country': 'Colombia'},
-    {'code': '+58', 'country': 'Venezuela'},
-    {'code': '+60', 'country': 'Malaysia'},
-    {'code': '+61', 'country': 'Australia'},
-    {'code': '+62', 'country': 'Indonesia'},
-    {'code': '+63', 'country': 'Philippines'},
-    {'code': '+64', 'country': 'New Zealand'},
-    {'code': '+65', 'country': 'Singapore'},
-    {'code': '+66', 'country': 'Thailand'},
-    {'code': '+81', 'country': 'Japan'},
-    {'code': '+82', 'country': 'South Korea'},
-    {'code': '+84', 'country': 'Vietnam'},
-    {'code': '+86', 'country': 'China'},
-    {'code': '+90', 'country': 'Turkey'},
     {'code': '+91', 'country': 'India'},
+    {'code': '+1', 'country': 'USA/Canada'},
+    {'code': '+44', 'country': 'United Kingdom'},
+    {'code': '+61', 'country': 'Australia'},
+    {'code': '+81', 'country': 'Japan'},
+    {'code': '+86', 'country': 'China'},
     {'code': '+92', 'country': 'Pakistan'},
-    {'code': '+93', 'country': 'Afghanistan'},
     {'code': '+94', 'country': 'Sri Lanka'},
-    {'code': '+95', 'country': 'Myanmar'},
-    {'code': '+98', 'country': 'Iran'},
-    {'code': '+211', 'country': 'South Sudan'},
-    {'code': '+212', 'country': 'Morocco'},
-    {'code': '+213', 'country': 'Algeria'},
-    {'code': '+216', 'country': 'Tunisia'},
-    {'code': '+218', 'country': 'Libya'},
-    {'code': '+220', 'country': 'Gambia'},
-    {'code': '+221', 'country': 'Senegal'},
-    {'code': '+222', 'country': 'Mauritania'},
-    {'code': '+223', 'country': 'Mali'},
-    {'code': '+224', 'country': 'Guinea'},
-    {'code': '+225', 'country': 'Ivory Coast'},
-    {'code': '+226', 'country': 'Burkina Faso'},
-    {'code': '+227', 'country': 'Niger'},
-    {'code': '+228', 'country': 'Togo'},
-    {'code': '+229', 'country': 'Benin'},
-    {'code': '+230', 'country': 'Mauritius'},
-    {'code': '+231', 'country': 'Liberia'},
-    {'code': '+232', 'country': 'Sierra Leone'},
-    {'code': '+233', 'country': 'Ghana'},
-    {'code': '+234', 'country': 'Nigeria'},
-    {'code': '+235', 'country': 'Chad'},
-    {'code': '+236', 'country': 'Central African Republic'},
-    {'code': '+237', 'country': 'Cameroon'},
-    {'code': '+238', 'country': 'Cape Verde'},
-    {'code': '+239', 'country': 'Sao Tome & Principe'},
-    {'code': '+240', 'country': 'Equatorial Guinea'},
-    {'code': '+241', 'country': 'Gabon'},
-    {'code': '+242', 'country': 'Congo'},
-    {'code': '+243', 'country': 'DR Congo'},
-    {'code': '+244', 'country': 'Angola'},
-    {'code': '+245', 'country': 'Guinea-Bissau'},
-    {'code': '+248', 'country': 'Seychelles'},
-    {'code': '+249', 'country': 'Sudan'},
-    {'code': '+250', 'country': 'Rwanda'},
-    {'code': '+251', 'country': 'Ethiopia'},
-    {'code': '+252', 'country': 'Somalia'},
-    {'code': '+253', 'country': 'Djibouti'},
-    {'code': '+254', 'country': 'Kenya'},
-    {'code': '+255', 'country': 'Tanzania'},
-    {'code': '+256', 'country': 'Uganda'},
-    {'code': '+257', 'country': 'Burundi'},
-    {'code': '+258', 'country': 'Mozambique'},
-    {'code': '+260', 'country': 'Zambia'},
-    {'code': '+261', 'country': 'Madagascar'},
-    {'code': '+263', 'country': 'Zimbabwe'},
-    {'code': '+264', 'country': 'Namibia'},
-    {'code': '+265', 'country': 'Malawi'},
-    {'code': '+266', 'country': 'Lesotho'},
-    {'code': '+267', 'country': 'Botswana'},
-    {'code': '+268', 'country': 'Eswatini'},
-    {'code': '+269', 'country': 'Comoros'},
-    {'code': '+291', 'country': 'Eritrea'},
-    {'code': '+297', 'country': 'Aruba'},
-    {'code': '+298', 'country': 'Faroe Islands'},
-    {'code': '+299', 'country': 'Greenland'},
-    {'code': '+350', 'country': 'Gibraltar'},
-    {'code': '+351', 'country': 'Portugal'},
-    {'code': '+352', 'country': 'Luxembourg'},
-    {'code': '+353', 'country': 'Ireland'},
-    {'code': '+354', 'country': 'Iceland'},
-    {'code': '+355', 'country': 'Albania'},
-    {'code': '+356', 'country': 'Malta'},
-    {'code': '+357', 'country': 'Cyprus'},
-    {'code': '+358', 'country': 'Finland'},
-    {'code': '+359', 'country': 'Bulgaria'},
-    {'code': '+370', 'country': 'Lithuania'},
-    {'code': '+371', 'country': 'Latvia'},
-    {'code': '+372', 'country': 'Estonia'},
-    {'code': '+373', 'country': 'Moldova'},
-    {'code': '+374', 'country': 'Armenia'},
-    {'code': '+375', 'country': 'Belarus'},
-    {'code': '+376', 'country': 'Andorra'},
-    {'code': '+377', 'country': 'Monaco'},
-    {'code': '+378', 'country': 'San Marino'},
-    {'code': '+379', 'country': 'Vatican City'},
-    {'code': '+380', 'country': 'Ukraine'},
-    {'code': '+381', 'country': 'Serbia'},
-    {'code': '+382', 'country': 'Montenegro'},
-    {'code': '+385', 'country': 'Croatia'},
-    {'code': '+386', 'country': 'Slovenia'},
-    {'code': '+387', 'country': 'Bosnia'},
-    {'code': '+420', 'country': 'Czech Republic'},
-    {'code': '+421', 'country': 'Slovakia'},
-    {'code': '+423', 'country': 'Liechtenstein'},
-    {'code': '+501', 'country': 'Belize'},
-    {'code': '+502', 'country': 'Guatemala'},
-    {'code': '+503', 'country': 'El Salvador'},
-    {'code': '+504', 'country': 'Honduras'},
-    {'code': '+505', 'country': 'Nicaragua'},
-    {'code': '+506', 'country': 'Costa Rica'},
-    {'code': '+507', 'country': 'Panama'},
-    {'code': '+591', 'country': 'Bolivia'},
-    {'code': '+592', 'country': 'Guyana'},
-    {'code': '+593', 'country': 'Ecuador'},
-    {'code': '+595', 'country': 'Paraguay'},
-    {'code': '+597', 'country': 'Suriname'},
-    {'code': '+598', 'country': 'Uruguay'},
-    {'code': '+670', 'country': 'Timor-Leste'},
-    {'code': '+673', 'country': 'Brunei'},
-    {'code': '+674', 'country': 'Nauru'},
-    {'code': '+675', 'country': 'Papua New Guinea'},
-    {'code': '+676', 'country': 'Tonga'},
-    {'code': '+677', 'country': 'Solomon Islands'},
-    {'code': '+678', 'country': 'Vanuatu'},
-    {'code': '+679', 'country': 'Fiji'},
-    {'code': '+680', 'country': 'Palau'},
-    {'code': '+685', 'country': 'Samoa'},
-    {'code': '+686', 'country': 'Kiribati'},
-    {'code': '+688', 'country': 'Tuvalu'},
-    {'code': '+691', 'country': 'Micronesia'},
-    {'code': '+692', 'country': 'Marshall Islands'},
-    {'code': '+850', 'country': 'North Korea'},
-    {'code': '+855', 'country': 'Cambodia'},
-    {'code': '+856', 'country': 'Laos'},
     {'code': '+880', 'country': 'Bangladesh'},
-    {'code': '+886', 'country': 'Taiwan'},
-    {'code': '+960', 'country': 'Maldives'},
-    {'code': '+961', 'country': 'Lebanon'},
-    {'code': '+962', 'country': 'Jordan'},
-    {'code': '+963', 'country': 'Syria'},
-    {'code': '+964', 'country': 'Iraq'},
-    {'code': '+965', 'country': 'Kuwait'},
-    {'code': '+966', 'country': 'Saudi Arabia'},
-    {'code': '+967', 'country': 'Yemen'},
-    {'code': '+968', 'country': 'Oman'},
-    {'code': '+970', 'country': 'Palestine'},
-    {'code': '+971', 'country': 'UAE'},
-    {'code': '+972', 'country': 'Israel'},
-    {'code': '+973', 'country': 'Bahrain'},
-    {'code': '+974', 'country': 'Qatar'},
-    {'code': '+975', 'country': 'Bhutan'},
-    {'code': '+976', 'country': 'Mongolia'},
     {'code': '+977', 'country': 'Nepal'},
-    {'code': '+992', 'country': 'Tajikistan'},
-    {'code': '+993', 'country': 'Turkmenistan'},
-    {'code': '+994', 'country': 'Azerbaijan'},
-    {'code': '+995', 'country': 'Georgia'},
-    {'code': '+996', 'country': 'Kyrgyzstan'},
-    {'code': '+998', 'country': 'Uzbekistan'},
+    {'code': '+60', 'country': 'Malaysia'},
+    {'code': '+65', 'country': 'Singapore'},
+    {'code': '+971', 'country': 'UAE'},
+    {'code': '+966', 'country': 'Saudi Arabia'},
+    {'code': '+49', 'country': 'Germany'},
+    {'code': '+33', 'country': 'France'},
+    {'code': '+39', 'country': 'Italy'},
+    {'code': '+34', 'country': 'Spain'},
+    {'code': '+55', 'country': 'Brazil'},
+    {'code': '+52', 'country': 'Mexico'},
   ];
 
   @override
@@ -313,20 +141,20 @@ class _SignUpScreenState extends State<SignUpScreen>
 
     _backToLoginRecognizer = TapGestureRecognizer()
       ..onTap = () {
-        HapticFeedback.selectionClick();
+        hapticSelection();
         _navigateBackToLogin();
       };
 
     _termsRecognizer = TapGestureRecognizer()
       ..onTap = () {
-        HapticFeedback.selectionClick();
-        _showSnackBar('Terms of Services', kLivinkeyGreen);
+        hapticSelection();
+        SnackbarHelper.show(context, 'Terms of Services');
       };
 
     _privacyRecognizer = TapGestureRecognizer()
       ..onTap = () {
-        HapticFeedback.selectionClick();
-        _showSnackBar('Privacy Policy', kLivinkeyGreen);
+        hapticSelection();
+        SnackbarHelper.show(context, 'Privacy Policy');
       };
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -386,21 +214,19 @@ class _SignUpScreenState extends State<SignUpScreen>
     }
 
     if (!_agreeToTerms) {
-      _showSnackBar('Please agree to the Terms of Services', Colors.red.shade800);
+      SnackbarHelper.showError(context, 'Please agree to the Terms of Services');
       return;
     }
 
     setState(() => _isLoading = true);
 
-    // Simulate API call to send OTP
     await Future.delayed(const Duration(seconds: 2));
 
     setState(() => _isLoading = false);
 
     if (mounted) {
-      _showSnackBar('OTP sent to ${_emailController.text}', kLivinkeyGreen);
+      SnackbarHelper.showSuccess(context, 'OTP sent to ${_emailController.text}');
 
-      // Navigate to OTP Verification Screen
       Navigator.of(context).push(
         PageRouteBuilder(
           pageBuilder: (context, animation, secondaryAnimation) =>
@@ -412,7 +238,7 @@ class _SignUpScreenState extends State<SignUpScreen>
                   'phone': _phoneController.text,
                   'nationality': _selectedNationality,
                   'countryCode': _selectedCountryCode,
-                  'role': 'guest', // Always set as guest
+                  'role': 'guest',
                 },
               ),
           transitionsBuilder: (context, animation, secondaryAnimation, child) {
@@ -432,31 +258,19 @@ class _SignUpScreenState extends State<SignUpScreen>
     }
   }
 
-  void _showSnackBar(String message, Color color) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: color,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        duration: const Duration(seconds: 2),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: const SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
         statusBarIconBrightness: Brightness.light,
-        systemNavigationBarColor: kLivinkeyBlack,
+        systemNavigationBarColor: Colors.black,
         systemNavigationBarIconBrightness: Brightness.light,
       ),
       child: GestureDetector(
         onTap: () => FocusScope.of(context).unfocus(),
         child: Scaffold(
-          backgroundColor: kLivinkeyBlack,
+          backgroundColor: Colors.black,
           body: SafeArea(
             child: FadeTransition(
               opacity: _fadeAnimation,
@@ -480,10 +294,10 @@ class _SignUpScreenState extends State<SignUpScreen>
                               child: Container(
                                 padding: const EdgeInsets.all(8),
                                 decoration: BoxDecoration(
-                                  color: kLivinkeyWhite.withOpacity(0.06),
+                                  color: Colors.white.withOpacity(0.06),
                                   borderRadius: BorderRadius.circular(12),
                                   border: Border.all(
-                                    color: kLivinkeyWhite.withOpacity(0.08),
+                                    color: Colors.white.withOpacity(0.08),
                                     width: 1,
                                   ),
                                 ),
@@ -502,7 +316,7 @@ class _SignUpScreenState extends State<SignUpScreen>
                               child: ScaleTransition(
                                 scale: _logoScaleAnimation,
                                 child: Image.asset(
-                                  'assets/images/general_logo.png',
+                                  kGeneralLogo,
                                   height: 70,
                                   width: 70,
                                   fit: BoxFit.contain,
@@ -539,7 +353,6 @@ class _SignUpScreenState extends State<SignUpScreen>
 
                             const SizedBox(height: 16),
 
-                            // Guest Role Indicator - Uneditable
                             Container(
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 16,
@@ -650,19 +463,19 @@ class _SignUpScreenState extends State<SignUpScreen>
                                   begin: Alignment.topLeft,
                                   end: Alignment.bottomRight,
                                   colors: [
-                                    kLivinkeyWhite.withOpacity(0.05),
-                                    kLivinkeyWhite.withOpacity(0.02),
+                                    Colors.white.withOpacity(0.05),
+                                    Colors.white.withOpacity(0.02),
                                   ],
                                 ),
                                 borderRadius: BorderRadius.circular(16),
                                 border: Border.all(
-                                  color: kLivinkeyWhite.withOpacity(0.1),
+                                  color: Colors.white.withOpacity(0.1),
                                   width: 1,
                                 ),
                               ),
                               child: DropdownButtonFormField<String>(
                                 value: _selectedNationality,
-                                dropdownColor: kLivinkeyBlack,
+                                dropdownColor: Colors.black,
                                 style: const TextStyle(
                                   color: Colors.white,
                                   fontSize: 16,
@@ -676,7 +489,7 @@ class _SignUpScreenState extends State<SignUpScreen>
                                   ),
                                   prefixIcon: Icon(
                                     Icons.flag_outlined,
-                                    color: kLivinkeyGreen.withOpacity(0.7),
+                                    color: const Color(0xFF92C24A).withOpacity(0.7),
                                     size: 22,
                                   ),
                                   border: OutlineInputBorder(
@@ -686,7 +499,7 @@ class _SignUpScreenState extends State<SignUpScreen>
                                   focusedBorder: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(16),
                                     borderSide: BorderSide(
-                                      color: kLivinkeyGreen.withOpacity(0.5),
+                                      color: const Color(0xFF92C24A).withOpacity(0.5),
                                       width: 2,
                                     ),
                                   ),
@@ -717,7 +530,7 @@ class _SignUpScreenState extends State<SignUpScreen>
                                   setState(() {
                                     _selectedNationality = value!;
                                   });
-                                  HapticFeedback.selectionClick();
+                                  hapticSelection();
                                 },
                                 validator: (value) {
                                   if (value == null || value.isEmpty) {
@@ -741,19 +554,19 @@ class _SignUpScreenState extends State<SignUpScreen>
                                         begin: Alignment.topLeft,
                                         end: Alignment.bottomRight,
                                         colors: [
-                                          kLivinkeyWhite.withOpacity(0.05),
-                                          kLivinkeyWhite.withOpacity(0.02),
+                                          Colors.white.withOpacity(0.05),
+                                          Colors.white.withOpacity(0.02),
                                         ],
                                       ),
                                       borderRadius: BorderRadius.circular(16),
                                       border: Border.all(
-                                        color: kLivinkeyWhite.withOpacity(0.1),
+                                        color: Colors.white.withOpacity(0.1),
                                         width: 1,
                                       ),
                                     ),
                                     child: DropdownButtonFormField<String>(
                                       value: _selectedCountryCode,
-                                      dropdownColor: kLivinkeyBlack,
+                                      dropdownColor: Colors.black,
                                       style: const TextStyle(
                                         color: Colors.white,
                                         fontSize: 14,
@@ -773,7 +586,7 @@ class _SignUpScreenState extends State<SignUpScreen>
                                         focusedBorder: OutlineInputBorder(
                                           borderRadius: BorderRadius.circular(16),
                                           borderSide: BorderSide(
-                                            color: kLivinkeyGreen.withOpacity(0.5),
+                                            color: const Color(0xFF92C24A).withOpacity(0.5),
                                             width: 2,
                                           ),
                                         ),
@@ -805,7 +618,7 @@ class _SignUpScreenState extends State<SignUpScreen>
                                         setState(() {
                                           _selectedCountryCode = value!;
                                         });
-                                        HapticFeedback.selectionClick();
+                                        hapticSelection();
                                       },
                                       validator: (value) {
                                         if (value == null || value.isEmpty) {
@@ -826,13 +639,13 @@ class _SignUpScreenState extends State<SignUpScreen>
                                         begin: Alignment.topLeft,
                                         end: Alignment.bottomRight,
                                         colors: [
-                                          kLivinkeyWhite.withOpacity(0.05),
-                                          kLivinkeyWhite.withOpacity(0.02),
+                                          Colors.white.withOpacity(0.05),
+                                          Colors.white.withOpacity(0.02),
                                         ],
                                       ),
                                       borderRadius: BorderRadius.circular(16),
                                       border: Border.all(
-                                        color: kLivinkeyWhite.withOpacity(0.1),
+                                        color: Colors.white.withOpacity(0.1),
                                         width: 1,
                                       ),
                                     ),
@@ -852,7 +665,7 @@ class _SignUpScreenState extends State<SignUpScreen>
                                         ),
                                         prefixIcon: Icon(
                                           Icons.phone_outlined,
-                                          color: kLivinkeyGreen.withOpacity(0.7),
+                                          color: const Color(0xFF92C24A).withOpacity(0.7),
                                           size: 22,
                                         ),
                                         border: OutlineInputBorder(
@@ -862,7 +675,7 @@ class _SignUpScreenState extends State<SignUpScreen>
                                         focusedBorder: OutlineInputBorder(
                                           borderRadius: BorderRadius.circular(16),
                                           borderSide: BorderSide(
-                                            color: kLivinkeyGreen.withOpacity(0.5),
+                                            color: const Color(0xFF92C24A).withOpacity(0.5),
                                             width: 2,
                                           ),
                                         ),
@@ -912,7 +725,7 @@ class _SignUpScreenState extends State<SignUpScreen>
                                   setState(() {
                                     _obscurePassword = !_obscurePassword;
                                   });
-                                  HapticFeedback.lightImpact();
+                                  hapticFeedback();
                                 },
                               ),
                               validator: (value) {
@@ -946,7 +759,7 @@ class _SignUpScreenState extends State<SignUpScreen>
                                   setState(() {
                                     _obscureConfirmPassword = !_obscureConfirmPassword;
                                   });
-                                  HapticFeedback.lightImpact();
+                                  hapticFeedback();
                                 },
                               ),
                               validator: (value) {
@@ -991,7 +804,7 @@ class _SignUpScreenState extends State<SignUpScreen>
                                   data: ThemeData(
                                     checkboxTheme: CheckboxThemeData(
                                       fillColor: WidgetStateProperty.resolveWith(
-                                        (states) => kLivinkeyGreen,
+                                        (states) => const Color(0xFF92C24A),
                                       ),
                                       shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(4),
@@ -1006,9 +819,9 @@ class _SignUpScreenState extends State<SignUpScreen>
                                       setState(() {
                                         _agreeToTerms = value!;
                                       });
-                                      HapticFeedback.selectionClick();
+                                      hapticSelection();
                                     },
-                                    activeColor: kLivinkeyGreen,
+                                    activeColor: const Color(0xFF92C24A),
                                     checkColor: Colors.black,
                                   ),
                                 ),
@@ -1025,11 +838,11 @@ class _SignUpScreenState extends State<SignUpScreen>
                                         TextSpan(
                                           text: 'Terms of Services',
                                           style: TextStyle(
-                                            color: kLivinkeyGreen.withOpacity(0.8),
+                                            color: const Color(0xFF92C24A).withOpacity(0.8),
                                             fontWeight: FontWeight.w600,
                                             decoration: TextDecoration.underline,
                                             decorationColor:
-                                                kLivinkeyGreen.withOpacity(0.3),
+                                                const Color(0xFF92C24A).withOpacity(0.3),
                                           ),
                                           recognizer: _termsRecognizer,
                                         ),
@@ -1037,11 +850,11 @@ class _SignUpScreenState extends State<SignUpScreen>
                                         TextSpan(
                                           text: 'Privacy Policy',
                                           style: TextStyle(
-                                            color: kLivinkeyGreen.withOpacity(0.8),
+                                            color: const Color(0xFF92C24A).withOpacity(0.8),
                                             fontWeight: FontWeight.w600,
                                             decoration: TextDecoration.underline,
                                             decorationColor:
-                                                kLivinkeyGreen.withOpacity(0.3),
+                                                const Color(0xFF92C24A).withOpacity(0.3),
                                           ),
                                           recognizer: _privacyRecognizer,
                                         ),
@@ -1061,27 +874,24 @@ class _SignUpScreenState extends State<SignUpScreen>
                               decoration: BoxDecoration(
                                 gradient: _agreeToTerms
                                     ? const LinearGradient(
-                                        colors: [
-                                          kLivinkeyGreen,
-                                          Color(0xFF4CAF50),
-                                        ],
+                                        colors: [Color(0xFF92C24A), Color(0xFF4CAF50)],
                                       )
                                     : LinearGradient(
                                         colors: [
-                                          kLivinkeyWhite.withOpacity(0.1),
-                                          kLivinkeyWhite.withOpacity(0.05),
+                                          Colors.white.withOpacity(0.1),
+                                          Colors.white.withOpacity(0.05),
                                         ],
                                       ),
                                 borderRadius: BorderRadius.circular(16),
                                 boxShadow: _agreeToTerms
                                     ? [
                                         BoxShadow(
-                                          color: kLivinkeyGreen.withOpacity(0.3),
+                                          color: const Color(0xFF92C24A).withOpacity(0.3),
                                           blurRadius: 24,
                                           offset: const Offset(0, 8),
                                         ),
                                         BoxShadow(
-                                          color: kLivinkeyGreen.withOpacity(0.1),
+                                          color: const Color(0xFF92C24A).withOpacity(0.1),
                                           blurRadius: 40,
                                           offset: const Offset(0, 4),
                                         ),
@@ -1158,11 +968,11 @@ class _SignUpScreenState extends State<SignUpScreen>
                                     TextSpan(
                                       text: 'Sign In',
                                       style: TextStyle(
-                                        color: kLivinkeyGreen,
+                                        color: const Color(0xFF92C24A),
                                         fontWeight: FontWeight.w700,
                                         decoration: TextDecoration.underline,
                                         decorationColor:
-                                            kLivinkeyGreen.withOpacity(0.3),
+                                            const Color(0xFF92C24A).withOpacity(0.3),
                                       ),
                                       recognizer: _backToLoginRecognizer,
                                     ),
@@ -1202,13 +1012,13 @@ class _SignUpScreenState extends State<SignUpScreen>
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            kLivinkeyWhite.withOpacity(0.05),
-            kLivinkeyWhite.withOpacity(0.02),
+            Colors.white.withOpacity(0.05),
+            Colors.white.withOpacity(0.02),
           ],
         ),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: kLivinkeyWhite.withOpacity(0.1),
+          color: Colors.white.withOpacity(0.1),
           width: 1,
         ),
       ),
@@ -1226,7 +1036,7 @@ class _SignUpScreenState extends State<SignUpScreen>
           ),
           prefixIcon: Icon(
             icon,
-            color: kLivinkeyGreen.withOpacity(0.7),
+            color: const Color(0xFF92C24A).withOpacity(0.7),
             size: 22,
           ),
           suffixIcon: suffixIcon,
@@ -1237,7 +1047,7 @@ class _SignUpScreenState extends State<SignUpScreen>
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(16),
             borderSide: BorderSide(
-              color: kLivinkeyGreen.withOpacity(0.5),
+              color: const Color(0xFF92C24A).withOpacity(0.5),
               width: 2,
             ),
           ),

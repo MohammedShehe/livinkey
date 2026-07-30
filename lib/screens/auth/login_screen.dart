@@ -3,15 +3,16 @@ import 'package:flutter/services.dart';
 import 'package:flutter/gestures.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../widgets/livinkey_logo.dart';
+import '../../widgets/livinkey_logo.dart';
+import '../../services/audio_service.dart';
+import '../../services/auth_service.dart';
+import '../../utils/constants.dart';
+import '../../utils/helpers.dart';
+import '../../widgets/common/snackbar_helper.dart';
+import '../tenant/tenant_screen.dart';
+import '../guest_screen.dart';
 import 'forgot_password_screen.dart';
 import 'signup_screen.dart';
-import '../services/audio_service.dart';
-import '../services/auth_service.dart';
-
-// Import the role-specific screens
-import 'tenant_screen.dart';
-import 'guest_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -36,12 +37,6 @@ class _LoginScreenState extends State<LoginScreen>
 
   late final TapGestureRecognizer _signUpRecognizer;
   late final TapGestureRecognizer _forgotPasswordRecognizer;
-
-  // Social Media URLs
-  static const String _googleUrl = 'https://share.google/ktGKY5w8NCakvEo6u';
-  static const String _instagramUrl = 'https://www.instagram.com/livinkey';
-  static const String _facebookUrl = 'https://www.facebook.com/livin.key.9';
-  static const String _whatsappNumber = '919878383497';
 
   @override
   void initState() {
@@ -85,7 +80,7 @@ class _LoginScreenState extends State<LoginScreen>
 
     _signUpRecognizer = TapGestureRecognizer()
       ..onTap = () {
-        HapticFeedback.selectionClick();
+        hapticSelection();
         Navigator.of(context).push(
           PageRouteBuilder(
             pageBuilder: (context, animation, secondaryAnimation) =>
@@ -108,7 +103,7 @@ class _LoginScreenState extends State<LoginScreen>
 
     _forgotPasswordRecognizer = TapGestureRecognizer()
       ..onTap = () {
-        HapticFeedback.selectionClick();
+        hapticSelection();
         Navigator.of(context).push(
           PageRouteBuilder(
             pageBuilder: (context, animation, secondaryAnimation) =>
@@ -157,24 +152,24 @@ class _LoginScreenState extends State<LoginScreen>
     final String password = _passwordController.text.trim();
 
     if (email.isEmpty) {
-      _showSnackBar('Please enter your email address', Colors.red.shade800);
+      SnackbarHelper.showError(context, 'Please enter your email address');
       return;
     }
 
     if (!_isValidEmail(email)) {
-      _showSnackBar('Please enter a valid email address', Colors.red.shade800);
+      SnackbarHelper.showError(context, 'Please enter a valid email address');
       return;
     }
 
     if (password.isEmpty) {
-      _showSnackBar('Please enter your password', Colors.red.shade800);
+      SnackbarHelper.showError(context, 'Please enter your password');
       return;
     }
 
     if (!AuthService.isValidCredentials(email, password)) {
-      _showSnackBar(
+      SnackbarHelper.showError(
+        context,
         'Invalid credentials. Please use the demo accounts.',
-        Colors.red.shade800,
       );
       return;
     }
@@ -186,19 +181,22 @@ class _LoginScreenState extends State<LoginScreen>
     setState(() => _isLoading = false);
 
     if (mounted) {
-      _showSnackBar('Login successful!', kLivinkeyGreen);
-
+      SnackbarHelper.showSuccess(context, 'Login successful!');
+      
       await Future.delayed(const Duration(milliseconds: 500));
-
+      
       if (mounted) {
         final String? role = AuthService.getRole(email);
-
+        
         if (role == AuthService.tenantRole) {
           _navigateToScreen(const TenantScreen(), 'Tenant');
         } else if (role == AuthService.guestRole) {
           _navigateToScreen(const GuestScreen(), 'Guest');
         } else {
-          _showSnackBar('Unknown role. Please contact support.', Colors.orange.shade800);
+          SnackbarHelper.showError(
+            context,
+            'Unknown role. Please contact support.',
+          );
         }
       }
     }
@@ -215,10 +213,10 @@ class _LoginScreenState extends State<LoginScreen>
           var tween = Tween(begin: begin, end: end)
               .chain(CurveTween(curve: curve));
           var offsetAnimation = animation.drive(tween);
-
+          
           var fadeTween = Tween<double>(begin: 0.0, end: 1.0);
           var fadeAnimation = animation.drive(fadeTween);
-
+          
           return FadeTransition(
             opacity: fadeAnimation,
             child: SlideTransition(
@@ -228,18 +226,6 @@ class _LoginScreenState extends State<LoginScreen>
           );
         },
         transitionDuration: const Duration(milliseconds: 600),
-      ),
-    );
-  }
-
-  void _showSnackBar(String message, Color color) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: color,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        duration: const Duration(seconds: 2),
       ),
     );
   }
@@ -261,13 +247,13 @@ class _LoginScreenState extends State<LoginScreen>
       }
     } catch (e) {
       if (mounted) {
-        _showSnackBar('Could not open the link. Please try again.', Colors.red.shade800);
+        SnackbarHelper.showError(context, 'Could not open the link. Please try again.');
       }
     }
   }
 
   Future<void> _launchWhatsApp() async {
-    final String phoneNumber = _whatsappNumber;
+    final String phoneNumber = kWhatsAppNumber;
     final String url = 'https://wa.me/$phoneNumber';
     
     try {
@@ -287,11 +273,11 @@ class _LoginScreenState extends State<LoginScreen>
             mode: LaunchMode.externalApplication,
           );
         } else {
-          _showSnackBar('Please install WhatsApp to continue.', Colors.red.shade800);
+          SnackbarHelper.showError(context, 'Please install WhatsApp to continue.');
         }
       }
     } catch (e) {
-      _showSnackBar('Could not open WhatsApp.', Colors.red.shade800);
+      SnackbarHelper.showError(context, 'Could not open WhatsApp.');
     }
   }
 
@@ -301,13 +287,13 @@ class _LoginScreenState extends State<LoginScreen>
       value: const SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
         statusBarIconBrightness: Brightness.light,
-        systemNavigationBarColor: kLivinkeyBlack,
+        systemNavigationBarColor: Colors.black,
         systemNavigationBarIconBrightness: Brightness.light,
       ),
       child: GestureDetector(
         onTap: () => FocusScope.of(context).unfocus(),
         child: Scaffold(
-          backgroundColor: kLivinkeyBlack,
+          backgroundColor: Colors.black,
           body: SafeArea(
             child: FadeTransition(
               opacity: _fadeAnimation,
@@ -329,7 +315,7 @@ class _LoginScreenState extends State<LoginScreen>
                             child: ScaleTransition(
                               scale: _logoScaleAnimation,
                               child: Image.asset(
-                                'assets/images/general_logo.png',
+                                kGeneralLogo,
                                 height: 80,
                                 width: 80,
                                 fit: BoxFit.contain,
@@ -374,13 +360,13 @@ class _LoginScreenState extends State<LoginScreen>
                                 begin: Alignment.topLeft,
                                 end: Alignment.bottomRight,
                                 colors: [
-                                  kLivinkeyGreen.withOpacity(0.1),
-                                  kLivinkeyGreen.withOpacity(0.03),
+                                  Colors.green.withOpacity(0.1),
+                                  Colors.green.withOpacity(0.03),
                                 ],
                               ),
                               borderRadius: BorderRadius.circular(12),
                               border: Border.all(
-                                color: kLivinkeyGreen.withOpacity(0.15),
+                                color: Colors.green.withOpacity(0.15),
                                 width: 1,
                               ),
                             ),
@@ -391,14 +377,14 @@ class _LoginScreenState extends State<LoginScreen>
                                   children: [
                                     Icon(
                                       Icons.info_outline_rounded,
-                                      color: kLivinkeyGreen.withOpacity(0.7),
+                                      color: Colors.green.withOpacity(0.7),
                                       size: 16,
                                     ),
                                     const SizedBox(width: 8),
                                     Text(
                                       'Demo Credentials',
                                       style: TextStyle(
-                                        color: kLivinkeyGreen.withOpacity(0.8),
+                                        color: Colors.green.withOpacity(0.8),
                                         fontSize: 12,
                                         fontWeight: FontWeight.w600,
                                       ),
@@ -410,14 +396,14 @@ class _LoginScreenState extends State<LoginScreen>
                                   children: [
                                     _buildCredentialChip(
                                       'Tenant',
-                                      'molittle1011@gmail.com',
-                                      'Tenant@123',
+                                      kTenantEmail,
+                                      kTenantPassword,
                                     ),
                                     const SizedBox(width: 8),
                                     _buildCredentialChip(
                                       'Guest',
-                                      'mosnake111@gmail.com',
-                                      'Guest@123',
+                                      kGuestEmail,
+                                      kGuestPassword,
                                     ),
                                   ],
                                 ),
@@ -443,7 +429,6 @@ class _LoginScreenState extends State<LoginScreen>
                             icon: Icons.lock_outline,
                             obscureText: _obscurePassword,
                             textInputAction: TextInputAction.done,
-                            // FIX: Use an anonymous function that calls _handleLogin
                             onSubmitted: (_) => _handleLogin(),
                             suffixIcon: IconButton(
                               icon: Icon(
@@ -457,7 +442,7 @@ class _LoginScreenState extends State<LoginScreen>
                                 setState(() {
                                   _obscurePassword = !_obscurePassword;
                                 });
-                                HapticFeedback.lightImpact();
+                                hapticFeedback();
                               },
                             ),
                           ),
@@ -472,12 +457,12 @@ class _LoginScreenState extends State<LoginScreen>
                                   TextSpan(
                                     text: 'Forgot Password?',
                                     style: TextStyle(
-                                      color: kLivinkeyGreen.withOpacity(0.8),
+                                      color: Colors.green.withOpacity(0.8),
                                       fontSize: 14,
                                       fontWeight: FontWeight.w600,
                                       decoration: TextDecoration.underline,
                                       decorationColor:
-                                          kLivinkeyGreen.withOpacity(0.3),
+                                          Colors.green.withOpacity(0.3),
                                     ),
                                     recognizer: _forgotPasswordRecognizer,
                                   ),
@@ -505,11 +490,11 @@ class _LoginScreenState extends State<LoginScreen>
                                   TextSpan(
                                     text: 'Sign Up',
                                     style: TextStyle(
-                                      color: kLivinkeyGreen,
+                                      color: Colors.green,
                                       fontWeight: FontWeight.w700,
                                       decoration: TextDecoration.underline,
                                       decorationColor:
-                                          kLivinkeyGreen.withOpacity(0.3),
+                                          Colors.green.withOpacity(0.3),
                                     ),
                                     recognizer: _signUpRecognizer,
                                   ),
@@ -540,10 +525,10 @@ class _LoginScreenState extends State<LoginScreen>
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: kLivinkeyWhite.withOpacity(0.05),
+        color: Colors.white.withOpacity(0.05),
         borderRadius: BorderRadius.circular(6),
         border: Border.all(
-          color: kLivinkeyWhite.withOpacity(0.06),
+          color: Colors.white.withOpacity(0.06),
           width: 1,
         ),
       ),
@@ -590,13 +575,13 @@ class _LoginScreenState extends State<LoginScreen>
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            kLivinkeyWhite.withOpacity(0.05),
-            kLivinkeyWhite.withOpacity(0.02),
+            Colors.white.withOpacity(0.05),
+            Colors.white.withOpacity(0.02),
           ],
         ),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: kLivinkeyWhite.withOpacity(0.1),
+          color: Colors.white.withOpacity(0.1),
           width: 1,
         ),
       ),
@@ -615,7 +600,7 @@ class _LoginScreenState extends State<LoginScreen>
           ),
           prefixIcon: Icon(
             icon,
-            color: kLivinkeyGreen.withOpacity(0.7),
+            color: Colors.green.withOpacity(0.7),
             size: 22,
           ),
           suffixIcon: suffixIcon,
@@ -626,7 +611,7 @@ class _LoginScreenState extends State<LoginScreen>
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(16),
             borderSide: BorderSide(
-              color: kLivinkeyGreen.withOpacity(0.5),
+              color: Colors.green.withOpacity(0.5),
               width: 2,
             ),
           ),
@@ -653,19 +638,19 @@ class _LoginScreenState extends State<LoginScreen>
       decoration: BoxDecoration(
         gradient: const LinearGradient(
           colors: [
-            kLivinkeyGreen,
+            Color(0xFF92C24A),
             Color(0xFF4CAF50),
           ],
         ),
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: kLivinkeyGreen.withOpacity(0.3),
+            color: const Color(0xFF92C24A).withOpacity(0.3),
             blurRadius: 24,
             offset: const Offset(0, 8),
           ),
           BoxShadow(
-            color: kLivinkeyGreen.withOpacity(0.1),
+            color: const Color(0xFF92C24A).withOpacity(0.1),
             blurRadius: 40,
             offset: const Offset(0, 4),
           ),
@@ -729,13 +714,13 @@ class _LoginScreenState extends State<LoginScreen>
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            kLivinkeyWhite.withOpacity(0.03),
+            Colors.white.withOpacity(0.03),
             Colors.transparent,
           ],
         ),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: kLivinkeyWhite.withOpacity(0.06),
+          color: Colors.white.withOpacity(0.06),
           width: 1,
         ),
       ),
@@ -779,8 +764,8 @@ class _LoginScreenState extends State<LoginScreen>
                 icon: FontAwesomeIcons.facebookF,
                 color: const Color(0xFF1877F2),
                 onTap: () {
-                  HapticFeedback.lightImpact();
-                  _launchUrl(_facebookUrl);
+                  hapticFeedback();
+                  _launchUrl(kFacebookUrl);
                 },
               ),
               const SizedBox(width: 16),
@@ -788,8 +773,8 @@ class _LoginScreenState extends State<LoginScreen>
                 icon: FontAwesomeIcons.instagram,
                 color: const Color(0xFFE4405F),
                 onTap: () {
-                  HapticFeedback.lightImpact();
-                  _launchUrl(_instagramUrl);
+                  hapticFeedback();
+                  _launchUrl(kInstagramUrl);
                 },
               ),
               const SizedBox(width: 16),
@@ -797,8 +782,8 @@ class _LoginScreenState extends State<LoginScreen>
                 icon: FontAwesomeIcons.google,
                 color: const Color(0xFFEA4335),
                 onTap: () {
-                  HapticFeedback.lightImpact();
-                  _launchUrl(_googleUrl);
+                  hapticFeedback();
+                  _launchUrl(kGoogleUrl);
                 },
               ),
               const SizedBox(width: 16),
@@ -806,7 +791,7 @@ class _LoginScreenState extends State<LoginScreen>
                 icon: FontAwesomeIcons.whatsapp,
                 color: const Color(0xFF25D366),
                 onTap: () {
-                  HapticFeedback.lightImpact();
+                  hapticFeedback();
                   _launchWhatsApp();
                 },
               ),
