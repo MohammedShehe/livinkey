@@ -34,3 +34,8 @@ const String kTenantEmail = 'molittle1011@gmail.com';
 const String kTenantPassword = 'Tenant@123';
 const String kGuestEmail = 'mosnake111@gmail.com';
 const String kGuestPassword = 'Guest@123';
+
+// Guest specific
+const String kGuestWhatsAppNumber = '919878383497';
+const String kGuestWhatsAppUrl = 'https://wa.me/$kGuestWhatsAppNumber';
+const String kGuestInstagramUrl = 'https://www.instagram.com/livinkey?igsh=MTc0eWdyeTNvcmFtZA==';

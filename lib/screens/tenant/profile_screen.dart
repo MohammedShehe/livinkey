@@ -5,7 +5,7 @@ import '../../utils/helpers.dart';
 import '../../widgets/tenant/profile_row.dart';
 import '../../widgets/common/snackbar_helper.dart';
 import '../auth/login_screen.dart';
-import '../guest_screen.dart';
+import '../guest/guest_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});

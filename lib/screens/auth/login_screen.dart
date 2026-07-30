@@ -10,7 +10,7 @@ import '../../utils/constants.dart';
 import '../../utils/helpers.dart';
 import '../../widgets/common/snackbar_helper.dart';
 import '../tenant/tenant_screen.dart';
-import '../guest_screen.dart';
+import '../guest/guest_screen.dart';
 import 'forgot_password_screen.dart';
 import 'signup_screen.dart';
 
