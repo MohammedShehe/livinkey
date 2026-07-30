@@ -412,6 +412,7 @@ class _SignUpScreenState extends State<SignUpScreen>
                   'phone': _phoneController.text,
                   'nationality': _selectedNationality,
                   'countryCode': _selectedCountryCode,
+                  'role': 'guest', // Always set as guest
                 },
               ),
           transitionsBuilder: (context, animation, secondaryAnimation, child) {
@@ -525,7 +526,7 @@ class _SignUpScreenState extends State<SignUpScreen>
                                 ),
                                 const SizedBox(height: 8),
                                 Text(
-                                  'Join the Livinkey community today',
+                                  'Join the Livinkey community as a Guest',
                                   style: TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.w400,
@@ -536,7 +537,74 @@ class _SignUpScreenState extends State<SignUpScreen>
                               ],
                             ),
 
-                            const SizedBox(height: 32),
+                            const SizedBox(height: 16),
+
+                            // Guest Role Indicator - Uneditable
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 10,
+                              ),
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                  colors: [
+                                    const Color(0xFFFF9800).withOpacity(0.15),
+                                    const Color(0xFFFF9800).withOpacity(0.05),
+                                  ],
+                                ),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: const Color(0xFFFF9800).withOpacity(0.2),
+                                  width: 1,
+                                ),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Container(
+                                    width: 8,
+                                    height: 8,
+                                    decoration: const BoxDecoration(
+                                      color: Color(0xFFFF9800),
+                                      shape: BoxShape.circle,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 10),
+                                  Text(
+                                    'Guest Account',
+                                    style: TextStyle(
+                                      color: const Color(0xFFFF9800),
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w600,
+                                      letterSpacing: 0.5,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 10),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 8,
+                                      vertical: 2,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFFFF9800).withOpacity(0.1),
+                                      borderRadius: BorderRadius.circular(4),
+                                    ),
+                                    child: Text(
+                                      'Fixed',
+                                      style: TextStyle(
+                                        color: const Color(0xFFFF9800).withOpacity(0.6),
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+
+                            const SizedBox(height: 24),
 
                             _buildTextField(
                               controller: _fullNameController,

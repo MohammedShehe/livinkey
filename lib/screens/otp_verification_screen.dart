@@ -188,7 +188,6 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen>
         ),
       );
 
-      // Simulate account creation
       await Future.delayed(const Duration(milliseconds: 500));
 
       if (mounted) {
@@ -204,7 +203,33 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen>
 
         await Future.delayed(const Duration(seconds: 1));
         if (mounted) {
-          _navigateBackToLogin();
+          // Navigate to login with smooth transition
+          Navigator.of(context).pushReplacement(
+            PageRouteBuilder(
+              pageBuilder: (context, animation, secondaryAnimation) =>
+                  const LoginScreen(),
+              transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                const begin = Offset(0.0, 0.3);
+                const end = Offset.zero;
+                const curve = Curves.easeInOutCubic;
+                var tween = Tween(begin: begin, end: end)
+                    .chain(CurveTween(curve: curve));
+                var offsetAnimation = animation.drive(tween);
+                
+                var fadeTween = Tween<double>(begin: 0.0, end: 1.0);
+                var fadeAnimation = animation.drive(fadeTween);
+                
+                return FadeTransition(
+                  opacity: fadeAnimation,
+                  child: SlideTransition(
+                    position: offsetAnimation,
+                    child: child,
+                  ),
+                );
+              },
+              transitionDuration: const Duration(milliseconds: 600),
+            ),
+          );
         }
       }
     }

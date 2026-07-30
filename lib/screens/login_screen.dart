@@ -7,6 +7,11 @@ import '../widgets/livinkey_logo.dart';
 import 'forgot_password_screen.dart';
 import 'signup_screen.dart';
 import '../services/audio_service.dart';
+import '../services/auth_service.dart';
+
+// Import the role-specific screens
+import 'tenant_screen.dart';
+import 'guest_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -36,7 +41,7 @@ class _LoginScreenState extends State<LoginScreen>
   static const String _googleUrl = 'https://share.google/ktGKY5w8NCakvEo6u';
   static const String _instagramUrl = 'https://www.instagram.com/livinkey';
   static const String _facebookUrl = 'https://www.facebook.com/livin.key.9';
-  static const String _whatsappNumber = '919878383497'; // Without + for URL
+  static const String _whatsappNumber = '919878383497';
 
   @override
   void initState() {
@@ -79,27 +84,27 @@ class _LoginScreenState extends State<LoginScreen>
     );
 
     _signUpRecognizer = TapGestureRecognizer()
-    ..onTap = () {
-      HapticFeedback.selectionClick();
-      Navigator.of(context).push(
-        PageRouteBuilder(
-          pageBuilder: (context, animation, secondaryAnimation) =>
-              const SignUpScreen(),
-          transitionsBuilder: (context, animation, secondaryAnimation, child) {
-            const begin = Offset(1.0, 0.0);
-            const end = Offset.zero;
-            const curve = Curves.easeInOutCubic;
-            var tween = Tween(begin: begin, end: end)
-                .chain(CurveTween(curve: curve));
-            var offsetAnimation = animation.drive(tween);
-            return SlideTransition(
-              position: offsetAnimation,
-              child: child,
-            );
-          },
-        ),
-      );
-    };
+      ..onTap = () {
+        HapticFeedback.selectionClick();
+        Navigator.of(context).push(
+          PageRouteBuilder(
+            pageBuilder: (context, animation, secondaryAnimation) =>
+                const SignUpScreen(),
+            transitionsBuilder: (context, animation, secondaryAnimation, child) {
+              const begin = Offset(1.0, 0.0);
+              const end = Offset.zero;
+              const curve = Curves.easeInOutCubic;
+              var tween = Tween(begin: begin, end: end)
+                  .chain(CurveTween(curve: curve));
+              var offsetAnimation = animation.drive(tween);
+              return SlideTransition(
+                position: offsetAnimation,
+                child: child,
+              );
+            },
+          ),
+        );
+      };
 
     _forgotPasswordRecognizer = TapGestureRecognizer()
       ..onTap = () {
@@ -152,58 +157,93 @@ class _LoginScreenState extends State<LoginScreen>
     final String password = _passwordController.text.trim();
 
     if (email.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text('Please enter your email address'),
-          backgroundColor: Colors.red.shade800,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        ),
-      );
+      _showSnackBar('Please enter your email address', Colors.red.shade800);
       return;
     }
 
     if (!_isValidEmail(email)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text('Please enter a valid email address'),
-          backgroundColor: Colors.red.shade800,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        ),
-      );
+      _showSnackBar('Please enter a valid email address', Colors.red.shade800);
       return;
     }
 
     if (password.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text('Please enter your password'),
-          backgroundColor: Colors.red.shade800,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        ),
+      _showSnackBar('Please enter your password', Colors.red.shade800);
+      return;
+    }
+
+    // Check credentials against demo accounts
+    if (!AuthService.isValidCredentials(email, password)) {
+      _showSnackBar(
+        'Invalid credentials. Please use the demo accounts.',
+        Colors.red.shade800,
       );
       return;
     }
 
     setState(() => _isLoading = true);
 
-    await Future.delayed(const Duration(seconds: 2));
+    await Future.delayed(const Duration(seconds: 1));
 
     setState(() => _isLoading = false);
 
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text('Login successful!'),
-          backgroundColor: kLivinkeyGreen,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        ),
-      );
-      // TODO: Navigate to Home Screen
+      _showSnackBar('Login successful!', kLivinkeyGreen);
+      
+      await Future.delayed(const Duration(milliseconds: 500));
+      
+      if (mounted) {
+        // Navigate to role-specific screen with smooth transition
+        final String? role = AuthService.getRole(email);
+        
+        if (role == AuthService.tenantRole) {
+          _navigateToScreen(const TenantScreen(), 'Tenant');
+        } else if (role == AuthService.guestRole) {
+          _navigateToScreen(const GuestScreen(), 'Guest');
+        } else {
+          _showSnackBar('Unknown role. Please contact support.', Colors.orange.shade800);
+        }
+      }
     }
+  }
+
+  void _navigateToScreen(Widget screen, String role) {
+    Navigator.of(context).pushReplacement(
+      PageRouteBuilder(
+        pageBuilder: (context, animation, secondaryAnimation) => screen,
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          const begin = Offset(0.0, 0.3);
+          const end = Offset.zero;
+          const curve = Curves.easeInOutCubic;
+          var tween = Tween(begin: begin, end: end)
+              .chain(CurveTween(curve: curve));
+          var offsetAnimation = animation.drive(tween);
+          
+          var fadeTween = Tween<double>(begin: 0.0, end: 1.0);
+          var fadeAnimation = animation.drive(fadeTween);
+          
+          return FadeTransition(
+            opacity: fadeAnimation,
+            child: SlideTransition(
+              position: offsetAnimation,
+              child: child,
+            ),
+          );
+        },
+        transitionDuration: const Duration(milliseconds: 600),
+      ),
+    );
+  }
+
+  void _showSnackBar(String message, Color color) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: color,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        duration: const Duration(seconds: 2),
+      ),
+    );
   }
 
   Future<void> _launchUrl(String url) async {
@@ -223,14 +263,7 @@ class _LoginScreenState extends State<LoginScreen>
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text('Could not open the link. Please try again.'),
-            backgroundColor: Colors.red.shade800,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          ),
-        );
+        _showSnackBar('Could not open the link. Please try again.', Colors.red.shade800);
       }
     }
   }
@@ -248,7 +281,6 @@ class _LoginScreenState extends State<LoginScreen>
           mode: LaunchMode.externalApplication,
         );
       } else {
-        // Fallback to web.whatsapp.com
         final String webUrl = 'https://web.whatsapp.com/send?phone=$phoneNumber';
         final Uri webUri = Uri.parse(webUrl);
         if (await canLaunchUrl(webUri)) {
@@ -257,29 +289,11 @@ class _LoginScreenState extends State<LoginScreen>
             mode: LaunchMode.externalApplication,
           );
         } else {
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: const Text('Please install WhatsApp to continue.'),
-                backgroundColor: Colors.red.shade800,
-                behavior: SnackBarBehavior.floating,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              ),
-            );
-          }
+          _showSnackBar('Please install WhatsApp to continue.', Colors.red.shade800);
         }
       }
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text('Could not open WhatsApp.'),
-            backgroundColor: Colors.red.shade800,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          ),
-        );
-      }
+      _showSnackBar('Could not open WhatsApp.', Colors.red.shade800);
     }
   }
 
@@ -354,135 +368,99 @@ class _LoginScreenState extends State<LoginScreen>
 
                           const SizedBox(height: 40),
 
+                          // Demo Credentials Info Box
                           Container(
+                            padding: const EdgeInsets.all(12),
                             decoration: BoxDecoration(
                               gradient: LinearGradient(
                                 begin: Alignment.topLeft,
                                 end: Alignment.bottomRight,
                                 colors: [
-                                  kLivinkeyWhite.withOpacity(0.05),
-                                  kLivinkeyWhite.withOpacity(0.02),
+                                  kLivinkeyGreen.withOpacity(0.1),
+                                  kLivinkeyGreen.withOpacity(0.03),
                                 ],
                               ),
-                              borderRadius: BorderRadius.circular(16),
+                              borderRadius: BorderRadius.circular(12),
                               border: Border.all(
-                                color: kLivinkeyWhite.withOpacity(0.1),
+                                color: kLivinkeyGreen.withOpacity(0.15),
                                 width: 1,
                               ),
                             ),
-                            child: TextField(
-                              controller: _emailController,
-                              style: const TextStyle(color: Colors.white),
-                              keyboardType: TextInputType.emailAddress,
-                              textInputAction: TextInputAction.next,
-                              decoration: InputDecoration(
-                                labelText: 'Email Address',
-                                labelStyle: TextStyle(
-                                  color: Colors.white.withOpacity(0.5),
-                                  fontWeight: FontWeight.w500,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Icon(
+                                      Icons.info_outline_rounded,
+                                      color: kLivinkeyGreen.withOpacity(0.7),
+                                      size: 16,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      'Demo Credentials',
+                                      style: TextStyle(
+                                        color: kLivinkeyGreen.withOpacity(0.8),
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                                prefixIcon: Icon(
-                                  Icons.email_outlined,
-                                  color: kLivinkeyGreen.withOpacity(0.7),
-                                  size: 22,
+                                const SizedBox(height: 6),
+                                Row(
+                                  children: [
+                                    _buildCredentialChip(
+                                      'Tenant',
+                                      'molittle1011@gmail.com',
+                                      'Tenant@123',
+                                    ),
+                                    const SizedBox(width: 8),
+                                    _buildCredentialChip(
+                                      'Guest',
+                                      'mosnake111@gmail.com',
+                                      'Guest@123',
+                                    ),
+                                  ],
                                 ),
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(16),
-                                  borderSide: BorderSide.none,
-                                ),
-                                focusedBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(16),
-                                  borderSide: BorderSide(
-                                    color: kLivinkeyGreen.withOpacity(0.5),
-                                    width: 2,
-                                  ),
-                                ),
-                                enabledBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(16),
-                                  borderSide: BorderSide(
-                                    color: Colors.transparent,
-                                  ),
-                                ),
-                                contentPadding: const EdgeInsets.symmetric(
-                                  horizontal: 20,
-                                  vertical: 16,
-                                ),
-                              ),
+                              ],
                             ),
+                          ),
+
+                          const SizedBox(height: 24),
+
+                          _buildTextField(
+                            controller: _emailController,
+                            label: 'Email Address',
+                            icon: Icons.email_outlined,
+                            keyboardType: TextInputType.emailAddress,
+                            textInputAction: TextInputAction.next,
                           ),
 
                           const SizedBox(height: 20),
 
-                          Container(
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                                colors: [
-                                  kLivinkeyWhite.withOpacity(0.05),
-                                  kLivinkeyWhite.withOpacity(0.02),
-                                ],
+                          _buildTextField(
+                            controller: _passwordController,
+                            label: 'Password',
+                            icon: Icons.lock_outline,
+                            obscureText: _obscurePassword,
+                            textInputAction: TextInputAction.done,
+                            // FIX: Use an anonymous function that calls _handleLogin
+                            onSubmitted: (_) => _handleLogin(),
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                _obscurePassword
+                                    ? Icons.visibility_off
+                                    : Icons.visibility,
+                                color: Colors.white.withOpacity(0.5),
+                                size: 22,
                               ),
-                              borderRadius: BorderRadius.circular(16),
-                              border: Border.all(
-                                color: kLivinkeyWhite.withOpacity(0.1),
-                                width: 1,
-                              ),
-                            ),
-                            child: TextField(
-                              controller: _passwordController,
-                              obscureText: _obscurePassword,
-                              style: const TextStyle(color: Colors.white),
-                              textInputAction: TextInputAction.done,
-                              onSubmitted: (_) => _handleLogin(),
-                              decoration: InputDecoration(
-                                labelText: 'Password',
-                                labelStyle: TextStyle(
-                                  color: Colors.white.withOpacity(0.5),
-                                  fontWeight: FontWeight.w500,
-                                ),
-                                prefixIcon: Icon(
-                                  Icons.lock_outline,
-                                  color: kLivinkeyGreen.withOpacity(0.7),
-                                  size: 22,
-                                ),
-                                suffixIcon: IconButton(
-                                  icon: Icon(
-                                    _obscurePassword
-                                        ? Icons.visibility_off
-                                        : Icons.visibility,
-                                    color: Colors.white.withOpacity(0.5),
-                                    size: 22,
-                                  ),
-                                  onPressed: () {
-                                    setState(() {
-                                      _obscurePassword = !_obscurePassword;
-                                    });
-                                    HapticFeedback.lightImpact();
-                                  },
-                                ),
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(16),
-                                  borderSide: BorderSide.none,
-                                ),
-                                focusedBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(16),
-                                  borderSide: BorderSide(
-                                    color: kLivinkeyGreen.withOpacity(0.5),
-                                    width: 2,
-                                  ),
-                                ),
-                                enabledBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(16),
-                                  borderSide: BorderSide(
-                                    color: Colors.transparent,
-                                  ),
-                                ),
-                                contentPadding: const EdgeInsets.symmetric(
-                                  horizontal: 20,
-                                  vertical: 16,
-                                ),
-                              ),
+                              onPressed: () {
+                                setState(() {
+                                  _obscurePassword = !_obscurePassword;
+                                });
+                                HapticFeedback.lightImpact();
+                              },
                             ),
                           ),
 
@@ -512,76 +490,7 @@ class _LoginScreenState extends State<LoginScreen>
 
                           const SizedBox(height: 32),
 
-                          AnimatedContainer(
-                            duration: const Duration(milliseconds: 300),
-                            width: double.infinity,
-                            height: 56,
-                            decoration: BoxDecoration(
-                              gradient: const LinearGradient(
-                                colors: [
-                                  kLivinkeyGreen,
-                                  Color(0xFF4CAF50),
-                                ],
-                              ),
-                              borderRadius: BorderRadius.circular(16),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: kLivinkeyGreen.withOpacity(0.3),
-                                  blurRadius: 24,
-                                  offset: const Offset(0, 8),
-                                ),
-                                BoxShadow(
-                                  color: kLivinkeyGreen.withOpacity(0.1),
-                                  blurRadius: 40,
-                                  offset: const Offset(0, 4),
-                                ),
-                              ],
-                            ),
-                            child: ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.transparent,
-                                foregroundColor: Colors.black,
-                                shadowColor: Colors.transparent,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(16),
-                                ),
-                                elevation: 0,
-                              ),
-                              onPressed: _isLoading ? null : _handleLogin,
-                              child: _isLoading
-                                  ? SizedBox(
-                                      height: 24,
-                                      width: 24,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2.5,
-                                        valueColor:
-                                            const AlwaysStoppedAnimation<Color>(
-                                              Colors.black,
-                                            ),
-                                      ),
-                                    )
-                                  : const Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: [
-                                        Text(
-                                          'Sign In',
-                                          style: TextStyle(
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.w700,
-                                            color: Colors.black,
-                                            letterSpacing: 0.5,
-                                          ),
-                                        ),
-                                        SizedBox(width: 8),
-                                        Icon(
-                                          Icons.arrow_forward_rounded,
-                                          color: Colors.black,
-                                          size: 22,
-                                        ),
-                                      ],
-                                    ),
-                            ),
-                          ),
+                          _buildLoginButton(),
 
                           const SizedBox(height: 24),
 
@@ -613,102 +522,7 @@ class _LoginScreenState extends State<LoginScreen>
 
                           const SizedBox(height: 32),
 
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 20,
-                              vertical: 16,
-                            ),
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                                colors: [
-                                  kLivinkeyWhite.withOpacity(0.03),
-                                  Colors.transparent,
-                                ],
-                              ),
-                              borderRadius: BorderRadius.circular(16),
-                              border: Border.all(
-                                color: kLivinkeyWhite.withOpacity(0.06),
-                                width: 1,
-                              ),
-                            ),
-                            child: Column(
-                              children: [
-                                Row(
-                                  children: [
-                                    Expanded(
-                                      child: Divider(
-                                        color: Colors.white.withOpacity(0.1),
-                                        thickness: 1,
-                                      ),
-                                    ),
-                                    Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 16,
-                                      ),
-                                      child: Text(
-                                        'Connect with Us',
-                                        style: TextStyle(
-                                          color: Colors.white.withOpacity(0.4),
-                                          fontSize: 13,
-                                          fontWeight: FontWeight.w500,
-                                          letterSpacing: 0.5,
-                                        ),
-                                      ),
-                                    ),
-                                    Expanded(
-                                      child: Divider(
-                                        color: Colors.white.withOpacity(0.1),
-                                        thickness: 1,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 16),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    _buildSocialButton(
-                                      icon: FontAwesomeIcons.facebookF,
-                                      color: const Color(0xFF1877F2),
-                                      onTap: () {
-                                        HapticFeedback.lightImpact();
-                                        _launchUrl(_facebookUrl);
-                                      },
-                                    ),
-                                    const SizedBox(width: 16),
-                                    _buildSocialButton(
-                                      icon: FontAwesomeIcons.instagram,
-                                      color: const Color(0xFFE4405F),
-                                      onTap: () {
-                                        HapticFeedback.lightImpact();
-                                        _launchUrl(_instagramUrl);
-                                      },
-                                    ),
-                                    const SizedBox(width: 16),
-                                    _buildSocialButton(
-                                      icon: FontAwesomeIcons.google,
-                                      color: const Color(0xFFEA4335),
-                                      onTap: () {
-                                        HapticFeedback.lightImpact();
-                                        _launchUrl(_googleUrl);
-                                      },
-                                    ),
-                                    const SizedBox(width: 16),
-                                    _buildSocialButton(
-                                      icon: FontAwesomeIcons.whatsapp,
-                                      color: const Color(0xFF25D366),
-                                      onTap: () {
-                                        HapticFeedback.lightImpact();
-                                        _launchWhatsApp();
-                                      },
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
+                          _buildSocialSection(),
 
                           const SizedBox(height: 40),
                         ],
@@ -720,6 +534,287 @@ class _LoginScreenState extends State<LoginScreen>
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildCredentialChip(String label, String email, String password) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: kLivinkeyWhite.withOpacity(0.05),
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(
+          color: kLivinkeyWhite.withOpacity(0.06),
+          width: 1,
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 6,
+            height: 6,
+            decoration: BoxDecoration(
+              color: label == 'Tenant' 
+                  ? const Color(0xFF4CAF50)
+                  : const Color(0xFFFF9800),
+              shape: BoxShape.circle,
+            ),
+          ),
+          const SizedBox(width: 4),
+          Text(
+            label,
+            style: TextStyle(
+              color: Colors.white.withOpacity(0.6),
+              fontSize: 10,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String label,
+    required IconData icon,
+    TextInputType keyboardType = TextInputType.text,
+    TextInputAction textInputAction = TextInputAction.next,
+    bool obscureText = false,
+    Widget? suffixIcon,
+    void Function(String)? onSubmitted,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            kLivinkeyWhite.withOpacity(0.05),
+            kLivinkeyWhite.withOpacity(0.02),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: kLivinkeyWhite.withOpacity(0.1),
+          width: 1,
+        ),
+      ),
+      child: TextField(
+        controller: controller,
+        style: const TextStyle(color: Colors.white),
+        keyboardType: keyboardType,
+        textInputAction: textInputAction,
+        obscureText: obscureText,
+        onSubmitted: onSubmitted,
+        decoration: InputDecoration(
+          labelText: label,
+          labelStyle: TextStyle(
+            color: Colors.white.withOpacity(0.5),
+            fontWeight: FontWeight.w500,
+          ),
+          prefixIcon: Icon(
+            icon,
+            color: kLivinkeyGreen.withOpacity(0.7),
+            size: 22,
+          ),
+          suffixIcon: suffixIcon,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16),
+            borderSide: BorderSide.none,
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16),
+            borderSide: BorderSide(
+              color: kLivinkeyGreen.withOpacity(0.5),
+              width: 2,
+            ),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16),
+            borderSide: BorderSide(
+              color: Colors.transparent,
+            ),
+          ),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 20,
+            vertical: 16,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLoginButton() {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 300),
+      width: double.infinity,
+      height: 56,
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [
+            kLivinkeyGreen,
+            Color(0xFF4CAF50),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: kLivinkeyGreen.withOpacity(0.3),
+            blurRadius: 24,
+            offset: const Offset(0, 8),
+          ),
+          BoxShadow(
+            color: kLivinkeyGreen.withOpacity(0.1),
+            blurRadius: 40,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.transparent,
+          foregroundColor: Colors.black,
+          shadowColor: Colors.transparent,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          elevation: 0,
+        ),
+        onPressed: _isLoading ? null : _handleLogin,
+        child: _isLoading
+            ? SizedBox(
+                height: 24,
+                width: 24,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2.5,
+                  valueColor:
+                      const AlwaysStoppedAnimation<Color>(
+                        Colors.black,
+                      ),
+                ),
+              )
+            : const Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    'Sign In',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.black,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                  SizedBox(width: 8),
+                  Icon(
+                    Icons.arrow_forward_rounded,
+                    color: Colors.black,
+                    size: 22,
+                  ),
+                ],
+              ),
+      ),
+    );
+  }
+
+  Widget _buildSocialSection() {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: 20,
+        vertical: 16,
+      ),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            kLivinkeyWhite.withOpacity(0.03),
+            Colors.transparent,
+          ],
+        ),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: kLivinkeyWhite.withOpacity(0.06),
+          width: 1,
+        ),
+      ),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Divider(
+                  color: Colors.white.withOpacity(0.1),
+                  thickness: 1,
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                ),
+                child: Text(
+                  'Connect with Us',
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.4),
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+              ),
+              Expanded(
+                child: Divider(
+                  color: Colors.white.withOpacity(0.1),
+                  thickness: 1,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              _buildSocialButton(
+                icon: FontAwesomeIcons.facebookF,
+                color: const Color(0xFF1877F2),
+                onTap: () {
+                  HapticFeedback.lightImpact();
+                  _launchUrl(_facebookUrl);
+                },
+              ),
+              const SizedBox(width: 16),
+              _buildSocialButton(
+                icon: FontAwesomeIcons.instagram,
+                color: const Color(0xFFE4405F),
+                onTap: () {
+                  HapticFeedback.lightImpact();
+                  _launchUrl(_instagramUrl);
+                },
+              ),
+              const SizedBox(width: 16),
+              _buildSocialButton(
+                icon: FontAwesomeIcons.google,
+                color: const Color(0xFFEA4335),
+                onTap: () {
+                  HapticFeedback.lightImpact();
+                  _launchUrl(_googleUrl);
+                },
+              ),
+              const SizedBox(width: 16),
+              _buildSocialButton(
+                icon: FontAwesomeIcons.whatsapp,
+                color: const Color(0xFF25D366),
+                onTap: () {
+                  HapticFeedback.lightImpact();
+                  _launchWhatsApp();
+                },
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
