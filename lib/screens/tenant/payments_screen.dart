@@ -1,3 +1,4 @@
+// lib/screens/tenant/payments_screen.dart
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -13,7 +14,11 @@ class PaymentsScreen extends StatefulWidget {
 }
 
 class _PaymentsScreenState extends State<PaymentsScreen>
-    with SingleTickerProviderStateMixin {
+    with AutomaticKeepAliveClientMixin, SingleTickerProviderStateMixin {
+  
+  @override
+  bool get wantKeepAlive => true;
+
   late AnimationController _fadeController;
   late Animation<double> _fadeAnimation;
   int _selectedPaymentMethod = 0;
@@ -37,7 +42,6 @@ class _PaymentsScreenState extends State<PaymentsScreen>
     super.dispose();
   }
 
-  // Show exit dialog when back button is pressed
   Future<bool> _onWillPop() async {
     return await showDialog(
       context: context,
@@ -98,6 +102,8 @@ class _PaymentsScreenState extends State<PaymentsScreen>
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
+    
     return WillPopScope(
       onWillPop: _onWillPop,
       child: Scaffold(

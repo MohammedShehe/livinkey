@@ -14,7 +14,11 @@ class GuestSearchScreen extends StatefulWidget {
 }
 
 class _GuestSearchScreenState extends State<GuestSearchScreen>
-    with SingleTickerProviderStateMixin {
+    with AutomaticKeepAliveClientMixin, SingleTickerProviderStateMixin {
+  
+  @override
+  bool get wantKeepAlive => true; // 🔥 Keep state alive
+
   late AnimationController _fadeController;
   late Animation<double> _fadeAnimation;
   final TextEditingController _searchController = TextEditingController();
@@ -156,6 +160,8 @@ class _GuestSearchScreenState extends State<GuestSearchScreen>
 
   @override
   Widget build(BuildContext context) {
+    super.build(context); // 🔥 Must call super.build
+    
     return Scaffold(
       backgroundColor: kLivinkeyBlack,
       appBar: AppBar(

@@ -1,3 +1,4 @@
+// lib/screens/tenant/documents_screen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../utils/constants.dart';
@@ -12,7 +13,11 @@ class DocumentsScreen extends StatefulWidget {
 }
 
 class _DocumentsScreenState extends State<DocumentsScreen>
-    with SingleTickerProviderStateMixin {
+    with AutomaticKeepAliveClientMixin, SingleTickerProviderStateMixin {
+  
+  @override
+  bool get wantKeepAlive => true; // 🔥 Keep state alive
+
   late AnimationController _fadeController;
   late Animation<double> _fadeAnimation;
   bool _isInternational = false;
@@ -52,7 +57,6 @@ class _DocumentsScreenState extends State<DocumentsScreen>
     super.dispose();
   }
 
-  // Show exit dialog when back button is pressed
   Future<bool> _onWillPop() async {
     return await showDialog(
       context: context,
@@ -115,6 +119,8 @@ class _DocumentsScreenState extends State<DocumentsScreen>
 
   @override
   Widget build(BuildContext context) {
+    super.build(context); // 🔥 Must call super.build
+    
     return WillPopScope(
       onWillPop: _onWillPop,
       child: Scaffold(
@@ -209,7 +215,6 @@ class _DocumentsScreenState extends State<DocumentsScreen>
 
                 const SizedBox(height: 16),
 
-                // Document Grid
                 GridView.builder(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
@@ -232,7 +237,6 @@ class _DocumentsScreenState extends State<DocumentsScreen>
 
                 const SizedBox(height: 16),
 
-                // Download Buttons
                 Row(
                   children: [
                     Expanded(

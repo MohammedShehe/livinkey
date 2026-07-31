@@ -1,3 +1,4 @@
+// lib/screens/tenant/profile_screen.dart
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../utils/constants.dart';
@@ -15,7 +16,11 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen>
-    with SingleTickerProviderStateMixin {
+    with AutomaticKeepAliveClientMixin, SingleTickerProviderStateMixin {
+  
+  @override
+  bool get wantKeepAlive => true;
+
   late AnimationController _fadeController;
   late Animation<double> _fadeAnimation;
 
@@ -54,7 +59,6 @@ class _ProfileScreenState extends State<ProfileScreen>
     super.dispose();
   }
 
-  // Show exit dialog when back button is pressed
   Future<bool> _onWillPop() async {
     return await showDialog(
       context: context,
@@ -115,6 +119,8 @@ class _ProfileScreenState extends State<ProfileScreen>
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
+    
     return WillPopScope(
       onWillPop: _onWillPop,
       child: Scaffold(
@@ -178,7 +184,6 @@ class _ProfileScreenState extends State<ProfileScreen>
 
                 const SizedBox(height: 20),
 
-                // Enter as Guest
                 Center(
                   child: TextButton.icon(
                     onPressed: () {
@@ -216,12 +221,10 @@ class _ProfileScreenState extends State<ProfileScreen>
 
                 const SizedBox(height: 20),
 
-                // Feedback Button
                 _buildFeedbackButton(),
 
                 const SizedBox(height: 12),
 
-                // Logout Button
                 SizedBox(
                   width: double.infinity,
                   child: OutlinedButton.icon(
@@ -780,21 +783,17 @@ class _ProfileScreenState extends State<ProfileScreen>
     List<double> ratings,
     String comment,
   ) {
-    // Close the feedback modal
     Navigator.pop(context);
 
-    // Show success message
     SnackbarHelper.showSuccess(
       context,
       'Thank you for your feedback! 🎉',
     );
 
-    // Mark as submitted
     setState(() {
       _hasSubmittedFeedback = true;
     });
 
-    // Show thank you dialog after a short delay
     Future.delayed(const Duration(milliseconds: 300), () {
       if (mounted) {
         _showThankYouDialog();

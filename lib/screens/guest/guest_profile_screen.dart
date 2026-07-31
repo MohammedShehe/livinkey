@@ -17,7 +17,11 @@ class GuestProfileScreen extends StatefulWidget {
 }
 
 class _GuestProfileScreenState extends State<GuestProfileScreen>
-    with SingleTickerProviderStateMixin {
+    with AutomaticKeepAliveClientMixin, SingleTickerProviderStateMixin {
+  
+  @override
+  bool get wantKeepAlive => true;
+
   late AnimationController _fadeController;
   late Animation<double> _fadeAnimation;
 
@@ -371,6 +375,8 @@ class _GuestProfileScreenState extends State<GuestProfileScreen>
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
+    
     return Scaffold(
       backgroundColor: kLivinkeyBlack,
       appBar: AppBar(

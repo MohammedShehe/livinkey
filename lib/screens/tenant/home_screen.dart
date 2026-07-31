@@ -1,3 +1,4 @@
+// lib/screens/tenant/home_screen.dart
 import 'package:flutter/material.dart';
 import '../../utils/constants.dart';
 import '../../utils/helpers.dart';
@@ -12,7 +13,12 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
+class _HomeScreenState extends State<HomeScreen>
+    with AutomaticKeepAliveClientMixin, TickerProviderStateMixin {
+  
+  @override
+  bool get wantKeepAlive => true; // 🔥 Keep state alive
+
   late AnimationController _fadeController;
   late Animation<double> _fadeAnimation;
 
@@ -36,30 +42,21 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   void _navigateToTab(int index) {
-    // Find the TenantScreenState and navigate
     final state = context.findAncestorStateOfType<TenantScreenState>();
     state?.navigateToTab(index);
   }
 
-  // Helper method to get responsive logo size
   double _getLogoSize(BuildContext context) {
     final double screenWidth = MediaQuery.of(context).size.width;
-    
-    // For tablets (width >= 600), use larger size
     if (screenWidth >= 600) {
-      return 80.0; // Perfect for tablets
-    }
-    // For phones, use smaller size
-    else if (screenWidth >= 400) {
+      return 80.0;
+    } else if (screenWidth >= 400) {
       return 40.0;
-    }
-    // For small phones
-    else {
+    } else {
       return 32.0;
     }
   }
 
-  // Show exit dialog when back button is pressed
   Future<bool> _onWillPop() async {
     return await showDialog(
       context: context,
@@ -120,11 +117,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context); // 🔥 Must call super.build
+    
     const tenantName = 'John Doe';
     const pgName = 'Green Valley PG';
     const roomNumber = 'Room 204';
     
-    // Get responsive logo size
     final double logoSize = _getLogoSize(context);
 
     return WillPopScope(
@@ -189,7 +187,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               children: [
                 const SizedBox(height: 12),
 
-                // Greeting Section with PG Info
                 Row(
                   children: [
                     Expanded(
@@ -284,7 +281,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
                 const SizedBox(height: 24),
 
-                // Stats Grid
                 GridView.count(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
@@ -330,7 +326,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
                 const SizedBox(height: 24),
 
-                // Quick Actions Section
                 const Text(
                   'Quick Actions',
                   style: TextStyle(

@@ -15,7 +15,11 @@ class GuestHomeScreen extends StatefulWidget {
 }
 
 class _GuestHomeScreenState extends State<GuestHomeScreen>
-    with SingleTickerProviderStateMixin {
+    with AutomaticKeepAliveClientMixin, SingleTickerProviderStateMixin {
+  
+  @override
+  bool get wantKeepAlive => true; // 🔥 Keep state alive
+
   late AnimationController _fadeController;
   late Animation<double> _fadeAnimation;
   String _selectedFilter = 'All';
@@ -166,7 +170,7 @@ class _GuestHomeScreenState extends State<GuestHomeScreen>
     
     // For tablets (width >= 600), use larger size
     if (screenWidth >= 600) {
-      return 80.0; // Perfect for tablets
+      return 80.0;
     }
     // For phones, use smaller size
     else if (screenWidth >= 400) {
@@ -180,7 +184,8 @@ class _GuestHomeScreenState extends State<GuestHomeScreen>
 
   @override
   Widget build(BuildContext context) {
-    // Get responsive logo size
+    super.build(context); // 🔥 Must call super.build
+    
     final double logoSize = _getLogoSize(context);
     
     return Scaffold(

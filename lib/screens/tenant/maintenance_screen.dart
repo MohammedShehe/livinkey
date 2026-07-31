@@ -1,3 +1,4 @@
+// lib/screens/tenant/maintenance_screen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:io';
@@ -14,7 +15,11 @@ class MaintenanceScreen extends StatefulWidget {
 }
 
 class _MaintenanceScreenState extends State<MaintenanceScreen>
-    with SingleTickerProviderStateMixin {
+    with AutomaticKeepAliveClientMixin, SingleTickerProviderStateMixin {
+  
+  @override
+  bool get wantKeepAlive => true;
+
   late AnimationController _fadeController;
   late Animation<double> _fadeAnimation;
   String _selectedFilter = 'All';
@@ -46,7 +51,6 @@ class _MaintenanceScreenState extends State<MaintenanceScreen>
     super.dispose();
   }
 
-  // Show exit dialog when back button is pressed
   Future<bool> _onWillPop() async {
     return await showDialog(
       context: context,
@@ -112,6 +116,8 @@ class _MaintenanceScreenState extends State<MaintenanceScreen>
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
+    
     return WillPopScope(
       onWillPop: _onWillPop,
       child: Scaffold(
@@ -135,7 +141,6 @@ class _MaintenanceScreenState extends State<MaintenanceScreen>
               children: [
                 const SizedBox(height: 12),
 
-                // Stats Row
                 Row(
                   children: [
                     _buildMaintenanceStat('Pending', 3, Colors.red),
@@ -146,7 +151,6 @@ class _MaintenanceScreenState extends State<MaintenanceScreen>
 
                 const SizedBox(height: 20),
 
-                // Filter Row
                 SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
                   child: Row(
@@ -164,7 +168,6 @@ class _MaintenanceScreenState extends State<MaintenanceScreen>
 
                 const SizedBox(height: 16),
 
-                // Maintenance List
                 ListView.separated(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
@@ -180,7 +183,6 @@ class _MaintenanceScreenState extends State<MaintenanceScreen>
 
                 const SizedBox(height: 16),
 
-                // Submit Request Button
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton.icon(
@@ -371,7 +373,6 @@ class _MaintenanceScreenState extends State<MaintenanceScreen>
                           ),
                           const SizedBox(height: 16),
                           
-                          // Image Upload Section
                           _buildImageUploadSection(
                             selectedImage: _selectedImage,
                             onImageSelected: (File? image) {
