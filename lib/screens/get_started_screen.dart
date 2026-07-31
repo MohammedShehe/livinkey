@@ -162,6 +162,16 @@ class _GetStartedScreenState extends State<GetStartedScreen>
 
   @override
   Widget build(BuildContext context) {
+    final Size screenSize = MediaQuery.of(context).size;
+
+    // Responsive logo width: the old hardcoded `width: 280` (plus its own
+    // container's horizontal padding of 40 and the outer Padding's 56)
+    // needed ~376px of screen width to avoid clipping/overflow — wider
+    // than a lot of small phones (iPhone SE / small Android = 320-360px).
+    // Scaling off screen width and clamping fixes both ends: it shrinks
+    // on narrow phones and stops growing past a sensible cap on tablets.
+    final double logoWidth = (screenSize.width * 0.62).clamp(180.0, 320.0);
+
     return WillPopScope(
       onWillPop: _onWillPop,
       child: AnnotatedRegion<SystemUiOverlayStyle>(
@@ -174,161 +184,185 @@ class _GetStartedScreenState extends State<GetStartedScreen>
         child: Scaffold(
           backgroundColor: kLivinkeyBlack,
           body: SafeArea(
-            child: FadeTransition(
-              opacity: _fadeAnimation,
-              child: AnimatedBuilder(
-                animation: _mainController,
-                builder: (context, _) {
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 28),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Spacer(flex: 1),
-
-                        ScaleTransition(
-                          scale: _scaleAnimation,
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 20,
-                              vertical: 30,
-                            ),
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                                colors: [
-                                  kLivinkeyGreen.withOpacity(0.08),
-                                  Colors.transparent,
-                                  kLivinkeyGreen.withOpacity(0.05),
-                                ],
-                              ),
-                              borderRadius: BorderRadius.circular(24),
-                              border: Border.all(
-                                color: kLivinkeyGreen.withOpacity(0.1),
-                                width: 1,
-                              ),
-                            ),
-                            child: LivinkeyLogoKeyBounce(
-                              bounceAnimation: _keyBounceAnimation,
-                              width: 280,
-                            ),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                return FadeTransition(
+                  opacity: _fadeAnimation,
+                  child: AnimatedBuilder(
+                    animation: _mainController,
+                    builder: (context, _) {
+                      // SingleChildScrollView + ConstrainedBox: the
+                      // original Column relied on Spacer()s to fill
+                      // exactly the available height. That works fine on
+                      // a typical phone, but on short screens (landscape
+                      // phones, older small devices, or with larger
+                      // system font/accessibility scaling turned up) the
+                      // fixed-height content (description text, button,
+                      // terms) can exceed the viewport and throw a
+                      // RenderFlex overflow. Wrapping it in a scroll view
+                      // with a minHeight constraint keeps the original
+                      // "centered, spaced out" look on normal screens but
+                      // lets it scroll instead of overflow on short ones.
+                      return SingleChildScrollView(
+                        physics: const ClampingScrollPhysics(),
+                        padding: const EdgeInsets.symmetric(horizontal: 28),
+                        child: ConstrainedBox(
+                          constraints: BoxConstraints(
+                            minHeight: constraints.maxHeight,
                           ),
-                        ),
-
-                        const SizedBox(height: 24),
-
-                        Transform.translate(
-                          offset: Offset(0, _slideAnimation.value),
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 24,
-                              vertical: 16,
-                            ),
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                                colors: [
-                                  kLivinkeyWhite.withOpacity(0.06),
-                                  Colors.transparent,
-                                ],
-                              ),
-                              borderRadius: BorderRadius.circular(20),
-                              border: Border.all(
-                                color: kLivinkeyWhite.withOpacity(0.05),
-                                width: 1,
-                              ),
-                            ),
+                          child: IntrinsicHeight(
                             child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Text(
-                                  'Start your living journey with',
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                    color: kLivinkeyWhite.withOpacity(0.7),
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w400,
-                                    letterSpacing: 0.5,
-                                  ),
-                                ),
-                                const SizedBox(height: 8),
-                                ShaderMask(
-                                  shaderCallback: (bounds) => LinearGradient(
-                                    colors: [
-                                      kLivinkeyGreen,
-                                      const Color(0xFF66BB6A),
-                                      kLivinkeyGreen,
-                                    ],
-                                    stops: const [0.0, 0.5, 1.0],
-                                  ).createShader(bounds),
-                                  child: Text(
-                                    'Livinkey',
-                                    textAlign: TextAlign.center,
-                                    style: const TextStyle(
-                                      color: kLivinkeyWhite,
-                                      fontSize: 38,
-                                      fontWeight: FontWeight.w800,
-                                      letterSpacing: 1.2,
+                                const Spacer(flex: 1),
+
+                                ScaleTransition(
+                                  scale: _scaleAnimation,
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 20,
+                                      vertical: 30,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      gradient: LinearGradient(
+                                        begin: Alignment.topLeft,
+                                        end: Alignment.bottomRight,
+                                        colors: [
+                                          kLivinkeyGreen.withOpacity(0.08),
+                                          Colors.transparent,
+                                          kLivinkeyGreen.withOpacity(0.05),
+                                        ],
+                                      ),
+                                      borderRadius: BorderRadius.circular(24),
+                                      border: Border.all(
+                                        color: kLivinkeyGreen.withOpacity(0.1),
+                                        width: 1,
+                                      ),
+                                    ),
+                                    child: LivinkeyLogoKeyBounce(
+                                      bounceAnimation: _keyBounceAnimation,
+                                      width: logoWidth,
                                     ),
                                   ),
                                 ),
+
+                                const SizedBox(height: 24),
+
+                                Transform.translate(
+                                  offset: Offset(0, _slideAnimation.value),
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 24,
+                                      vertical: 16,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      gradient: LinearGradient(
+                                        begin: Alignment.topLeft,
+                                        end: Alignment.bottomRight,
+                                        colors: [
+                                          kLivinkeyWhite.withOpacity(0.06),
+                                          Colors.transparent,
+                                        ],
+                                      ),
+                                      borderRadius: BorderRadius.circular(20),
+                                      border: Border.all(
+                                        color: kLivinkeyWhite.withOpacity(0.05),
+                                        width: 1,
+                                      ),
+                                    ),
+                                    child: Column(
+                                      children: [
+                                        Text(
+                                          'Start your living journey with',
+                                          textAlign: TextAlign.center,
+                                          style: TextStyle(
+                                            color: kLivinkeyWhite.withOpacity(0.7),
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w400,
+                                            letterSpacing: 0.5,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 8),
+                                        ShaderMask(
+                                          shaderCallback: (bounds) => LinearGradient(
+                                            colors: [
+                                              kLivinkeyGreen,
+                                              const Color(0xFF66BB6A),
+                                              kLivinkeyGreen,
+                                            ],
+                                            stops: const [0.0, 0.5, 1.0],
+                                          ).createShader(bounds),
+                                          child: Text(
+                                            'Livinkey',
+                                            textAlign: TextAlign.center,
+                                            style: const TextStyle(
+                                              color: kLivinkeyWhite,
+                                              fontSize: 38,
+                                              fontWeight: FontWeight.w800,
+                                              letterSpacing: 1.2,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+
+                                const SizedBox(height: 16),
+
+                                Transform.translate(
+                                  offset: Offset(0, _slideAnimation.value * 0.5),
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 20,
+                                      vertical: 14,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: kLivinkeyWhite.withOpacity(0.04),
+                                      borderRadius: BorderRadius.circular(16),
+                                      border: Border.all(
+                                        color: kLivinkeyWhite.withOpacity(0.06),
+                                        width: 1,
+                                      ),
+                                    ),
+                                   child: Text(
+                                      'We believe that finding a home is just the beginning of your journey. Livinkey is a comprehensive platform designed to transform the way you discover, book, and manage your living space.\n\nWhether you\'re a student, professional, or anyone seeking a comfortable stay, Livinkey makes your entire living experience seamless and stress-free.',
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        color: Colors.white.withOpacity(0.8),
+                                        fontSize: 15,
+                                        height: 1.6,
+                                        fontWeight: FontWeight.w400,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+
+                                const Spacer(flex: 2),
+
+                                Transform.translate(
+                                  offset: Offset(0, _slideAnimation.value * 0.3),
+                                  child: _buildGetStartedButton(),
+                                ),
+
+                                const SizedBox(height: 24),
+
+                                Transform.translate(
+                                  offset: Offset(0, _slideAnimation.value * 0.2),
+                                  child: _buildTermsText(),
+                                ),
+
+                                const SizedBox(height: 20),
+                                const Spacer(flex: 1),
                               ],
                             ),
                           ),
                         ),
-
-                        const SizedBox(height: 16),
-
-                        Transform.translate(
-                          offset: Offset(0, _slideAnimation.value * 0.5),
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 20,
-                              vertical: 14,
-                            ),
-                            decoration: BoxDecoration(
-                              color: kLivinkeyWhite.withOpacity(0.04),
-                              borderRadius: BorderRadius.circular(16),
-                              border: Border.all(
-                                color: kLivinkeyWhite.withOpacity(0.06),
-                                width: 1,
-                              ),
-                            ),
-                           child: Text(
-                              'We believe that finding a home is just the beginning of your journey. Livinkey is a comprehensive platform designed to transform the way you discover, book, and manage your living space.\n\nWhether you\'re a student, professional, or anyone seeking a comfortable stay, Livinkey makes your entire living experience seamless and stress-free.',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                color: Colors.white.withOpacity(0.8),
-                                fontSize: 15,
-                                height: 1.6,
-                                fontWeight: FontWeight.w400,
-                              ),
-                            ),
-                          ),
-                        ),
-
-                        const Spacer(flex: 2),
-
-                        Transform.translate(
-                          offset: Offset(0, _slideAnimation.value * 0.3),
-                          child: _buildGetStartedButton(),
-                        ),
-
-                        const SizedBox(height: 24),
-
-                        Transform.translate(
-                          offset: Offset(0, _slideAnimation.value * 0.2),
-                          child: _buildTermsText(),
-                        ),
-
-                        const SizedBox(height: 20),
-                        const Spacer(flex: 1),
-                      ],
-                    ),
-                  );
-                },
-              ),
+                      );
+                    },
+                  ),
+                );
+              },
             ),
           ),
         ),

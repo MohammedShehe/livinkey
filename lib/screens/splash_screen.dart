@@ -70,10 +70,22 @@ class _SplashScreenState extends State<SplashScreen>
 
   @override
   Widget build(BuildContext context) {
+    // Responsive logo width: previously LivinkeyLogo() was called with no
+    // width at all, which silently fell back to a FIXED 300px regardless
+    // of device size — too big on small phones, too small on tablets.
+    // Instead we take a percentage of the screen width and clamp it so it
+    // never gets too cramped on small phones or absurdly large on
+    // tablets/desktop web.
+    final double screenWidth = MediaQuery.of(context).size.width;
+    final double logoWidth = (screenWidth * 0.72).clamp(220.0, 420.0);
+
     return Scaffold(
       backgroundColor: kLivinkeyBlack,
       body: Center(
-        child: LivinkeyLogo(keyAnimation: _keyRotation),
+        child: LivinkeyLogo(
+          keyAnimation: _keyRotation,
+          width: logoWidth,
+        ),
       ),
     );
   }
