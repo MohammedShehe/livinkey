@@ -17,6 +17,7 @@ class GuestScreen extends StatefulWidget {
 class GuestScreenState extends State<GuestScreen> {
   int _selectedIndex = 0;
   late final PageController _pageController;
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   static const List<Widget> _screens = [
     GuestHomeScreen(),
@@ -45,6 +46,10 @@ class GuestScreenState extends State<GuestScreen> {
       );
     }
     HapticFeedback.lightImpact();
+  }
+
+  void openDrawer() {
+    _scaffoldKey.currentState?.openDrawer();
   }
 
   // Helper methods for floating tabs
@@ -132,81 +137,85 @@ class GuestScreenState extends State<GuestScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      key: const Key('guest_scaffold'),
+      key: _scaffoldKey,
       backgroundColor: kLivinkeyBlack,
       drawer: const GuestDrawer(),
-      body: Column(
-        children: [
-          // 1. Top Progress Bar
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
-            child: Row(
-              children: [
-                Expanded(
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(2),
-                    child: LinearProgressIndicator(
-                      value: _selectedIndex / (_screens.length - 1),
-                      backgroundColor: Colors.white.withOpacity(0.05),
-                      valueColor: const AlwaysStoppedAnimation<Color>(
-                        kLivinkeyGreen,
+      body: GuestScreenProvider(
+        openDrawer: openDrawer,
+        navigateToTab: navigateToTab,
+        child: Column(
+          children: [
+            // 1. Top Progress Bar
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(2),
+                      child: LinearProgressIndicator(
+                        value: _selectedIndex / (_screens.length - 1),
+                        backgroundColor: Colors.white.withOpacity(0.05),
+                        valueColor: const AlwaysStoppedAnimation<Color>(
+                          kLivinkeyGreen,
+                        ),
+                        minHeight: 2,
                       ),
-                      minHeight: 2,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Text(
+                    '${((_selectedIndex / (_screens.length - 1)) * 100).toInt()}%',
+                    style: TextStyle(
+                      color: Colors.white.withOpacity(0.3),
+                      fontSize: 10,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            
+            // 2. Page Indicator Dots
+            Container(
+              padding: const EdgeInsets.symmetric(vertical: 6),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: List.generate(
+                  _screens.length,
+                  (index) => AnimatedContainer(
+                    duration: const Duration(milliseconds: 300),
+                    margin: const EdgeInsets.symmetric(horizontal: 4),
+                    width: _selectedIndex == index ? 20 : 6,
+                    height: 6,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(3),
+                      color: _selectedIndex == index
+                          ? kLivinkeyGreen
+                          : Colors.white.withOpacity(0.15),
                     ),
                   ),
                 ),
-                const SizedBox(width: 10),
-                Text(
-                  '${((_selectedIndex / (_screens.length - 1)) * 100).toInt()}%',
-                  style: TextStyle(
-                    color: Colors.white.withOpacity(0.3),
-                    fontSize: 10,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          
-          // 2. Page Indicator Dots
-          Container(
-            padding: const EdgeInsets.symmetric(vertical: 6),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: List.generate(
-                _screens.length,
-                (index) => AnimatedContainer(
-                  duration: const Duration(milliseconds: 300),
-                  margin: const EdgeInsets.symmetric(horizontal: 4),
-                  width: _selectedIndex == index ? 20 : 6,
-                  height: 6,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(3),
-                    color: _selectedIndex == index
-                        ? kLivinkeyGreen
-                        : Colors.white.withOpacity(0.15),
-                  ),
-                ),
               ),
             ),
-          ),
-          
-          // 3. Main PageView
-          Expanded(
-            child: PageView(
-              controller: _pageController,
-              physics: const BouncingScrollPhysics(
-                parent: AlwaysScrollableScrollPhysics(),
+            
+            // 3. Main PageView
+            Expanded(
+              child: PageView(
+                controller: _pageController,
+                physics: const BouncingScrollPhysics(
+                  parent: AlwaysScrollableScrollPhysics(),
+                ),
+                onPageChanged: (index) {
+                  setState(() {
+                    _selectedIndex = index;
+                  });
+                },
+                children: _screens,
               ),
-              onPageChanged: (index) {
-                setState(() {
-                  _selectedIndex = index;
-                });
-              },
-              children: _screens,
             ),
-          ),
-        ],
+          ],
+        ),
       ),
       bottomNavigationBar: Container(
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -245,5 +254,28 @@ class GuestScreenState extends State<GuestScreen> {
         ),
       ),
     );
+  }
+}
+
+// InheritedWidget to pass functions to child screens
+class GuestScreenProvider extends InheritedWidget {
+  final VoidCallback openDrawer;
+  final Function(int) navigateToTab;
+
+  const GuestScreenProvider({
+    super.key,
+    required this.openDrawer,
+    required this.navigateToTab,
+    required super.child,
+  });
+
+  static GuestScreenProvider? of(BuildContext context) {
+    return context.dependOnInheritedWidgetOfExactType<GuestScreenProvider>();
+  }
+
+  @override
+  bool updateShouldNotify(GuestScreenProvider oldWidget) {
+    return openDrawer != oldWidget.openDrawer ||
+        navigateToTab != oldWidget.navigateToTab;
   }
 }

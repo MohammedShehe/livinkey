@@ -5,6 +5,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../utils/constants.dart';
 import '../../widgets/tenant/payment_chip.dart';
 import '../../widgets/common/snackbar_helper.dart';
+import 'tenant_screen.dart';
 
 class PaymentsScreen extends StatefulWidget {
   const PaymentsScreen({super.key});
@@ -140,18 +141,23 @@ class _PaymentsScreenState extends State<PaymentsScreen>
           backgroundColor: kLivinkeyBlack,
           elevation: 0,
           scrolledUnderElevation: 0,
-          leading: Builder(
-            builder: (context) => IconButton(
-              icon: Container(
-                padding: const EdgeInsets.all(6),
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.06),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: const Icon(Icons.menu_rounded, color: Colors.white, size: 22),
+          leading: IconButton(
+            icon: Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.06),
+                borderRadius: BorderRadius.circular(10),
               ),
-              onPressed: () => Scaffold.of(context).openDrawer(),
+              child: const Icon(Icons.menu_rounded, color: Colors.white, size: 22),
             ),
+            onPressed: () {
+              final provider = TenantScreenProvider.of(context);
+              if (provider != null) {
+                provider.openDrawer();
+              } else {
+                Scaffold.of(context).openDrawer();
+              }
+            },
           ),
           title: const Text(
             'Payments',

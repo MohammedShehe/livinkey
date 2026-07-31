@@ -7,6 +7,7 @@ import '../../widgets/tenant/profile_row.dart';
 import '../../widgets/common/snackbar_helper.dart';
 import '../auth/login_screen.dart';
 import '../guest/guest_screen.dart';
+import 'tenant_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -24,7 +25,6 @@ class _ProfileScreenState extends State<ProfileScreen>
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
 
-  // Feedback state
   bool _hasSubmittedFeedback = false;
 
   final List<Map<String, String>> _details = const [
@@ -157,18 +157,23 @@ class _ProfileScreenState extends State<ProfileScreen>
           backgroundColor: kLivinkeyBlack,
           elevation: 0,
           scrolledUnderElevation: 0,
-          leading: Builder(
-            builder: (context) => IconButton(
-              icon: Container(
-                padding: const EdgeInsets.all(6),
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.06),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: const Icon(Icons.menu_rounded, color: Colors.white, size: 22),
+          leading: IconButton(
+            icon: Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.06),
+                borderRadius: BorderRadius.circular(10),
               ),
-              onPressed: () => Scaffold.of(context).openDrawer(),
+              child: const Icon(Icons.menu_rounded, color: Colors.white, size: 22),
             ),
+            onPressed: () {
+              final provider = TenantScreenProvider.of(context);
+              if (provider != null) {
+                provider.openDrawer();
+              } else {
+                Scaffold.of(context).openDrawer();
+              }
+            },
           ),
           title: const Text(
             'Profile',

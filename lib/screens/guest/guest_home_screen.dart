@@ -6,6 +6,7 @@ import '../../utils/helpers.dart';
 import '../../widgets/guest/pg_card.dart';
 import '../../widgets/guest/pg_detail_modal.dart';
 import '../../models/pg_model.dart';
+import 'guest_screen.dart';
 
 class GuestHomeScreen extends StatefulWidget {
   const GuestHomeScreen({super.key});
@@ -17,7 +18,7 @@ class GuestHomeScreen extends StatefulWidget {
 class _GuestHomeScreenState extends State<GuestHomeScreen>
     with AutomaticKeepAliveClientMixin, SingleTickerProviderStateMixin {
   @override
-  bool get wantKeepAlive => true; // 🔥 Keep state alive
+  bool get wantKeepAlive => true;
 
   late AnimationController _fadeController;
   late Animation<double> _fadeAnimation;
@@ -25,7 +26,6 @@ class _GuestHomeScreenState extends State<GuestHomeScreen>
   String _selectedFilter = 'All';
   final String guestName = 'Guest User';
 
-  // Sample PG Data
   final List<PgModel> _allPgs = [
     PgModel(
       id: '1',
@@ -140,14 +140,12 @@ class _GuestHomeScreenState extends State<GuestHomeScreen>
   List<PgModel> get _filteredPgs {
     List<PgModel> filtered = List.from(_allPgs);
 
-    // Sort: Vacant first
     filtered.sort((a, b) {
       if (a.status == 'Vacant' && b.status != 'Vacant') return -1;
       if (a.status != 'Vacant' && b.status == 'Vacant') return 1;
       return 0;
     });
 
-    // Apply filter
     if (_selectedFilter == 'Vacant') {
       filtered = filtered.where((pg) => pg.status == 'Vacant').toList();
     } else if (_selectedFilter == 'Full Occupied') {
@@ -194,10 +192,8 @@ class _GuestHomeScreenState extends State<GuestHomeScreen>
     );
   }
 
-  // Helper method to get responsive logo size
   double _getLogoSize(BuildContext context) {
     final double screenWidth = MediaQuery.of(context).size.width;
-
     if (screenWidth >= 600) {
       return 72.0;
     } else if (screenWidth >= 400) {
@@ -209,7 +205,7 @@ class _GuestHomeScreenState extends State<GuestHomeScreen>
 
   @override
   Widget build(BuildContext context) {
-    super.build(context); // 🔥 Must call super.build
+    super.build(context);
 
     final double logoSize = _getLogoSize(context);
 
@@ -220,21 +216,24 @@ class _GuestHomeScreenState extends State<GuestHomeScreen>
         elevation: 0,
         backgroundColor: kLivinkeyBlack,
         surfaceTintColor: Colors.transparent,
-        leading: Builder(
-          builder: (context) => IconButton(
-            icon: Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.06),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.white.withOpacity(0.08)),
-              ),
-              child: const Icon(Icons.menu_rounded, color: Colors.white, size: 20),
+        leading: IconButton(
+          icon: Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.06),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.white.withOpacity(0.08)),
             ),
-            onPressed: () {
-              Scaffold.of(context).openDrawer();
-            },
+            child: const Icon(Icons.menu_rounded, color: Colors.white, size: 20),
           ),
+          onPressed: () {
+            final provider = GuestScreenProvider.of(context);
+            if (provider != null) {
+              provider.openDrawer();
+            } else {
+              Scaffold.of(context).openDrawer();
+            }
+          },
         ),
         title: Image.asset(
           kGeneralLogo,
@@ -296,7 +295,6 @@ class _GuestHomeScreenState extends State<GuestHomeScreen>
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Greeting
               Padding(
                 padding: const EdgeInsets.fromLTRB(20, 8, 20, 4),
                 child: Column(
@@ -346,7 +344,6 @@ class _GuestHomeScreenState extends State<GuestHomeScreen>
                 ),
               ),
 
-              // Welcome Message / Stats Banner
               Container(
                 margin: const EdgeInsets.fromLTRB(20, 14, 20, 4),
                 padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
@@ -426,7 +423,6 @@ class _GuestHomeScreenState extends State<GuestHomeScreen>
 
               const SizedBox(height: 18),
 
-              // Filter Chips
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: SingleChildScrollView(
@@ -445,7 +441,6 @@ class _GuestHomeScreenState extends State<GuestHomeScreen>
 
               const SizedBox(height: 16),
 
-              // PG Cards Grid
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -594,7 +589,6 @@ class _GuestHomeScreenState extends State<GuestHomeScreen>
   }
 }
 
-/// Small pulsing status dot used in the Guest badge.
 class _PulsingDot extends StatefulWidget {
   const _PulsingDot();
 

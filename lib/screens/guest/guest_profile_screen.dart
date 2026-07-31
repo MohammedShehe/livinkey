@@ -8,6 +8,7 @@ import '../../widgets/common/snackbar_helper.dart';
 import '../../widgets/guest/profile_row.dart';
 import '../auth/login_screen.dart';
 import '../../models/guest_model.dart';
+import 'guest_screen.dart';
 
 class GuestProfileScreen extends StatefulWidget {
   const GuestProfileScreen({super.key});
@@ -26,7 +27,6 @@ class _GuestProfileScreenState extends State<GuestProfileScreen>
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
 
-  // Guest data
   GuestModel guest = GuestModel(
     fullName: 'Guest User',
     email: 'guest@example.com',
@@ -471,21 +471,24 @@ class _GuestProfileScreenState extends State<GuestProfileScreen>
         elevation: 0,
         backgroundColor: kLivinkeyBlack,
         surfaceTintColor: Colors.transparent,
-        leading: Builder(
-          builder: (context) => IconButton(
-            icon: Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.06),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.white.withOpacity(0.08)),
-              ),
-              child: const Icon(Icons.menu_rounded, color: Colors.white, size: 20),
+        leading: IconButton(
+          icon: Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.06),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.white.withOpacity(0.08)),
             ),
-            onPressed: () {
-              Scaffold.of(context).openDrawer();
-            },
+            child: const Icon(Icons.menu_rounded, color: Colors.white, size: 20),
           ),
+          onPressed: () {
+            final provider = GuestScreenProvider.of(context);
+            if (provider != null) {
+              provider.openDrawer();
+            } else {
+              Scaffold.of(context).openDrawer();
+            }
+          },
         ),
         title: const Text(
           'Profile',
@@ -555,11 +558,9 @@ class _GuestProfileScreenState extends State<GuestProfileScreen>
               children: [
                 const SizedBox(height: 8),
 
-                // Profile Header
                 _buildProfileHeader(),
                 const SizedBox(height: 24),
 
-                // Guest Details
                 _buildSectionLabel('Guest Details'),
                 const SizedBox(height: 12),
 
@@ -599,7 +600,6 @@ class _GuestProfileScreenState extends State<GuestProfileScreen>
 
                 const SizedBox(height: 20),
 
-                // Edit Profile Button
                 SizedBox(
                   width: double.infinity,
                   child: OutlinedButton.icon(
@@ -636,7 +636,6 @@ class _GuestProfileScreenState extends State<GuestProfileScreen>
 
                 const SizedBox(height: 12),
 
-                // Change Password Button
                 SizedBox(
                   width: double.infinity,
                   child: OutlinedButton.icon(
@@ -673,7 +672,6 @@ class _GuestProfileScreenState extends State<GuestProfileScreen>
 
                 const SizedBox(height: 24),
 
-                // Links Section
                 _buildSectionLabel('Quick Links'),
                 const SizedBox(height: 12),
 
@@ -701,7 +699,6 @@ class _GuestProfileScreenState extends State<GuestProfileScreen>
 
                 const SizedBox(height: 20),
 
-                // Logout Button
                 SizedBox(
                   width: double.infinity,
                   child: OutlinedButton.icon(
@@ -1217,7 +1214,6 @@ class _GuestProfileScreenState extends State<GuestProfileScreen>
   }
 }
 
-/// Small pulsing status dot used in the Guest badge.
 class _PulsingDot extends StatefulWidget {
   const _PulsingDot();
 

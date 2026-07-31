@@ -16,7 +16,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen>
     with AutomaticKeepAliveClientMixin, TickerProviderStateMixin {
   @override
-  bool get wantKeepAlive => true; // 🔥 Keep state alive
+  bool get wantKeepAlive => true;
 
   late AnimationController _fadeController;
   late Animation<double> _fadeAnimation;
@@ -145,7 +145,7 @@ class _HomeScreenState extends State<HomeScreen>
 
   @override
   Widget build(BuildContext context) {
-    super.build(context); // 🔥 Must call super.build
+    super.build(context);
 
     const tenantName = 'John Doe';
     const pgName = 'Green Valley PG';
@@ -163,18 +163,23 @@ class _HomeScreenState extends State<HomeScreen>
           backgroundColor: kLivinkeyBlack,
           elevation: 0,
           scrolledUnderElevation: 0,
-          leading: Builder(
-            builder: (context) => IconButton(
-              icon: Container(
-                padding: const EdgeInsets.all(6),
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.06),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: const Icon(Icons.menu_rounded, color: Colors.white, size: 22),
+          leading: IconButton(
+            icon: Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.06),
+                borderRadius: BorderRadius.circular(10),
               ),
-              onPressed: () => Scaffold.of(context).openDrawer(),
+              child: const Icon(Icons.menu_rounded, color: Colors.white, size: 22),
             ),
+            onPressed: () {
+              final provider = TenantScreenProvider.of(context);
+              if (provider != null) {
+                provider.openDrawer();
+              } else {
+                Scaffold.of(context).openDrawer();
+              }
+            },
           ),
           title: Image.asset(
             kGeneralLogo,
@@ -244,7 +249,6 @@ class _HomeScreenState extends State<HomeScreen>
                   children: [
                     const SizedBox(height: 8),
 
-                    // ---------- Greeting Card ----------
                     Container(
                       padding: const EdgeInsets.all(18),
                       decoration: BoxDecoration(
@@ -363,7 +367,6 @@ class _HomeScreenState extends State<HomeScreen>
 
                     const SizedBox(height: 28),
 
-                    // ---------- Overview ----------
                     Row(
                       children: [
                         Container(
@@ -433,7 +436,6 @@ class _HomeScreenState extends State<HomeScreen>
 
                     const SizedBox(height: 28),
 
-                    // ---------- Quick Actions ----------
                     Row(
                       children: [
                         Container(

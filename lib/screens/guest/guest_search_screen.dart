@@ -5,6 +5,7 @@ import '../../utils/constants.dart';
 import '../../widgets/guest/pg_card.dart';
 import '../../widgets/guest/pg_detail_modal.dart';
 import '../../models/pg_model.dart';
+import 'guest_screen.dart';
 
 class GuestSearchScreen extends StatefulWidget {
   const GuestSearchScreen({super.key});
@@ -17,7 +18,7 @@ class _GuestSearchScreenState extends State<GuestSearchScreen>
     with AutomaticKeepAliveClientMixin, SingleTickerProviderStateMixin {
   
   @override
-  bool get wantKeepAlive => true; // 🔥 Keep state alive
+  bool get wantKeepAlive => true;
 
   late AnimationController _fadeController;
   late Animation<double> _fadeAnimation;
@@ -27,7 +28,6 @@ class _GuestSearchScreenState extends State<GuestSearchScreen>
   String _searchQuery = '';
   bool _isFocused = false;
 
-  // Sample PG Data (same as home)
   final List<PgModel> _allPgs = [
     PgModel(
       id: '1',
@@ -176,7 +176,7 @@ class _GuestSearchScreenState extends State<GuestSearchScreen>
 
   @override
   Widget build(BuildContext context) {
-    super.build(context); // 🔥 Must call super.build
+    super.build(context);
     
     return Scaffold(
       backgroundColor: kLivinkeyBlack,
@@ -184,21 +184,24 @@ class _GuestSearchScreenState extends State<GuestSearchScreen>
         elevation: 0,
         backgroundColor: kLivinkeyBlack,
         surfaceTintColor: Colors.transparent,
-        leading: Builder(
-          builder: (context) => IconButton(
-            icon: Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.06),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.white.withOpacity(0.08)),
-              ),
-              child: const Icon(Icons.menu_rounded, color: Colors.white, size: 20),
+        leading: IconButton(
+          icon: Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.06),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.white.withOpacity(0.08)),
             ),
-            onPressed: () {
-              Scaffold.of(context).openDrawer();
-            },
+            child: const Icon(Icons.menu_rounded, color: Colors.white, size: 20),
           ),
+          onPressed: () {
+            final provider = GuestScreenProvider.of(context);
+            if (provider != null) {
+              provider.openDrawer();
+            } else {
+              Scaffold.of(context).openDrawer();
+            }
+          },
         ),
         title: const Text(
           'Search PGs',
@@ -262,7 +265,6 @@ class _GuestSearchScreenState extends State<GuestSearchScreen>
           position: _slideAnimation,
           child: Column(
             children: [
-              // Search Bar
               Container(
                 padding: const EdgeInsets.fromLTRB(20, 10, 20, 16),
                 child: AnimatedContainer(
@@ -370,7 +372,6 @@ class _GuestSearchScreenState extends State<GuestSearchScreen>
                 ),
               ),
 
-              // Results Count
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Row(
@@ -399,7 +400,6 @@ class _GuestSearchScreenState extends State<GuestSearchScreen>
 
               const SizedBox(height: 12),
 
-              // Results Grid
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -481,7 +481,6 @@ class _GuestSearchScreenState extends State<GuestSearchScreen>
   }
 }
 
-/// Small pulsing status dot used in the Guest badge.
 class _PulsingDot extends StatefulWidget {
   const _PulsingDot();
 

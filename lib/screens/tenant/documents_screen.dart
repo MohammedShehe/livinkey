@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import '../../utils/constants.dart';
 import '../../widgets/tenant/document_card.dart';
 import '../../widgets/common/snackbar_helper.dart';
+import 'tenant_screen.dart';
 
 class DocumentsScreen extends StatefulWidget {
   const DocumentsScreen({super.key});
@@ -15,7 +16,7 @@ class DocumentsScreen extends StatefulWidget {
 class _DocumentsScreenState extends State<DocumentsScreen>
     with AutomaticKeepAliveClientMixin, SingleTickerProviderStateMixin {
   @override
-  bool get wantKeepAlive => true; // 🔥 Keep state alive
+  bool get wantKeepAlive => true;
 
   late AnimationController _fadeController;
   late Animation<double> _fadeAnimation;
@@ -147,7 +148,7 @@ class _DocumentsScreenState extends State<DocumentsScreen>
 
   @override
   Widget build(BuildContext context) {
-    super.build(context); // 🔥 Must call super.build
+    super.build(context);
 
     return WillPopScope(
       onWillPop: _onWillPop,
@@ -157,18 +158,23 @@ class _DocumentsScreenState extends State<DocumentsScreen>
           backgroundColor: kLivinkeyBlack,
           elevation: 0,
           scrolledUnderElevation: 0,
-          leading: Builder(
-            builder: (context) => IconButton(
-              icon: Container(
-                padding: const EdgeInsets.all(6),
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.06),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: const Icon(Icons.menu_rounded, color: Colors.white, size: 22),
+          leading: IconButton(
+            icon: Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.06),
+                borderRadius: BorderRadius.circular(10),
               ),
-              onPressed: () => Scaffold.of(context).openDrawer(),
+              child: const Icon(Icons.menu_rounded, color: Colors.white, size: 22),
             ),
+            onPressed: () {
+              final provider = TenantScreenProvider.of(context);
+              if (provider != null) {
+                provider.openDrawer();
+              } else {
+                Scaffold.of(context).openDrawer();
+              }
+            },
           ),
           title: const Text(
             'Documents',
