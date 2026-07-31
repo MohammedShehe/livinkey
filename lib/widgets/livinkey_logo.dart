@@ -20,7 +20,25 @@ const String kLogoBaseAsset = 'assets/images/livinkey_base_white.png';
 // version contains ONLY the key artwork, padded 4px on each side.
 // Add it to your project at assets/images/livinkey_key_white.png
 // and register it in pubspec.yaml's assets list.
-const String kLogoKeyAsset = 'assets/images/livinkey_key_white.png';
+const String kLogoKeyAsset = 'assets/images/livinkey_key_white_without_ring.png';
+// UPDATED ASSET: this file has had its ring + dot pixels erased (made
+// transparent) — it now shows only the arms, shaft, and teeth. The ring
+// and dot are supplied separately by kLogoRingDotAsset below and are
+// drawn back in by the animation, landing in the exact gap this file
+// leaves behind. Replace your existing asset with this updated version.
+
+// This is the piece that bounces — and, since the file above no longer
+// contains it, it's also the ONLY place the ring + dot are drawn at all.
+// It's a tight crop of just the two connected pixel clusters that make up
+// the ring (the hole, which reads as a "white ring" against the white
+// background) and the little dot floating inside that hole. Found by
+// running connected-component analysis on the original key PNG's alpha
+// channel: the ring+dot formed their own small island, fully disconnected
+// from the wide arms on either side. Add it to your project at
+// assets/images/livinkey_key_ringdot_white.png and register it in
+// pubspec.yaml's assets list, alongside the other two images.
+const String kLogoRingDotAsset =
+    'assets/images/livinkey_key_ringdot_white.png';
 
 /// Original canvas size (px) of the base logo image.
 const double _canvasW = 1231;
@@ -33,8 +51,32 @@ const double _canvasH = 487;
 const double _keyNativeW = 178;
 const double _keyNativeH = 296;
 
+/// Where the tight ring+dot crop sits inside the full key asset's own
+/// 178x296 coordinate space (measured directly from the pixel data), and
+/// how big that crop is.
+const double _ringDotCropLeft = 64;
+const double _ringDotCropTop = 10;
+const double _ringDotNativeW = 53;
+const double _ringDotNativeH = 54;
+
+/// The key's fixed, natural resting position on the canvas (next to the
+/// "e" in "Livinke"). The key NEVER moves from here anymore — only the
+/// ring+dot piece animates, as requested.
+const Offset _keyRestPosition = Offset(1125, 322);
+
+/// The center-point where the bouncing ring+dot piece needs to land so it
+/// sits exactly in the gap left behind in the static key artwork (the key
+/// asset no longer draws its own ring+dot — this animation is now the
+/// only place they're drawn). Computed from the key's own top-left corner
+/// plus the ring+dot's known offset inside the original key asset — no
+/// guessing.
+final Offset _topRestCenter = Offset(
+  _keyRestPosition.dx - _keyNativeW / 2 + _ringDotCropLeft + _ringDotNativeW / 2,
+  _keyRestPosition.dy - _keyNativeH / 2 + _ringDotCropTop + _ringDotNativeH / 2,
+);
+
 /// ------------------------------------------------------------------
-/// Key path waypoints through "Livinke"
+/// Bounce path waypoints for the small dot.
 ///
 /// These are the ACTUAL measured centers of each letter, taken directly
 /// from livinkey_base_white.png's pixel data (found via alpha-channel
@@ -42,42 +84,34 @@ const double _keyNativeH = 296;
 /// and invisible to the eye against a white background):
 ///   L -> (137, 215)   v -> (366, 244)   n -> (611, 242)
 ///   k -> (784, 210)   e -> (950, 244)
-/// Both "i"s are skipped as stops — the straight L->v and v->n segments
-/// naturally glide right past each i's stem without pausing on it.
-/// The final waypoint (1125, 322) is the key artwork's own natural resting
-/// position in the original file, so the animation ends exactly where the
-/// static design intended.
+/// Both "i"s are skipped as stops — the dot hops right past each i's stem
+/// without landing on it. The final waypoint is computed above so the dot
+/// lands exactly on the real dot already drawn on the key artwork.
 /// ------------------------------------------------------------------
-const List<Offset> _keyPath = [
-  Offset(133, 15),    // 0: Start - directly above the roof apex
-  Offset(137, 215),   // 1: 'L'
-  Offset(366, 244),   // 2: 'v'   (passes right by the first 'i' en route)
-  Offset(611, 242),   // 3: 'n'   (passes right by the second 'i' en route)
-  Offset(784, 210),   // 4: 'k'
-  Offset(950, 244),   // 5: 'e'
-  Offset(1125, 322),  // 6: End - key's natural resting position
+final List<Offset> _dotPath = [
+  const Offset(133, 15), // 0: Start - directly above the roof apex
+  const Offset(137, 215), // 1: 'L'
+  const Offset(366, 244), // 2: 'v'   (hops right over the first 'i')
+  const Offset(611, 242), // 3: 'n'   (hops right over the second 'i')
+  const Offset(784, 210), // 4: 'k'
+  const Offset(950, 244), // 5: 'e'
+  _topRestCenter, // 6: End - lands exactly on the key's own ring + dot
 ];
 
-/// Rotation values at each waypoint (radians). The key now does a full,
-/// continuous 360° tumble WHILE it slides through the letters — spinning
-/// as it travels rather than staying flat — and lands back at 2*pi, which
-/// is visually identical to 0 (straight, like a 'Y'), so it still finishes
-/// perfectly upright at the resting spot next to the "e".
-final List<double> _keyRotations = [
-  0.0,             // 0: start, upright
-  math.pi * 0.3,   // 1: L      - spin begins
-  math.pi * 0.8,   // 2: v
-  math.pi * 1.3,   // 3: n      - past halfway through the spin
-  math.pi * 1.7,   // 4: k
-  math.pi * 1.95,  // 5: e      - nearly back around to upright
-  math.pi * 2.0,   // 6: end    - full rotation complete, visually straight
-];
+/// Extra upward arc height added to each hop (in canvas px), one entry
+/// per segment (_dotPath.length - 1 segments). Decreasing values give the
+/// classic "losing energy" bounce feel as the dot approaches its home.
+const List<double> _hopHeights = [36, 70, 55, 44, 32, 20];
 
 const double kLogoAspectRatio = _canvasW / _canvasH;
 
-/// Full "Livinkey — A Complete Home" logo with key sliding through letters.
-/// Use this ONLY on the Splash screen — it drives both the key's position
-/// and its tumbling rotation along the letter path.
+/// Full "Livinkey — A Complete Home" logo. The key artwork (arms, shaft,
+/// teeth) is completely static, fixed at its natural resting spot — it no
+/// longer includes the ring or dot at all. Only the ring + dot piece
+/// (kLogoRingDotAsset) animates: it drops in from above the roof and
+/// bounces across the letters of "Livinke" until it lands exactly in the
+/// gap left for it at the top of the key, where it stays — completing the
+/// logo. Use this ONLY on the Splash screen.
 class LivinkeyLogo extends StatelessWidget {
   final Animation<double> keyAnimation;
   final double width;
@@ -90,86 +124,83 @@ class LivinkeyLogo extends StatelessWidget {
     this.showDebugPoints = false,
   });
 
-  Offset _getKeyPosition(double progress) {
-    if (progress <= 0) return _keyPath.first;
-    if (progress >= 1) return _keyPath.last;
-
-    double totalLength = 0;
-    List<double> segmentLengths = [];
-
-    for (int i = 0; i < _keyPath.length - 1; i++) {
-      double dx = _keyPath[i + 1].dx - _keyPath[i].dx;
-      double dy = _keyPath[i + 1].dy - _keyPath[i].dy;
-      double length = math.sqrt(dx * dx + dy * dy);
-      segmentLengths.add(length);
-      totalLength += length;
-    }
-
-    double targetDistance = progress * totalLength;
-    double accumulatedDistance = 0;
-
-    for (int i = 0; i < segmentLengths.length; i++) {
-      if (targetDistance <= accumulatedDistance + segmentLengths[i]) {
-        double localProgress =
-            (targetDistance - accumulatedDistance) / segmentLengths[i];
-        double easedProgress = _easeInOutCubic(localProgress);
-
-        return Offset(
-          _lerp(_keyPath[i].dx, _keyPath[i + 1].dx, easedProgress),
-          _lerp(_keyPath[i].dy, _keyPath[i + 1].dy, easedProgress),
-        );
-      }
-      accumulatedDistance += segmentLengths[i];
-    }
-
-    return _keyPath.last;
-  }
-
-  double _getKeyRotation(double progress) {
-    if (progress <= 0) return _keyRotations.first;
-    if (progress >= 1) return _keyRotations.last;
-
-    double totalLength = 0;
-    List<double> segmentLengths = [];
-
-    for (int i = 0; i < _keyPath.length - 1; i++) {
-      double dx = _keyPath[i + 1].dx - _keyPath[i].dx;
-      double dy = _keyPath[i + 1].dy - _keyPath[i].dy;
-      double length = math.sqrt(dx * dx + dy * dy);
-      segmentLengths.add(length);
-      totalLength += length;
-    }
-
-    double targetDistance = progress * totalLength;
-    double accumulatedDistance = 0;
-
-    for (int i = 0; i < segmentLengths.length; i++) {
-      if (targetDistance <= accumulatedDistance + segmentLengths[i]) {
-        double localProgress =
-            (targetDistance - accumulatedDistance) / segmentLengths[i];
-        double easedProgress = _easeInOutCubic(localProgress);
-
-        return _lerp(
-          _keyRotations[i],
-          _keyRotations[i + 1],
-          easedProgress,
-        );
-      }
-      accumulatedDistance += segmentLengths[i];
-    }
-
-    return _keyRotations.last;
-  }
-
   double _lerp(double a, double b, double t) => a + (b - a) * t;
 
   double _easeInOutCubic(double t) {
     return t < 0.5 ? 4 * t * t * t : 1 - math.pow(-2 * t + 2, 3) / 2;
   }
 
+  /// Returns (position, squashScaleX, squashScaleY, opacity) for the
+  /// bouncing dot at the given overall animation progress.
+  _DotState _getDotState(double progress) {
+    if (progress <= 0) {
+      return _DotState(_dotPath.first, 1.0, 1.0, 1.0);
+    }
+    if (progress >= 1) {
+      return _DotState(_dotPath.last, 1.0, 1.0, 1.0);
+    }
+
+    // Weight each segment's share of the timeline by its straight-line
+    // distance, same approach as measuring the overall path length.
+    double totalLength = 0;
+    final List<double> segmentLengths = [];
+    for (int i = 0; i < _dotPath.length - 1; i++) {
+      final dx = _dotPath[i + 1].dx - _dotPath[i].dx;
+      final dy = _dotPath[i + 1].dy - _dotPath[i].dy;
+      final length = math.sqrt(dx * dx + dy * dy);
+      segmentLengths.add(length);
+      totalLength += length;
+    }
+
+    final double targetDistance = progress * totalLength;
+    double accumulated = 0;
+
+    for (int i = 0; i < segmentLengths.length; i++) {
+      final segLen = segmentLengths[i];
+      if (targetDistance <= accumulated + segLen || i == segmentLengths.length - 1) {
+        final double t = segLen == 0
+            ? 1.0
+            : ((targetDistance - accumulated) / segLen).clamp(0.0, 1.0);
+
+        final Offset start = _dotPath[i];
+        final Offset end = _dotPath[i + 1];
+
+        // Horizontal motion eases in/out per hop.
+        final double easedT = _easeInOutCubic(t);
+        final double x = _lerp(start.dx, end.dx, easedT);
+
+        // Vertical motion: straight-line lerp minus a parabolic arc lift,
+        // using raw t so the arc peaks cleanly at the midpoint of the hop.
+        final double baseY = _lerp(start.dy, end.dy, t);
+        final double arc = _hopHeights[i] * math.sin(math.pi * t);
+        final double y = baseY - arc;
+
+        // Cartoon squash-and-stretch: flattened at contact (t=0/1),
+        // stretched tall mid-flight (t=0.5).
+        final double peak = math.sin(math.pi * t);
+        final double scaleY = 0.75 + 0.45 * peak;
+        final double scaleX = 1.25 - 0.35 * peak;
+
+        // No fade-out: the static key artwork no longer includes the
+        // ring+dot, so this piece has to stay fully visible once it
+        // lands — it's the only place that part of the key is drawn.
+        return _DotState(Offset(x, y), scaleX, scaleY, 1.0);
+      }
+      accumulated += segLen;
+    }
+
+    return _DotState(_dotPath.last, 1.0, 1.0, 1.0);
+  }
+
   @override
   Widget build(BuildContext context) {
-    double scale = width / _canvasW;
+    final double scale = width / _canvasW;
+    final double keyW = _keyNativeW * scale;
+    final double keyH = _keyNativeH * scale;
+    final double keyScreenX = _keyRestPosition.dx * scale;
+    final double keyScreenY = _keyRestPosition.dy * scale;
+    final double topW = _ringDotNativeW * scale;
+    final double topH = _ringDotNativeH * scale;
 
     return SizedBox(
       width: width,
@@ -191,37 +222,66 @@ class LivinkeyLogo extends StatelessWidget {
             },
           ),
 
-          // Animated key (slides + tumbles, lands straight)
+          // Static key, always at its natural resting position — no
+          // sliding, no rotating. It never moves.
+          Positioned(
+            left: keyScreenX - (keyW / 2),
+            top: keyScreenY - (keyH / 2),
+            child: SizedBox(
+              width: keyW,
+              height: keyH,
+              child: Image.asset(
+                kLogoKeyAsset,
+                fit: BoxFit.contain,
+                errorBuilder: (context, error, stackTrace) {
+                  return Container(
+                    color: Colors.red.withOpacity(0.3),
+                    child: const Icon(Icons.vpn_key,
+                        color: Colors.red, size: 50),
+                  );
+                },
+              ),
+            ),
+          ),
+
+          // Bouncing ring+dot piece: drops from above the roof, hops
+          // across the letters, lands in the gap left for it at the top
+          // of the key, and stays there — it's the only place this part
+          // of the key is drawn, since the static key asset no longer
+          // includes it.
           AnimatedBuilder(
             animation: keyAnimation,
             builder: (context, child) {
-              double progress = keyAnimation.value;
-              Offset position = _getKeyPosition(progress);
-              double rotation = _getKeyRotation(progress);
+              final double progress = keyAnimation.value;
+              final _DotState state = _getDotState(progress);
 
-              double keyW = _keyNativeW * scale;
-              double keyH = _keyNativeH * scale;
-              double screenX = position.dx * scale;
-              double screenY = position.dy * scale;
+              final double screenX = state.position.dx * scale;
+              final double screenY = state.position.dy * scale;
+
+              if (state.opacity <= 0) return const SizedBox.shrink();
 
               return Positioned(
-                left: screenX - (keyW / 2),
-                top: screenY - (keyH / 2),
-                child: Transform.rotate(
-                  angle: rotation,
-                  child: SizedBox(
-                    width: keyW,
-                    height: keyH,
-                    child: Image.asset(
-                      kLogoKeyAsset,
-                      fit: BoxFit.contain,
-                      errorBuilder: (context, error, stackTrace) {
-                        return Container(
-                          color: Colors.red.withOpacity(0.3),
-                          child: const Icon(Icons.vpn_key,
-                              color: Colors.red, size: 50),
-                        );
-                      },
+                left: screenX - (topW / 2),
+                top: screenY - (topH / 2),
+                child: Opacity(
+                  opacity: state.opacity,
+                  child: Transform.scale(
+                    scaleX: state.scaleX,
+                    scaleY: state.scaleY,
+                    child: SizedBox(
+                      width: topW,
+                      height: topH,
+                      child: Image.asset(
+                        kLogoRingDotAsset,
+                        fit: BoxFit.fill,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Container(
+                            color: Colors.red.withOpacity(0.3),
+                            child: const Icon(Icons.circle_outlined,
+                                color: Colors.red, size: 30),
+                          );
+                        },
+                      ),
                     ),
                   ),
                 ),
@@ -241,11 +301,19 @@ class LivinkeyLogo extends StatelessWidget {
   }
 }
 
+class _DotState {
+  final Offset position;
+  final double scaleX;
+  final double scaleY;
+  final double opacity;
+
+  _DotState(this.position, this.scaleX, this.scaleY, this.opacity);
+}
+
 /// Static-position logo used on the Get Started screen (and anywhere else
-/// that only wants a rotation, not the letter-by-letter slide). The key
-/// sits fixed at its natural resting spot next to the "e" and rotates in
-/// place from straight (0) to fully upside down (pi) as `keyAnimation`
-/// goes from 0 -> 1.
+/// that only wants a rotation, not the bounce). The key sits fixed at its
+/// natural resting spot next to the "e" and rotates in place from
+/// straight (0) to fully upside down (pi) as `keyAnimation` goes from 0 -> 1.
 class LivinkeyLogoKeyFlip extends StatelessWidget {
   final Animation<double> keyAnimation; // 0 = straight, 1 = upside down
   final double width;
@@ -259,7 +327,7 @@ class LivinkeyLogoKeyFlip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final double scale = width / _canvasW;
-    final Offset restPosition = _keyPath.last; // (1125, 322)
+    final Offset restPosition = _keyRestPosition;
 
     final double keyW = _keyNativeW * scale;
     final double keyH = _keyNativeH * scale;
@@ -319,7 +387,7 @@ class LivinkeyLogoKeyFlip extends StatelessWidget {
   }
 }
 
-/// Debug painter to visualize the key path (Splash screen only)
+/// Debug painter to visualize the dot's bounce path (Splash screen only)
 class _DebugPathPainter extends CustomPainter {
   final double scale;
 
@@ -333,9 +401,9 @@ class _DebugPathPainter extends CustomPainter {
       ..style = PaintingStyle.stroke;
 
     final path = Path();
-    for (int i = 0; i < _keyPath.length; i++) {
-      double x = _keyPath[i].dx * scale;
-      double y = _keyPath[i].dy * scale;
+    for (int i = 0; i < _dotPath.length; i++) {
+      final double x = _dotPath[i].dx * scale;
+      final double y = _dotPath[i].dy * scale;
 
       if (i == 0) {
         path.moveTo(x, y);
@@ -345,12 +413,12 @@ class _DebugPathPainter extends CustomPainter {
     }
     canvas.drawPath(path, pathPaint);
 
-    final letterHints = ['Start', 'L', 'v', 'n', 'k', 'e', 'End'];
-    for (int i = 0; i < _keyPath.length; i++) {
-      double x = _keyPath[i].dx * scale;
-      double y = _keyPath[i].dy * scale;
+    final letterHints = ['Start', 'L', 'v', 'n', 'k', 'e', 'Dot rest'];
+    for (int i = 0; i < _dotPath.length; i++) {
+      final double x = _dotPath[i].dx * scale;
+      final double y = _dotPath[i].dy * scale;
 
-      Paint pointPaint = Paint()
+      final Paint pointPaint = Paint()
         ..color = Colors.blue
         ..style = PaintingStyle.fill;
       canvas.drawCircle(Offset(x, y), 10, pointPaint);
@@ -420,7 +488,7 @@ class _LivinkeyLogoExampleState extends State<LivinkeyLogoExample>
   void initState() {
     super.initState();
     _controller = AnimationController(
-      duration: const Duration(milliseconds: 7500),
+      duration: const Duration(milliseconds: 3200),
       vsync: this,
     )..addStatusListener((status) {
         if (status == AnimationStatus.completed) {
@@ -428,10 +496,10 @@ class _LivinkeyLogoExampleState extends State<LivinkeyLogoExample>
         }
       });
 
-    _animation = CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeInOutSine,
-    );
+    // Linear drive here: the bounce shaping (arcs, ease per hop, squash)
+    // is already handled inside LivinkeyLogo, so we don't want a second
+    // easing curve fighting it.
+    _animation = _controller;
   }
 
   @override
