@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../utils/constants.dart';
@@ -161,7 +162,7 @@ class TenantDrawer extends StatelessWidget {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
-      builder: (context) => Container(
+      builder: (BuildContext context) => Container(
         padding: const EdgeInsets.all(24),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -189,7 +190,7 @@ class TenantDrawer extends StatelessWidget {
               color: const Color(0xFF25D366),
               title: 'WhatsApp',
               subtitle: '+91 98783 83497',
-              onTap: () => _launchUrl(kWhatsAppUrl),
+              onTap: () => _launchUrl(context, kWhatsAppUrl),
             ),
             const SizedBox(height: 12),
             _buildSupportOption(
@@ -197,7 +198,7 @@ class TenantDrawer extends StatelessWidget {
               color: const Color(0xFFE4405F),
               title: 'Instagram',
               subtitle: '@livinkey',
-              onTap: () => _launchUrl(kInstagramUrl),
+              onTap: () => _launchUrl(context, kInstagramUrl),
             ),
             const SizedBox(height: 12),
             _buildSupportOption(
@@ -205,7 +206,7 @@ class TenantDrawer extends StatelessWidget {
               color: Colors.blue,
               title: 'Email',
               subtitle: 'livinkey@gmail.com',
-              onTap: () => _launchUrl(kEmailUrl),
+              onTap: () => _launchEmail(context),
             ),
             const SizedBox(height: 20),
           ],
@@ -285,11 +286,77 @@ class TenantDrawer extends StatelessWidget {
     );
   }
 
-  Future<void> _launchUrl(String url) async {
+  // Method to handle regular URLs (WhatsApp, Instagram, etc).
+  // Note: we deliberately do NOT gate this on canLaunchUrl(). On Android 11+
+  // canLaunchUrl() can return a false negative for implicit intents (like
+  // mailto: or wa.me links) unless the querying app's package visibility is
+  // declared — see the <queries> note below. Attempting the launch directly
+  // and catching failures is more reliable in practice.
+  Future<void> _launchUrl(BuildContext context, String url) async {
     try {
-      if (await canLaunchUrl(Uri.parse(url))) {
-        await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+      final Uri uri = Uri.parse(url);
+      final bool launched = await launchUrl(
+        uri,
+        mode: LaunchMode.externalApplication,
+      );
+      if (!launched && context.mounted) {
+        _showUnableToOpenSnackbar(context, url);
       }
-    } catch (_) {}
+    } catch (_) {
+      if (context.mounted) {
+        _showUnableToOpenSnackbar(context, url);
+      }
+    }
+  }
+
+  // Dedicated method for launching email with layered fallbacks so the
+  // support option always resolves to *something* useful for the user.
+  Future<void> _launchEmail(BuildContext context) async {
+    const String email = 'livinkey@gmail.com';
+
+    // Try progressively simpler mailto URIs. Some mail apps / OEM Android
+    // builds fail to resolve a mailto: URI that includes query parameters,
+    // so we fall back to a bare address if the richer one fails.
+    final List<Uri> attempts = [
+      Uri(scheme: 'mailto', path: email, query: 'subject=Support%20Inquiry'),
+      Uri(scheme: 'mailto', path: email),
+    ];
+
+    for (final uri in attempts) {
+      try {
+        final bool launched = await launchUrl(
+          uri,
+          mode: LaunchMode.externalApplication,
+        );
+        if (launched) return;
+      } catch (_) {
+        // Try the next, simpler URI.
+      }
+    }
+
+    // No mail app could handle it (or none is installed) — copy the address
+    // so the user can still reach support instead of hitting a dead end.
+    await Clipboard.setData(const ClipboardData(text: email));
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('No email app found. Copied $email to clipboard.'),
+          backgroundColor: Colors.black87,
+          duration: const Duration(seconds: 4),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
+  }
+
+  void _showUnableToOpenSnackbar(BuildContext context, String url) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Unable to open: $url'),
+        backgroundColor: Colors.black87,
+        duration: const Duration(seconds: 4),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
   }
 }
