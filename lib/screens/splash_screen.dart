@@ -25,12 +25,20 @@ class _SplashScreenState extends State<SplashScreen>
 
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 7500),
+      // Slowed from 7500ms -> 9500ms so each hop has more room to
+      // breathe. Combined with the sine-based easing now used inside
+      // LivinkeyLogo, this is what makes the bounce read as smooth
+      // rather than quick/snappy.
+      duration: const Duration(milliseconds: 9500),
     );
 
     _keyRotation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOutSine),
+      CurvedAnimation(parent: _controller, curve: Curves.linear),
     );
+    // Note: curve is linear on purpose. All the easing (per-hop ease-in/
+    // out, arc shaping, squash-and-stretch) is already computed inside
+    // LivinkeyLogo based on raw progress — layering a second curve here
+    // would fight that shaping and make the motion feel uneven again.
 
     _startSequence();
   }

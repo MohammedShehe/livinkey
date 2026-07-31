@@ -78,30 +78,41 @@ final Offset _topRestCenter = Offset(
 /// ------------------------------------------------------------------
 /// Bounce path waypoints for the small dot.
 ///
-/// These are the ACTUAL measured centers of each letter, taken directly
-/// from livinkey_base_white.png's pixel data (found via alpha-channel
-/// connected-component analysis, since the letters are white-on-transparent
-/// and invisible to the eye against a white background):
-///   L -> (137, 215)   v -> (366, 244)   n -> (611, 242)
-///   k -> (784, 210)   e -> (950, 244)
+/// Horizontal (dx) values are the ACTUAL measured letter centers, taken
+/// directly from livinkey_base_white.png's pixel data (alpha-channel
+/// connected-component analysis):
+///   L -> x=137   v -> x=366   n -> x=611   k -> x=784   e -> x=950
+///
+/// Vertical (dy) values have been shifted UP from the letters' measured
+/// centers to sit on the TOP EDGE of each letterform instead of landing
+/// mid-letter, per request. Ascender letters (L, k) got a bigger lift
+/// than x-height letters (v, n, e) since they're taller:
+///   L: 215 -> 150 (-65)    k: 210 -> 145 (-65)
+///   v: 244 -> 210 (-34)    n: 242 -> 208 (-34)   e: 244 -> 210 (-34)
+/// If you want this pixel-perfect, re-run the same connected-component
+/// scan and grab each glyph's min-y (top of its bounding box) instead of
+/// its centroid — these are close approximations of that.
+///
 /// Both "i"s are skipped as stops — the dot hops right past each i's stem
 /// without landing on it. The final waypoint is computed above so the dot
 /// lands exactly on the real dot already drawn on the key artwork.
 /// ------------------------------------------------------------------
 final List<Offset> _dotPath = [
   const Offset(133, 15), // 0: Start - directly above the roof apex
-  const Offset(137, 215), // 1: 'L'
-  const Offset(366, 244), // 2: 'v'   (hops right over the first 'i')
-  const Offset(611, 242), // 3: 'n'   (hops right over the second 'i')
-  const Offset(784, 210), // 4: 'k'
-  const Offset(950, 244), // 5: 'e'
+  const Offset(137, 150), // 1: 'L' — top edge
+  const Offset(366, 210), // 2: 'v' — top edge (hops right over the first 'i')
+  const Offset(611, 208), // 3: 'n' — top edge (hops right over the second 'i')
+  const Offset(784, 145), // 4: 'k' — top edge
+  const Offset(950, 210), // 5: 'e' — top edge
   _topRestCenter, // 6: End - lands exactly on the key's own ring + dot
 ];
 
 /// Extra upward arc height added to each hop (in canvas px), one entry
-/// per segment (_dotPath.length - 1 segments). Decreasing values give the
-/// classic "losing energy" bounce feel as the dot approaches its home.
-const List<double> _hopHeights = [36, 70, 55, 44, 32, 20];
+/// per segment (_dotPath.length - 1 segments). Slightly taller and more
+/// gradually decreasing than before, so each hop reads as a full, lazy
+/// arc rather than a quick flick — reinforces the "losing energy" bounce
+/// feel as the dot approaches its home.
+const List<double> _hopHeights = [52, 86, 68, 56, 40, 24];
 
 const double kLogoAspectRatio = _canvasW / _canvasH;
 
@@ -109,11 +120,12 @@ const double kLogoAspectRatio = _canvasW / _canvasH;
 /// teeth) is completely static, fixed at its natural resting spot — it no
 /// longer includes the ring or dot at all. Only the ring + dot piece
 /// (kLogoRingDotAsset) animates: it drops in from above the roof and
-/// bounces across the letters of "Livinke" until it lands exactly in the
-/// gap left for it at the top of the key, where it stays — completing the
-/// logo. Use this ONLY on the Splash screen.
+/// bounces across the TOP EDGES of the letters of "Livinke" until it
+/// lands exactly in the gap left for it at the top of the key, where it
+/// stays — completing the logo. Use this ONLY on the Splash screen.
 ///
-/// !! DO NOT MODIFY — the splash screen animation is final. !!
+/// Drive `keyAnimation` with a controller of ~9-10s (see SplashScreen)
+/// for a slow, smooth bounce rather than a quick one.
 class LivinkeyLogo extends StatelessWidget {
   final Animation<double> keyAnimation;
   final double width;
@@ -128,8 +140,14 @@ class LivinkeyLogo extends StatelessWidget {
 
   double _lerp(double a, double b, double t) => a + (b - a) * t;
 
-  double _easeInOutCubic(double t) {
-    return t < 0.5 ? 4 * t * t * t : 1 - math.pow(-2 * t + 2, 3) / 2;
+  /// Sine-based ease-in-out. Compared to the cubic ease previously used,
+  /// this has a gentler, more rounded shoulder at both ends of each hop,
+  /// which is what reads as "smooth/slow" rather than "snappy" motion.
+  /// Both the horizontal motion and the vertical arc/squash now share
+  /// this same eased value, so they stay perfectly in sync — that
+  /// synchronization is a big part of what makes a bounce look smooth.
+  double _easeInOutSine(double t) {
+    return -(math.cos(math.pi * t) - 1) / 2;
   }
 
   /// Returns (position, squashScaleX, squashScaleY, opacity) for the
@@ -167,21 +185,27 @@ class LivinkeyLogo extends StatelessWidget {
         final Offset start = _dotPath[i];
         final Offset end = _dotPath[i + 1];
 
-        // Horizontal motion eases in/out per hop.
-        final double easedT = _easeInOutCubic(t);
+        // Horizontal motion eases in/out per hop using the smoother sine
+        // curve.
+        final double easedT = _easeInOutSine(t);
         final double x = _lerp(start.dx, end.dx, easedT);
 
-        // Vertical motion: straight-line lerp minus a parabolic arc lift,
-        // using raw t so the arc peaks cleanly at the midpoint of the hop.
-        final double baseY = _lerp(start.dy, end.dy, t);
-        final double arc = _hopHeights[i] * math.sin(math.pi * t);
+        // Vertical motion: straight-line lerp minus a parabolic arc lift.
+        // The arc now uses the SAME easedT as the horizontal motion (not
+        // raw t) so the peak of the arc lines up exactly with the
+        // midpoint of horizontal travel — this removes the subtle
+        // "wobble" you get when x and y are paced differently.
+        final double baseY = _lerp(start.dy, end.dy, easedT);
+        final double arc = _hopHeights[i] * math.sin(math.pi * easedT);
         final double y = baseY - arc;
 
         // Cartoon squash-and-stretch: flattened at contact (t=0/1),
-        // stretched tall mid-flight (t=0.5).
-        final double peak = math.sin(math.pi * t);
-        final double scaleY = 0.75 + 0.45 * peak;
-        final double scaleX = 1.25 - 0.35 * peak;
+        // stretched tall mid-flight (peak of the hop). Also driven off
+        // easedT so it settles in step with the rest of the motion
+        // instead of snapping.
+        final double peak = math.sin(math.pi * easedT);
+        final double scaleY = 0.78 + 0.4 * peak;
+        final double scaleX = 1.22 - 0.32 * peak;
 
         // No fade-out: the static key artwork no longer includes the
         // ring+dot, so this piece has to stay fully visible once it
@@ -247,10 +271,10 @@ class LivinkeyLogo extends StatelessWidget {
           ),
 
           // Bouncing ring+dot piece: drops from above the roof, hops
-          // across the letters, lands in the gap left for it at the top
-          // of the key, and stays there — it's the only place this part
-          // of the key is drawn, since the static key asset no longer
-          // includes it.
+          // across the top edges of the letters, lands in the gap left
+          // for it at the top of the key, and stays there — it's the
+          // only place this part of the key is drawn, since the static
+          // key asset no longer includes it.
           AnimatedBuilder(
             animation: keyAnimation,
             builder: (context, child) {
@@ -539,7 +563,8 @@ class _LivinkeyLogoExampleState extends State<LivinkeyLogoExample>
   void initState() {
     super.initState();
     _controller = AnimationController(
-      duration: const Duration(milliseconds: 3200),
+      // Slowed down to match the smoother splash-screen timing.
+      duration: const Duration(milliseconds: 4200),
       vsync: this,
     )..addStatusListener((status) {
         if (status == AnimationStatus.completed) {
