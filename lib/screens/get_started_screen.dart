@@ -295,8 +295,8 @@ class _GetStartedScreenState extends State<GetStartedScreen>
                                 width: 1,
                               ),
                             ),
-                            child: Text(
-                              'Find and manage your PG stay in LPU,\nhassle-free.',
+                           child: Text(
+                              'We believe that finding a home is just the beginning of your journey. Livinkey is a comprehensive platform designed to transform the way you discover, book, and manage your living space.\n\nWhether you\'re a student, professional, or anyone seeking a comfortable stay, Livinkey makes your entire living experience seamless and stress-free.',
                               textAlign: TextAlign.center,
                               style: TextStyle(
                                 color: Colors.white.withOpacity(0.8),

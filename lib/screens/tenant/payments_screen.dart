@@ -15,12 +15,12 @@ class PaymentsScreen extends StatefulWidget {
 
 class _PaymentsScreenState extends State<PaymentsScreen>
     with AutomaticKeepAliveClientMixin, SingleTickerProviderStateMixin {
-  
   @override
   bool get wantKeepAlive => true;
 
   late AnimationController _fadeController;
   late Animation<double> _fadeAnimation;
+  late Animation<Offset> _slideAnimation;
   int _selectedPaymentMethod = 0;
 
   @override
@@ -33,6 +33,12 @@ class _PaymentsScreenState extends State<PaymentsScreen>
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(parent: _fadeController, curve: Curves.easeOut),
     );
+    _slideAnimation = Tween<Offset>(
+      begin: const Offset(0, 0.04),
+      end: Offset.zero,
+    ).animate(
+      CurvedAnimation(parent: _fadeController, curve: Curves.easeOutCubic),
+    );
     WidgetsBinding.instance.addPostFrameCallback((_) => _fadeController.forward());
   }
 
@@ -44,138 +50,195 @@ class _PaymentsScreenState extends State<PaymentsScreen>
 
   Future<bool> _onWillPop() async {
     return await showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: kLivinkeyBlack,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
-        title: const Text(
-          'Exit App?',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 20,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-        content: Text(
-          'Are you sure you want to exit the app?',
-          style: TextStyle(
-            color: Colors.white.withOpacity(0.7),
-            fontSize: 15,
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: Text(
-              'Cancel',
+          context: context,
+          builder: (context) => AlertDialog(
+            backgroundColor: const Color(0xFF141414),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+              side: BorderSide(
+                color: Colors.white.withOpacity(0.06),
+                width: 1,
+              ),
+            ),
+            title: const Text(
+              'Exit App?',
               style: TextStyle(
-                color: Colors.white.withOpacity(0.6),
-                fontWeight: FontWeight.w600,
+                color: Colors.white,
+                fontSize: 20,
+                fontWeight: FontWeight.w700,
               ),
             ),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [kLivinkeyGreen, Color(0xFF7CB342)],
-                ),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: const Text(
-                'Exit',
-                style: TextStyle(
-                  color: Colors.black,
-                  fontWeight: FontWeight.w700,
-                ),
+            content: Text(
+              'Are you sure you want to exit the app?',
+              style: TextStyle(
+                color: Colors.white.withOpacity(0.65),
+                fontSize: 15,
+                height: 1.4,
               ),
             ),
+            actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                style: TextButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                child: Text(
+                  'Cancel',
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.6),
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                child: Ink(
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [kLivinkeyGreen, Color(0xFF7CB342)],
+                    ),
+                    borderRadius: BorderRadius.circular(10),
+                    boxShadow: [
+                      BoxShadow(
+                        color: kLivinkeyGreen.withOpacity(0.35),
+                        blurRadius: 12,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+                    child: const Text(
+                      'Exit',
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
-    ) ?? false;
+        ) ??
+        false;
   }
 
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    
+
     return WillPopScope(
       onWillPop: _onWillPop,
       child: Scaffold(
         backgroundColor: kLivinkeyBlack,
         appBar: AppBar(
-          leading: IconButton(
-            icon: Icon(Icons.menu_rounded, color: Colors.white, size: 28),
-            onPressed: () {
-              Scaffold.of(context).openDrawer();
-            },
+          backgroundColor: kLivinkeyBlack,
+          elevation: 0,
+          scrolledUnderElevation: 0,
+          leading: Builder(
+            builder: (context) => IconButton(
+              icon: Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.06),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Icon(Icons.menu_rounded, color: Colors.white, size: 22),
+              ),
+              onPressed: () => Scaffold.of(context).openDrawer(),
+            ),
           ),
-          title: const Text('Payments'),
+          title: const Text(
+            'Payments',
+            style: TextStyle(
+              fontSize: 19,
+              fontWeight: FontWeight.w700,
+              letterSpacing: -0.2,
+            ),
+          ),
           actions: [
             IconButton(
-              icon: Icon(
-                Icons.history_rounded,
-                color: Colors.white.withOpacity(0.7),
-                size: 26,
+              icon: Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.06),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(
+                  Icons.history_rounded,
+                  color: Colors.white.withOpacity(0.8),
+                  size: 22,
+                ),
               ),
               onPressed: () => _showPaymentHistory(context),
             ),
+            const SizedBox(width: 8),
           ],
         ),
-        body: FadeTransition(
-          opacity: _fadeAnimation,
-          child: SingleChildScrollView(
-            physics: const BouncingScrollPhysics(),
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(height: 12),
-
-                _buildPaymentStats(),
-                const SizedBox(height: 24),
-
-                const Text(
-                  'Payment Method',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                const SizedBox(height: 12),
-
-                Row(
+        body: DecoratedBox(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                kLivinkeyGreen.withOpacity(0.05),
+                kLivinkeyBlack,
+                kLivinkeyBlack,
+              ],
+              stops: const [0.0, 0.3, 1.0],
+            ),
+          ),
+          child: FadeTransition(
+            opacity: _fadeAnimation,
+            child: SlideTransition(
+              position: _slideAnimation,
+              child: SingleChildScrollView(
+                physics: const BouncingScrollPhysics(),
+                padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    PaymentChip(
-                      label: 'Pay Online',
-                      isSelected: _selectedPaymentMethod == 0,
-                      onTap: () => setState(() => _selectedPaymentMethod = 0),
+                    const SizedBox(height: 8),
+
+                    _buildPaymentStats(),
+                    const SizedBox(height: 28),
+
+                    _buildSectionHeader('Payment Method'),
+                    const SizedBox(height: 14),
+
+                    Row(
+                      children: [
+                        PaymentChip(
+                          label: 'Pay Online',
+                          isSelected: _selectedPaymentMethod == 0,
+                          onTap: () => setState(() => _selectedPaymentMethod = 0),
+                        ),
+                        const SizedBox(width: 10),
+                        PaymentChip(
+                          label: 'Pay Cash',
+                          isSelected: _selectedPaymentMethod == 1,
+                          onTap: () => setState(() => _selectedPaymentMethod = 1),
+                        ),
+                        const SizedBox(width: 10),
+                        PaymentChip(
+                          label: 'Partial Payment',
+                          isSelected: _selectedPaymentMethod == 2,
+                          onTap: () => setState(() => _selectedPaymentMethod = 2),
+                        ),
+                      ],
                     ),
-                    const SizedBox(width: 10),
-                    PaymentChip(
-                      label: 'Pay Cash',
-                      isSelected: _selectedPaymentMethod == 1,
-                      onTap: () => setState(() => _selectedPaymentMethod = 1),
-                    ),
-                    const SizedBox(width: 10),
-                    PaymentChip(
-                      label: 'Partial Payment',
-                      isSelected: _selectedPaymentMethod == 2,
-                      onTap: () => setState(() => _selectedPaymentMethod = 2),
-                    ),
+
+                    const SizedBox(height: 20),
+                    _buildQRSection(),
+                    const SizedBox(height: 16),
                   ],
                 ),
-
-                const SizedBox(height: 20),
-                _buildQRSection(),
-                const SizedBox(height: 40),
-              ],
+              ),
             ),
           ),
         ),
@@ -183,23 +246,55 @@ class _PaymentsScreenState extends State<PaymentsScreen>
     );
   }
 
+  Widget _buildSectionHeader(String title) {
+    return Row(
+      children: [
+        Container(
+          width: 4,
+          height: 18,
+          decoration: BoxDecoration(
+            color: kLivinkeyGreen,
+            borderRadius: BorderRadius.circular(2),
+          ),
+        ),
+        const SizedBox(width: 8),
+        Text(
+          title,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 18,
+            fontWeight: FontWeight.w800,
+            letterSpacing: -0.2,
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget _buildPaymentStats() {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            kLivinkeyGreen.withOpacity(0.08),
-            Colors.transparent,
+            kLivinkeyGreen.withOpacity(0.1),
+            Colors.white.withOpacity(0.02),
           ],
         ),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: kLivinkeyGreen.withOpacity(0.1),
+          color: kLivinkeyGreen.withOpacity(0.14),
           width: 1,
         ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.2),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+          ),
+        ],
       ),
       child: Column(
         children: [
@@ -209,14 +304,14 @@ class _PaymentsScreenState extends State<PaymentsScreen>
               _buildStatItem('Due Date', '14 Aug, 2026', Colors.orange),
             ],
           ),
-          const SizedBox(height: 12),
+          Divider(color: Colors.white.withOpacity(0.06), height: 24),
           Row(
             children: [
               _buildStatItem('Fines', '₹0', Colors.red, subtitle: '0 days overdue'),
               _buildStatItem('E-Bill', '₹650', Colors.blue),
             ],
           ),
-          const SizedBox(height: 12),
+          Divider(color: Colors.white.withOpacity(0.06), height: 24),
           Row(
             children: [
               _buildStatItem('Maintenance Fee', '₹500', Colors.purple),
@@ -237,28 +332,31 @@ class _PaymentsScreenState extends State<PaymentsScreen>
   }) {
     return Expanded(
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8),
+        padding: const EdgeInsets.symmetric(vertical: 4),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               label,
               style: TextStyle(
-                color: Colors.white.withOpacity(0.4),
-                fontSize: 11,
-                fontWeight: FontWeight.w500,
+                color: Colors.white.withOpacity(0.45),
+                fontSize: 11.5,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 0.1,
               ),
             ),
-            const SizedBox(height: 2),
+            const SizedBox(height: 4),
             Text(
               value,
               style: TextStyle(
                 color: isTotal ? kLivinkeyGreen : color,
-                fontSize: isTotal ? 20 : 16,
+                fontSize: isTotal ? 21 : 16.5,
                 fontWeight: isTotal ? FontWeight.w800 : FontWeight.w700,
+                letterSpacing: -0.2,
               ),
             ),
-            if (subtitle != null)
+            if (subtitle != null) ...[
+              const SizedBox(height: 1),
               Text(
                 subtitle,
                 style: TextStyle(
@@ -266,6 +364,7 @@ class _PaymentsScreenState extends State<PaymentsScreen>
                   fontSize: 10,
                 ),
               ),
+            ],
           ],
         ),
       ),
@@ -301,30 +400,38 @@ class _PaymentsScreenState extends State<PaymentsScreen>
     return GestureDetector(
       onTap: () => _showQRPreview(qrColor),
       child: Container(
-        padding: const EdgeInsets.all(24),
+        width: double.infinity,
+        padding: const EdgeInsets.all(28),
         decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              qrColor.withOpacity(0.08),
-              Colors.transparent,
+              qrColor.withOpacity(0.1),
+              Colors.white.withOpacity(0.02),
             ],
           ),
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: qrColor.withOpacity(0.15),
+            color: qrColor.withOpacity(0.2),
             width: 1,
           ),
         ),
         child: Column(
           children: [
             Container(
-              width: 120,
-              height: 120,
+              width: 128,
+              height: 128,
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: qrColor.withOpacity(0.25),
+                    blurRadius: 20,
+                    offset: const Offset(0, 8),
+                  ),
+                ],
               ),
               child: Center(
                 child: Icon(
@@ -334,15 +441,17 @@ class _PaymentsScreenState extends State<PaymentsScreen>
                 ),
               ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
             Text(
               title,
               style: const TextStyle(
                 color: Colors.white,
-                fontSize: 16,
+                fontSize: 16.5,
                 fontWeight: FontWeight.w700,
+                letterSpacing: -0.1,
               ),
             ),
+            const SizedBox(height: 3),
             Text(
               subtitle,
               style: TextStyle(
@@ -358,29 +467,30 @@ class _PaymentsScreenState extends State<PaymentsScreen>
 
   Widget _buildCashPaymentCard() {
     return Container(
-      padding: const EdgeInsets.all(24),
+      width: double.infinity,
+      padding: const EdgeInsets.all(28),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            Colors.green.withOpacity(0.08),
-            Colors.transparent,
+            Colors.green.withOpacity(0.1),
+            Colors.white.withOpacity(0.02),
           ],
         ),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: Colors.green.withOpacity(0.15),
+          color: Colors.green.withOpacity(0.2),
           width: 1,
         ),
       ),
       child: Column(
         children: [
           Container(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(18),
             decoration: BoxDecoration(
-              color: Colors.green.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(16),
+              color: Colors.green.withOpacity(0.12),
+              borderRadius: BorderRadius.circular(18),
             ),
             child: const Icon(
               Icons.attach_money_rounded,
@@ -388,13 +498,14 @@ class _PaymentsScreenState extends State<PaymentsScreen>
               size: 48,
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 14),
           const Text(
             'Pay by Cash',
             style: TextStyle(
               color: Colors.white,
-              fontSize: 16,
+              fontSize: 16.5,
               fontWeight: FontWeight.w700,
+              letterSpacing: -0.1,
             ),
           ),
           const SizedBox(height: 4),
@@ -404,18 +515,19 @@ class _PaymentsScreenState extends State<PaymentsScreen>
               color: Colors.white.withOpacity(0.5),
               fontSize: 13,
             ),
+            textAlign: TextAlign.center,
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 14),
           InkWell(
             onTap: () => _launchWhatsApp(),
             borderRadius: BorderRadius.circular(12),
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 11),
               decoration: BoxDecoration(
                 color: const Color(0xFF25D366).withOpacity(0.15),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: const Color(0xFF25D366).withOpacity(0.2),
+                  color: const Color(0xFF25D366).withOpacity(0.25),
                   width: 1,
                 ),
               ),
@@ -445,10 +557,13 @@ class _PaymentsScreenState extends State<PaymentsScreen>
     showDialog(
       context: context,
       builder: (context) => Dialog(
-        backgroundColor: kLivinkeyBlack,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        backgroundColor: const Color(0xFF141414),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(24),
+          side: BorderSide(color: Colors.white.withOpacity(0.06)),
+        ),
         child: Container(
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.all(28),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -457,7 +572,14 @@ class _PaymentsScreenState extends State<PaymentsScreen>
                 height: 200,
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: color.withOpacity(0.3),
+                      blurRadius: 24,
+                      offset: const Offset(0, 10),
+                    ),
+                  ],
                 ),
                 child: Center(
                   child: Icon(
@@ -467,38 +589,47 @@ class _PaymentsScreenState extends State<PaymentsScreen>
                   ),
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 20),
               const Text(
                 'Scan to Pay',
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 18,
                   fontWeight: FontWeight.w700,
+                  letterSpacing: -0.2,
                 ),
               ),
-              const SizedBox(height: 8),
-              ElevatedButton.icon(
-                onPressed: () {
-                  SnackbarHelper.show(context, 'QR Code downloaded');
-                },
-                icon: const Icon(Icons.download_rounded, color: Colors.black),
-                label: const Text(
-                  'Download QR',
-                  style: TextStyle(color: Colors.black, fontWeight: FontWeight.w600),
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: kLivinkeyGreen,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+              const SizedBox(height: 16),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    SnackbarHelper.show(context, 'QR Code downloaded');
+                  },
+                  icon: const Icon(Icons.download_rounded, color: Colors.black, size: 20),
+                  label: const Text(
+                    'Download QR',
+                    style: TextStyle(color: Colors.black, fontWeight: FontWeight.w700),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: kLivinkeyGreen,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    elevation: 0,
                   ),
                 ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 6),
               TextButton(
                 onPressed: () => Navigator.pop(context),
                 child: Text(
                   'Close',
-                  style: TextStyle(color: Colors.white.withOpacity(0.5)),
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.5),
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
             ],
@@ -512,9 +643,9 @@ class _PaymentsScreenState extends State<PaymentsScreen>
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: kLivinkeyBlack,
+      backgroundColor: const Color(0xFF141414),
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
       ),
       builder: (context) => DraggableScrollableSheet(
         initialChildSize: 0.8,
@@ -522,7 +653,7 @@ class _PaymentsScreenState extends State<PaymentsScreen>
         maxChildSize: 0.9,
         expand: false,
         builder: (context, scrollController) => Container(
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
           child: Column(
             children: [
               Container(
@@ -533,14 +664,28 @@ class _PaymentsScreenState extends State<PaymentsScreen>
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
-              const SizedBox(height: 16),
-              const Text(
-                'Payment History',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 20,
-                  fontWeight: FontWeight.w700,
-                ),
+              const SizedBox(height: 18),
+              Row(
+                children: [
+                  Container(
+                    width: 4,
+                    height: 18,
+                    decoration: BoxDecoration(
+                      color: kLivinkeyGreen,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  const Text(
+                    'Payment History',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 20,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: -0.2,
+                    ),
+                  ),
+                ],
               ),
               const SizedBox(height: 16),
               Expanded(
@@ -573,14 +718,14 @@ class _PaymentsScreenState extends State<PaymentsScreen>
     final payment = payments[index % payments.length];
 
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 12),
+      padding: const EdgeInsets.symmetric(vertical: 14),
       child: Row(
         children: [
           Container(
-            padding: const EdgeInsets.all(10),
+            padding: const EdgeInsets.all(11),
             decoration: BoxDecoration(
-              color: kLivinkeyGreen.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(12),
+              color: kLivinkeyGreen.withOpacity(0.12),
+              borderRadius: BorderRadius.circular(14),
             ),
             child: Icon(
               Icons.receipt_rounded,
@@ -601,17 +746,18 @@ class _PaymentsScreenState extends State<PaymentsScreen>
                     fontWeight: FontWeight.w700,
                   ),
                 ),
+                const SizedBox(height: 2),
                 Text(
                   '${payment['date']} • ${payment['mode']}',
                   style: TextStyle(
-                    color: Colors.white.withOpacity(0.4),
+                    color: Colors.white.withOpacity(0.42),
                     fontSize: 12,
                   ),
                 ),
                 Text(
                   payment['id']!,
                   style: TextStyle(
-                    color: Colors.white.withOpacity(0.2),
+                    color: Colors.white.withOpacity(0.22),
                     fontSize: 10,
                   ),
                 ),
@@ -623,16 +769,17 @@ class _PaymentsScreenState extends State<PaymentsScreen>
             style: ElevatedButton.styleFrom(
               backgroundColor: kLivinkeyGreen,
               foregroundColor: Colors.black,
+              elevation: 0,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10),
               ),
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
               minimumSize: const Size(80, 32),
             ),
             child: const Text(
               'Receipt',
               style: TextStyle(
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.w700,
                 fontSize: 11,
               ),
             ),
@@ -646,10 +793,13 @@ class _PaymentsScreenState extends State<PaymentsScreen>
     showDialog(
       context: context,
       builder: (context) => Dialog(
-        backgroundColor: kLivinkeyBlack,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        backgroundColor: const Color(0xFF141414),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(24),
+          side: BorderSide(color: Colors.white.withOpacity(0.06)),
+        ),
         child: Container(
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.all(26),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -658,24 +808,26 @@ class _PaymentsScreenState extends State<PaymentsScreen>
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 18,
-                  fontWeight: FontWeight.w700,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: -0.2,
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 18),
               Container(
+                width: double.infinity,
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                     colors: [
-                      kLivinkeyGreen.withOpacity(0.08),
-                      Colors.transparent,
+                      kLivinkeyGreen.withOpacity(0.1),
+                      Colors.white.withOpacity(0.02),
                     ],
                   ),
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(16),
                   border: Border.all(
-                    color: kLivinkeyGreen.withOpacity(0.1),
+                    color: kLivinkeyGreen.withOpacity(0.14),
                     width: 1,
                   ),
                 ),
@@ -689,30 +841,37 @@ class _PaymentsScreenState extends State<PaymentsScreen>
                   ],
                 ),
               ),
-              const SizedBox(height: 16),
-              ElevatedButton.icon(
-                onPressed: () {
-                  SnackbarHelper.show(context, 'Receipt downloaded');
-                },
-                icon: const Icon(Icons.download_rounded, color: Colors.black),
-                label: const Text(
-                  'Download Receipt',
-                  style: TextStyle(color: Colors.black, fontWeight: FontWeight.w600),
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: kLivinkeyGreen,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+              const SizedBox(height: 18),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    SnackbarHelper.show(context, 'Receipt downloaded');
+                  },
+                  icon: const Icon(Icons.download_rounded, color: Colors.black, size: 20),
+                  label: const Text(
+                    'Download Receipt',
+                    style: TextStyle(color: Colors.black, fontWeight: FontWeight.w700),
                   ),
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: kLivinkeyGreen,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                  ),
                 ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 6),
               TextButton(
                 onPressed: () => Navigator.pop(context),
                 child: Text(
                   'Close',
-                  style: TextStyle(color: Colors.white.withOpacity(0.5)),
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.5),
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
             ],
@@ -724,7 +883,7 @@ class _PaymentsScreenState extends State<PaymentsScreen>
 
   Widget _buildReceiptRow(String label, String value, {bool isStatus = false}) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
+      padding: const EdgeInsets.symmetric(vertical: 7),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -740,7 +899,7 @@ class _PaymentsScreenState extends State<PaymentsScreen>
             style: TextStyle(
               color: isStatus ? kLivinkeyGreen : Colors.white,
               fontSize: 13,
-              fontWeight: isStatus ? FontWeight.w700 : FontWeight.w500,
+              fontWeight: isStatus ? FontWeight.w700 : FontWeight.w600,
             ),
           ),
         ],

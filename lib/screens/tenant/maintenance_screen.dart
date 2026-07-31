@@ -16,12 +16,12 @@ class MaintenanceScreen extends StatefulWidget {
 
 class _MaintenanceScreenState extends State<MaintenanceScreen>
     with AutomaticKeepAliveClientMixin, SingleTickerProviderStateMixin {
-  
   @override
   bool get wantKeepAlive => true;
 
   late AnimationController _fadeController;
   late Animation<double> _fadeAnimation;
+  late Animation<Offset> _slideAnimation;
   String _selectedFilter = 'All';
 
   final List<Map<String, String>> _requests = [
@@ -42,6 +42,12 @@ class _MaintenanceScreenState extends State<MaintenanceScreen>
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(parent: _fadeController, curve: Curves.easeOut),
     );
+    _slideAnimation = Tween<Offset>(
+      begin: const Offset(0, 0.04),
+      end: Offset.zero,
+    ).animate(
+      CurvedAnimation(parent: _fadeController, curve: Curves.easeOutCubic),
+    );
     WidgetsBinding.instance.addPostFrameCallback((_) => _fadeController.forward());
   }
 
@@ -53,60 +59,82 @@ class _MaintenanceScreenState extends State<MaintenanceScreen>
 
   Future<bool> _onWillPop() async {
     return await showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: kLivinkeyBlack,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
-        title: const Text(
-          'Exit App?',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 20,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-        content: Text(
-          'Are you sure you want to exit the app?',
-          style: TextStyle(
-            color: Colors.white.withOpacity(0.7),
-            fontSize: 15,
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: Text(
-              'Cancel',
+          context: context,
+          builder: (context) => AlertDialog(
+            backgroundColor: const Color(0xFF141414),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+              side: BorderSide(
+                color: Colors.white.withOpacity(0.06),
+                width: 1,
+              ),
+            ),
+            title: const Text(
+              'Exit App?',
               style: TextStyle(
-                color: Colors.white.withOpacity(0.6),
-                fontWeight: FontWeight.w600,
+                color: Colors.white,
+                fontSize: 20,
+                fontWeight: FontWeight.w700,
               ),
             ),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [kLivinkeyGreen, Color(0xFF7CB342)],
-                ),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: const Text(
-                'Exit',
-                style: TextStyle(
-                  color: Colors.black,
-                  fontWeight: FontWeight.w700,
-                ),
+            content: Text(
+              'Are you sure you want to exit the app?',
+              style: TextStyle(
+                color: Colors.white.withOpacity(0.65),
+                fontSize: 15,
+                height: 1.4,
               ),
             ),
+            actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                style: TextButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                child: Text(
+                  'Cancel',
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.6),
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                child: Ink(
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [kLivinkeyGreen, Color(0xFF7CB342)],
+                    ),
+                    borderRadius: BorderRadius.circular(10),
+                    boxShadow: [
+                      BoxShadow(
+                        color: kLivinkeyGreen.withOpacity(0.35),
+                        blurRadius: 12,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+                    child: const Text(
+                      'Exit',
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
-    ) ?? false;
+        ) ??
+        false;
   }
 
   List<Map<String, String>> get _filteredRequests {
@@ -117,97 +145,140 @@ class _MaintenanceScreenState extends State<MaintenanceScreen>
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    
+
     return WillPopScope(
       onWillPop: _onWillPop,
       child: Scaffold(
         backgroundColor: kLivinkeyBlack,
         appBar: AppBar(
-          leading: IconButton(
-            icon: Icon(Icons.menu_rounded, color: Colors.white, size: 28),
-            onPressed: () {
-              Scaffold.of(context).openDrawer();
-            },
+          backgroundColor: kLivinkeyBlack,
+          elevation: 0,
+          scrolledUnderElevation: 0,
+          leading: Builder(
+            builder: (context) => IconButton(
+              icon: Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.06),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Icon(Icons.menu_rounded, color: Colors.white, size: 22),
+              ),
+              onPressed: () => Scaffold.of(context).openDrawer(),
+            ),
           ),
-          title: const Text('Maintenance'),
+          title: const Text(
+            'Maintenance',
+            style: TextStyle(
+              fontSize: 19,
+              fontWeight: FontWeight.w700,
+              letterSpacing: -0.2,
+            ),
+          ),
         ),
-        body: FadeTransition(
-          opacity: _fadeAnimation,
-          child: SingleChildScrollView(
-            physics: const BouncingScrollPhysics(),
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(height: 12),
-
-                Row(
+        body: DecoratedBox(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                kLivinkeyGreen.withOpacity(0.05),
+                kLivinkeyBlack,
+                kLivinkeyBlack,
+              ],
+              stops: const [0.0, 0.3, 1.0],
+            ),
+          ),
+          child: FadeTransition(
+            opacity: _fadeAnimation,
+            child: SlideTransition(
+              position: _slideAnimation,
+              child: SingleChildScrollView(
+                physics: const BouncingScrollPhysics(),
+                padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildMaintenanceStat('Pending', 3, Colors.red),
-                    _buildMaintenanceStat('In Progress', 2, Colors.orange),
-                    _buildMaintenanceStat('Solved', 5, kLivinkeyGreen),
+                    const SizedBox(height: 8),
+
+                    Row(
+                      children: [
+                        _buildMaintenanceStat('Pending', 3, Colors.red),
+                        const SizedBox(width: 10),
+                        _buildMaintenanceStat('In Progress', 2, Colors.orange),
+                        const SizedBox(width: 10),
+                        _buildMaintenanceStat('Solved', 5, kLivinkeyGreen),
+                      ],
+                    ),
+
+                    const SizedBox(height: 24),
+
+                    _buildSectionHeader('Requests'),
+                    const SizedBox(height: 14),
+
+                    SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: [
+                          _buildFilterChip('All'),
+                          const SizedBox(width: 8),
+                          _buildFilterChip('Pending'),
+                          const SizedBox(width: 8),
+                          _buildFilterChip('In Progress'),
+                          const SizedBox(width: 8),
+                          _buildFilterChip('Solved'),
+                        ],
+                      ),
+                    ),
+
+                    const SizedBox(height: 18),
+
+                    ListView.separated(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: _filteredRequests.length,
+                      separatorBuilder: (context, index) => Divider(
+                        color: Colors.white.withOpacity(0.05),
+                        height: 12,
+                      ),
+                      itemBuilder: (context, index) {
+                        return MaintenanceItem(request: _filteredRequests[index]);
+                      },
+                    ),
+
+                    const SizedBox(height: 20),
+
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        onPressed: () => _showSubmitRequest(context),
+                        icon: const Icon(Icons.add_rounded, color: Colors.black, size: 22),
+                        label: const Text(
+                          'Submit Request',
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 16,
+                          ),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: kLivinkeyGreen,
+                          padding: const EdgeInsets.symmetric(vertical: 15),
+                          elevation: 0,
+                          shadowColor: kLivinkeyGreen.withOpacity(0.4),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                        ).copyWith(
+                          elevation: WidgetStateProperty.all(0),
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 16),
                   ],
                 ),
-
-                const SizedBox(height: 20),
-
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    children: [
-                      _buildFilterChip('All'),
-                      const SizedBox(width: 8),
-                      _buildFilterChip('Pending'),
-                      const SizedBox(width: 8),
-                      _buildFilterChip('In Progress'),
-                      const SizedBox(width: 8),
-                      _buildFilterChip('Solved'),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(height: 16),
-
-                ListView.separated(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: _filteredRequests.length,
-                  separatorBuilder: (context, index) => Divider(
-                    color: Colors.white.withOpacity(0.05),
-                    height: 12,
-                  ),
-                  itemBuilder: (context, index) {
-                    return MaintenanceItem(request: _filteredRequests[index]);
-                  },
-                ),
-
-                const SizedBox(height: 16),
-
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton.icon(
-                    onPressed: () => _showSubmitRequest(context),
-                    icon: const Icon(Icons.add_rounded, color: Colors.black),
-                    label: const Text(
-                      'Submit Request',
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontWeight: FontWeight.w700,
-                        fontSize: 16,
-                      ),
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: kLivinkeyGreen,
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 32),
-              ],
+              ),
             ),
           ),
         ),
@@ -215,22 +286,47 @@ class _MaintenanceScreenState extends State<MaintenanceScreen>
     );
   }
 
+  Widget _buildSectionHeader(String title) {
+    return Row(
+      children: [
+        Container(
+          width: 4,
+          height: 18,
+          decoration: BoxDecoration(
+            color: kLivinkeyGreen,
+            borderRadius: BorderRadius.circular(2),
+          ),
+        ),
+        const SizedBox(width: 8),
+        Text(
+          title,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 18,
+            fontWeight: FontWeight.w800,
+            letterSpacing: -0.2,
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget _buildMaintenanceStat(String label, int count, Color color) {
     return Expanded(
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 12),
+        padding: const EdgeInsets.symmetric(vertical: 16),
         decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              color.withOpacity(0.12),
+              color.withOpacity(0.14),
               color.withOpacity(0.03),
             ],
           ),
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: color.withOpacity(0.15),
+            color: color.withOpacity(0.18),
             width: 1,
           ),
         ),
@@ -240,16 +336,19 @@ class _MaintenanceScreenState extends State<MaintenanceScreen>
               count.toString(),
               style: TextStyle(
                 color: color,
-                fontSize: 20,
+                fontSize: 22,
                 fontWeight: FontWeight.w800,
+                letterSpacing: -0.3,
               ),
             ),
+            const SizedBox(height: 2),
             Text(
               label,
               style: TextStyle(
-                color: Colors.white.withOpacity(0.5),
-                fontSize: 10,
-                fontWeight: FontWeight.w500,
+                color: Colors.white.withOpacity(0.55),
+                fontSize: 10.5,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 0.1,
               ),
             ),
           ],
@@ -267,8 +366,9 @@ class _MaintenanceScreenState extends State<MaintenanceScreen>
         });
         HapticFeedback.selectionClick();
       },
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 9),
         decoration: BoxDecoration(
           gradient: isSelected
               ? const LinearGradient(
@@ -285,14 +385,23 @@ class _MaintenanceScreenState extends State<MaintenanceScreen>
             color: isSelected
                 ? kLivinkeyGreen
                 : Colors.white.withOpacity(0.08),
-            width: isSelected ? 2 : 1,
+            width: isSelected ? 1.5 : 1,
           ),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: kLivinkeyGreen.withOpacity(0.3),
+                    blurRadius: 10,
+                    offset: const Offset(0, 3),
+                  ),
+                ]
+              : null,
         ),
         child: Text(
           label,
           style: TextStyle(
-            color: isSelected ? Colors.black : Colors.white.withOpacity(0.6),
-            fontSize: 12,
+            color: isSelected ? Colors.black : Colors.white.withOpacity(0.65),
+            fontSize: 12.5,
             fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
           ),
         ),
@@ -317,10 +426,14 @@ class _MaintenanceScreenState extends State<MaintenanceScreen>
             minChildSize: 0.6,
             maxChildSize: 0.95,
             builder: (context, scrollController) => Container(
-              padding: const EdgeInsets.all(24),
-              decoration: const BoxDecoration(
-                color: kLivinkeyBlack,
-                borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+              padding: const EdgeInsets.fromLTRB(24, 12, 24, 24),
+              decoration: BoxDecoration(
+                color: const Color(0xFF141414),
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+                border: Border.all(
+                  color: Colors.white.withOpacity(0.06),
+                  width: 1,
+                ),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -335,16 +448,30 @@ class _MaintenanceScreenState extends State<MaintenanceScreen>
                       ),
                     ),
                   ),
-                  const SizedBox(height: 16),
-                  const Text(
-                    'Submit Maintenance Request',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 20,
-                      fontWeight: FontWeight.w700,
-                    ),
+                  const SizedBox(height: 18),
+                  Row(
+                    children: [
+                      Container(
+                        width: 4,
+                        height: 18,
+                        decoration: BoxDecoration(
+                          color: kLivinkeyGreen,
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      const Text(
+                        'Submit Maintenance Request',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 19,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: -0.2,
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 18),
                   Expanded(
                     child: SingleChildScrollView(
                       controller: scrollController,
@@ -372,7 +499,7 @@ class _MaintenanceScreenState extends State<MaintenanceScreen>
                             maxLines: 3,
                           ),
                           const SizedBox(height: 16),
-                          
+
                           _buildImageUploadSection(
                             selectedImage: _selectedImage,
                             onImageSelected: (File? image) {
@@ -381,22 +508,23 @@ class _MaintenanceScreenState extends State<MaintenanceScreen>
                               });
                             },
                           ),
-                          
-                          const SizedBox(height: 16),
+
+                          const SizedBox(height: 20),
                           SizedBox(
                             width: double.infinity,
                             child: ElevatedButton(
                               onPressed: () {
                                 Navigator.pop(context);
                                 SnackbarHelper.show(
-                                  context, 
-                                  'Request submitted successfully!${_selectedImage != null ? ' 📸' : ''}'
+                                  context,
+                                  'Request submitted successfully!${_selectedImage != null ? ' 📸' : ''}',
                                 );
                               },
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: kLivinkeyGreen,
                                 foregroundColor: Colors.black,
-                                padding: const EdgeInsets.symmetric(vertical: 14),
+                                elevation: 0,
+                                padding: const EdgeInsets.symmetric(vertical: 15),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(14),
                                 ),
@@ -437,7 +565,7 @@ class _MaintenanceScreenState extends State<MaintenanceScreen>
             kLivinkeyWhite.withOpacity(0.02),
           ],
         ),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(14),
         border: Border.all(
           color: kLivinkeyWhite.withOpacity(0.08),
           width: 1,
@@ -447,20 +575,20 @@ class _MaintenanceScreenState extends State<MaintenanceScreen>
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
             child: Row(
               children: [
                 Icon(
                   Icons.image_rounded,
-                  color: kLivinkeyGreen.withOpacity(0.7),
+                  color: kLivinkeyGreen.withOpacity(0.8),
                   size: 20,
                 ),
                 const SizedBox(width: 8),
                 Text(
                   'Attach Image (Optional)',
                   style: TextStyle(
-                    color: Colors.white.withOpacity(0.5),
-                    fontWeight: FontWeight.w500,
+                    color: Colors.white.withOpacity(0.55),
+                    fontWeight: FontWeight.w600,
                     fontSize: 14,
                   ),
                 ),
@@ -473,7 +601,7 @@ class _MaintenanceScreenState extends State<MaintenanceScreen>
               child: Stack(
                 children: [
                   ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(10),
                     child: Image.file(
                       selectedImage,
                       height: 100,
@@ -506,7 +634,7 @@ class _MaintenanceScreenState extends State<MaintenanceScreen>
               ),
             ),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 14),
             child: Row(
               children: [
                 Expanded(
@@ -529,8 +657,8 @@ class _MaintenanceScreenState extends State<MaintenanceScreen>
                     label: Text(
                       'Gallery',
                       style: TextStyle(
-                        color: Colors.white.withOpacity(0.7),
-                        fontWeight: FontWeight.w500,
+                        color: Colors.white.withOpacity(0.75),
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                     style: OutlinedButton.styleFrom(
@@ -538,7 +666,7 @@ class _MaintenanceScreenState extends State<MaintenanceScreen>
                         color: kLivinkeyGreen.withOpacity(0.3),
                         width: 1,
                       ),
-                      padding: const EdgeInsets.symmetric(vertical: 10),
+                      padding: const EdgeInsets.symmetric(vertical: 11),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),
                       ),
@@ -566,8 +694,8 @@ class _MaintenanceScreenState extends State<MaintenanceScreen>
                     label: Text(
                       'Camera',
                       style: TextStyle(
-                        color: Colors.white.withOpacity(0.7),
-                        fontWeight: FontWeight.w500,
+                        color: Colors.white.withOpacity(0.75),
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                     style: OutlinedButton.styleFrom(
@@ -575,7 +703,7 @@ class _MaintenanceScreenState extends State<MaintenanceScreen>
                         color: kLivinkeyGreen.withOpacity(0.3),
                         width: 1,
                       ),
-                      padding: const EdgeInsets.symmetric(vertical: 10),
+                      padding: const EdgeInsets.symmetric(vertical: 11),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),
                       ),
@@ -608,7 +736,7 @@ class _MaintenanceScreenState extends State<MaintenanceScreen>
             kLivinkeyWhite.withOpacity(0.02),
           ],
         ),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(14),
         border: Border.all(
           color: kLivinkeyWhite.withOpacity(0.08),
           width: 1,
@@ -632,24 +760,24 @@ class _MaintenanceScreenState extends State<MaintenanceScreen>
           prefixIcon: icon != null
               ? Icon(
                   icon,
-                  color: kLivinkeyGreen.withOpacity(0.7),
+                  color: kLivinkeyGreen.withOpacity(0.8),
                   size: 20,
                 )
               : null,
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(14),
             borderSide: BorderSide.none,
           ),
           focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(14),
             borderSide: BorderSide(
-              color: kLivinkeyGreen.withOpacity(0.3),
-              width: 1,
+              color: kLivinkeyGreen.withOpacity(0.4),
+              width: 1.5,
             ),
           ),
           enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(
+            borderRadius: BorderRadius.circular(14),
+            borderSide: const BorderSide(
               color: Colors.transparent,
             ),
           ),

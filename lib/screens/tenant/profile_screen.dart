@@ -17,12 +17,12 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen>
     with AutomaticKeepAliveClientMixin, SingleTickerProviderStateMixin {
-  
   @override
   bool get wantKeepAlive => true;
 
   late AnimationController _fadeController;
   late Animation<double> _fadeAnimation;
+  late Animation<Offset> _slideAnimation;
 
   // Feedback state
   bool _hasSubmittedFeedback = false;
@@ -50,6 +50,12 @@ class _ProfileScreenState extends State<ProfileScreen>
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(parent: _fadeController, curve: Curves.easeOut),
     );
+    _slideAnimation = Tween<Offset>(
+      begin: const Offset(0, 0.04),
+      end: Offset.zero,
+    ).animate(
+      CurvedAnimation(parent: _fadeController, curve: Curves.easeOutCubic),
+    );
     WidgetsBinding.instance.addPostFrameCallback((_) => _fadeController.forward());
   }
 
@@ -61,199 +67,279 @@ class _ProfileScreenState extends State<ProfileScreen>
 
   Future<bool> _onWillPop() async {
     return await showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: kLivinkeyBlack,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
-        title: const Text(
-          'Exit App?',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 20,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-        content: Text(
-          'Are you sure you want to exit the app?',
-          style: TextStyle(
-            color: Colors.white.withOpacity(0.7),
-            fontSize: 15,
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: Text(
-              'Cancel',
+          context: context,
+          builder: (context) => AlertDialog(
+            backgroundColor: const Color(0xFF141414),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+              side: BorderSide(
+                color: Colors.white.withOpacity(0.06),
+                width: 1,
+              ),
+            ),
+            title: const Text(
+              'Exit App?',
               style: TextStyle(
-                color: Colors.white.withOpacity(0.6),
-                fontWeight: FontWeight.w600,
+                color: Colors.white,
+                fontSize: 20,
+                fontWeight: FontWeight.w700,
               ),
             ),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [kLivinkeyGreen, Color(0xFF7CB342)],
-                ),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: const Text(
-                'Exit',
-                style: TextStyle(
-                  color: Colors.black,
-                  fontWeight: FontWeight.w700,
-                ),
+            content: Text(
+              'Are you sure you want to exit the app?',
+              style: TextStyle(
+                color: Colors.white.withOpacity(0.65),
+                fontSize: 15,
+                height: 1.4,
               ),
             ),
+            actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                style: TextButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                child: Text(
+                  'Cancel',
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.6),
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                child: Ink(
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [kLivinkeyGreen, Color(0xFF7CB342)],
+                    ),
+                    borderRadius: BorderRadius.circular(10),
+                    boxShadow: [
+                      BoxShadow(
+                        color: kLivinkeyGreen.withOpacity(0.35),
+                        blurRadius: 12,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+                    child: const Text(
+                      'Exit',
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
-    ) ?? false;
+        ) ??
+        false;
   }
 
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    
+
     return WillPopScope(
       onWillPop: _onWillPop,
       child: Scaffold(
         backgroundColor: kLivinkeyBlack,
         appBar: AppBar(
-          leading: IconButton(
-            icon: Icon(Icons.menu_rounded, color: Colors.white, size: 28),
-            onPressed: () {
-              Scaffold.of(context).openDrawer();
-            },
+          backgroundColor: kLivinkeyBlack,
+          elevation: 0,
+          scrolledUnderElevation: 0,
+          leading: Builder(
+            builder: (context) => IconButton(
+              icon: Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.06),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Icon(Icons.menu_rounded, color: Colors.white, size: 22),
+              ),
+              onPressed: () => Scaffold.of(context).openDrawer(),
+            ),
           ),
-          title: const Text('Profile'),
+          title: const Text(
+            'Profile',
+            style: TextStyle(
+              fontSize: 19,
+              fontWeight: FontWeight.w700,
+              letterSpacing: -0.2,
+            ),
+          ),
         ),
-        body: FadeTransition(
-          opacity: _fadeAnimation,
-          child: SingleChildScrollView(
-            physics: const BouncingScrollPhysics(),
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(height: 12),
-
-                _buildProfileHeader(),
-                const SizedBox(height: 20),
-
-                const Text(
-                  'Details',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                const SizedBox(height: 12),
-
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [
-                        kLivinkeyWhite.withOpacity(0.03),
-                        Colors.transparent,
-                      ],
-                    ),
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                      color: kLivinkeyWhite.withOpacity(0.06),
-                      width: 1,
-                    ),
-                  ),
-                  child: Column(
-                    children: _details.map((d) => ProfileRow(
-                      label: d['label']!,
-                      value: d['value']!,
-                    )).toList(),
-                  ),
-                ),
-
-                const SizedBox(height: 20),
-
-                Center(
-                  child: TextButton.icon(
-                    onPressed: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(builder: (_) => const GuestScreen()),
-                      );
-                    },
-                    icon: Icon(
-                      Icons.switch_account_rounded,
-                      color: kLivinkeyGreen,
-                      size: 20,
-                    ),
-                    label: Text(
-                      'Enter as Guest',
-                      style: TextStyle(
-                        color: kLivinkeyGreen,
-                        fontSize: 15,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    style: TextButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                      backgroundColor: kLivinkeyGreen.withOpacity(0.05),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 20),
-
-                _buildLinkItem('Terms of Service', Icons.description_rounded),
-                _buildLinkItem('Privacy Policy', Icons.privacy_tip_rounded),
-
-                const SizedBox(height: 20),
-
-                _buildFeedbackButton(),
-
-                const SizedBox(height: 12),
-
-                SizedBox(
-                  width: double.infinity,
-                  child: OutlinedButton.icon(
-                    onPressed: _handleLogout,
-                    icon: const Icon(Icons.logout_rounded, color: Colors.red),
-                    label: const Text(
-                      'Logout',
-                      style: TextStyle(
-                        color: Colors.red,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 16,
-                      ),
-                    ),
-                    style: OutlinedButton.styleFrom(
-                      side: const BorderSide(color: Colors.red, width: 1),
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 32),
+        body: DecoratedBox(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                kLivinkeyGreen.withOpacity(0.05),
+                kLivinkeyBlack,
+                kLivinkeyBlack,
               ],
+              stops: const [0.0, 0.3, 1.0],
+            ),
+          ),
+          child: FadeTransition(
+            opacity: _fadeAnimation,
+            child: SlideTransition(
+              position: _slideAnimation,
+              child: SingleChildScrollView(
+                physics: const BouncingScrollPhysics(),
+                padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: 8),
+
+                    _buildProfileHeader(),
+                    const SizedBox(height: 26),
+
+                    _buildSectionHeader('Details'),
+                    const SizedBox(height: 14),
+
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            Colors.white.withOpacity(0.035),
+                            Colors.white.withOpacity(0.015),
+                          ],
+                        ),
+                        borderRadius: BorderRadius.circular(18),
+                        border: Border.all(
+                          color: Colors.white.withOpacity(0.07),
+                          width: 1,
+                        ),
+                      ),
+                      child: Column(
+                        children: _details
+                            .map((d) => ProfileRow(
+                                  label: d['label']!,
+                                  value: d['value']!,
+                                ))
+                            .toList(),
+                      ),
+                    ),
+
+                    const SizedBox(height: 22),
+
+                    Center(
+                      child: TextButton.icon(
+                        onPressed: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(builder: (_) => const GuestScreen()),
+                          );
+                        },
+                        icon: Icon(
+                          Icons.switch_account_rounded,
+                          color: kLivinkeyGreen,
+                          size: 20,
+                        ),
+                        label: Text(
+                          'Enter as Guest',
+                          style: TextStyle(
+                            color: kLivinkeyGreen,
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        style: TextButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 12),
+                          backgroundColor: kLivinkeyGreen.withOpacity(0.08),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            side: BorderSide(
+                              color: kLivinkeyGreen.withOpacity(0.15),
+                              width: 1,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 22),
+
+                    _buildLinkItem('Terms of Service', Icons.description_rounded),
+                    _buildLinkItem('Privacy Policy', Icons.privacy_tip_rounded),
+
+                    const SizedBox(height: 22),
+
+                    _buildFeedbackButton(),
+
+                    const SizedBox(height: 12),
+
+                    SizedBox(
+                      width: double.infinity,
+                      child: OutlinedButton.icon(
+                        onPressed: _handleLogout,
+                        icon: const Icon(Icons.logout_rounded, color: Colors.red, size: 20),
+                        label: const Text(
+                          'Logout',
+                          style: TextStyle(
+                            color: Colors.red,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 16,
+                          ),
+                        ),
+                        style: OutlinedButton.styleFrom(
+                          side: BorderSide(color: Colors.red.withOpacity(0.6), width: 1),
+                          padding: const EdgeInsets.symmetric(vertical: 15),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 16),
+                  ],
+                ),
+              ),
             ),
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildSectionHeader(String title) {
+    return Row(
+      children: [
+        Container(
+          width: 4,
+          height: 18,
+          decoration: BoxDecoration(
+            color: kLivinkeyGreen,
+            borderRadius: BorderRadius.circular(2),
+          ),
+        ),
+        const SizedBox(width: 8),
+        Text(
+          title,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 18,
+            fontWeight: FontWeight.w800,
+            letterSpacing: -0.2,
+          ),
+        ),
+      ],
     );
   }
 
@@ -266,39 +352,55 @@ class _ProfileScreenState extends State<ProfileScreen>
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            kLivinkeyGreen.withOpacity(0.08),
-            Colors.transparent,
+            kLivinkeyGreen.withOpacity(0.12),
+            Colors.white.withOpacity(0.02),
           ],
         ),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: kLivinkeyGreen.withOpacity(0.1),
+          color: kLivinkeyGreen.withOpacity(0.16),
           width: 1,
         ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.2),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+          ),
+        ],
       ),
       child: Row(
         children: [
           Container(
-            width: 64,
-            height: 64,
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
+            width: 68,
+            height: 68,
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
                 colors: [kLivinkeyGreen, Color(0xFF66BB6A)],
               ),
-              borderRadius: BorderRadius.all(Radius.circular(16)),
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: kLivinkeyGreen.withOpacity(0.35),
+                  blurRadius: 18,
+                  offset: const Offset(0, 6),
+                ),
+              ],
             ),
             child: Center(
               child: Text(
                 getInitials(name),
                 style: const TextStyle(
                   color: Colors.black,
-                  fontSize: 24,
-                  fontWeight: FontWeight.w700,
+                  fontSize: 25,
+                  fontWeight: FontWeight.w800,
                 ),
               ),
             ),
           ),
-          const SizedBox(width: 16),
+          const SizedBox(width: 18),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -307,33 +409,41 @@ class _ProfileScreenState extends State<ProfileScreen>
                   'John Doe',
                   style: TextStyle(
                     color: Colors.white,
-                    fontSize: 20,
-                    fontWeight: FontWeight.w700,
+                    fontSize: 21,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -0.3,
                   ),
                 ),
-                const Text(
+                const SizedBox(height: 3),
+                Text(
                   'Room 101 • Block A',
                   style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 14,
+                    color: Colors.white.withOpacity(0.55),
+                    fontSize: 13.5,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
+                const SizedBox(height: 8),
                 Container(
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 2,
+                    horizontal: 11,
+                    vertical: 3,
                   ),
                   decoration: BoxDecoration(
-                    color: kLivinkeyGreen.withOpacity(0.15),
+                    color: kLivinkeyGreen.withOpacity(0.16),
                     borderRadius: BorderRadius.circular(10),
+                    border: Border.all(
+                      color: kLivinkeyGreen.withOpacity(0.2),
+                      width: 1,
+                    ),
                   ),
                   child: const Text(
                     'Tenant',
                     style: TextStyle(
                       color: kLivinkeyGreen,
                       fontSize: 11,
-                      fontWeight: FontWeight.w600,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 0.2,
                     ),
                   ),
                 ),
@@ -347,39 +457,49 @@ class _ProfileScreenState extends State<ProfileScreen>
 
   Widget _buildLinkItem(String title, IconData icon) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 8),
+      margin: const EdgeInsets.only(bottom: 10),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            kLivinkeyWhite.withOpacity(0.03),
-            Colors.transparent,
+            Colors.white.withOpacity(0.035),
+            Colors.white.withOpacity(0.015),
           ],
         ),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(14),
         border: Border.all(
-          color: kLivinkeyWhite.withOpacity(0.06),
+          color: Colors.white.withOpacity(0.07),
           width: 1,
         ),
       ),
       child: ListTile(
-        leading: Icon(
-          icon,
-          color: kLivinkeyGreen.withOpacity(0.7),
-          size: 22,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(14),
+        ),
+        leading: Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: kLivinkeyGreen.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Icon(
+            icon,
+            color: kLivinkeyGreen.withOpacity(0.85),
+            size: 20,
+          ),
         ),
         title: Text(
           title,
           style: TextStyle(
-            color: Colors.white.withOpacity(0.8),
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
+            color: Colors.white.withOpacity(0.85),
+            fontSize: 14.5,
+            fontWeight: FontWeight.w600,
           ),
         ),
         trailing: Icon(
           Icons.chevron_right_rounded,
-          color: Colors.white.withOpacity(0.2),
+          color: Colors.white.withOpacity(0.25),
           size: 20,
         ),
         onTap: () {
@@ -393,9 +513,7 @@ class _ProfileScreenState extends State<ProfileScreen>
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton.icon(
-        onPressed: _hasSubmittedFeedback 
-            ? _showThankYouDialog 
-            : _showFeedbackModal,
+        onPressed: _hasSubmittedFeedback ? _showThankYouDialog : _showFeedbackModal,
         icon: Icon(
           _hasSubmittedFeedback ? Icons.thumb_up_rounded : Icons.feedback_rounded,
           color: Colors.black,
@@ -410,10 +528,9 @@ class _ProfileScreenState extends State<ProfileScreen>
           ),
         ),
         style: ElevatedButton.styleFrom(
-          backgroundColor: _hasSubmittedFeedback 
-              ? Colors.grey[600] 
-              : kLivinkeyGreen,
-          padding: const EdgeInsets.symmetric(vertical: 14),
+          backgroundColor: _hasSubmittedFeedback ? Colors.grey[600] : kLivinkeyGreen,
+          elevation: 0,
+          padding: const EdgeInsets.symmetric(vertical: 15),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(14),
           ),
@@ -426,9 +543,10 @@ class _ProfileScreenState extends State<ProfileScreen>
     showDialog(
       context: context,
       builder: (context) => Dialog(
-        backgroundColor: kLivinkeyBlack,
+        backgroundColor: const Color(0xFF141414),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(24),
+          side: BorderSide(color: Colors.white.withOpacity(0.06)),
         ),
         child: Container(
           padding: const EdgeInsets.all(32),
@@ -440,6 +558,13 @@ class _ProfileScreenState extends State<ProfileScreen>
                 decoration: BoxDecoration(
                   color: kLivinkeyGreen.withOpacity(0.15),
                   shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: kLivinkeyGreen.withOpacity(0.25),
+                      blurRadius: 24,
+                      offset: const Offset(0, 8),
+                    ),
+                  ],
                 ),
                 child: const Icon(
                   Icons.thumb_up_rounded,
@@ -447,13 +572,14 @@ class _ProfileScreenState extends State<ProfileScreen>
                   size: 56,
                 ),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 22),
               const Text(
                 'Thank You!',
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 24,
                   fontWeight: FontWeight.w800,
+                  letterSpacing: -0.3,
                 ),
               ),
               const SizedBox(height: 12),
@@ -461,12 +587,12 @@ class _ProfileScreenState extends State<ProfileScreen>
                 'We appreciate your valuable feedback! Your input helps us improve the Livinkey experience for everyone.',
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  color: Colors.white.withOpacity(0.7),
+                  color: Colors.white.withOpacity(0.65),
                   fontSize: 15,
                   height: 1.5,
                 ),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 26),
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
@@ -474,6 +600,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                   style: ElevatedButton.styleFrom(
                     backgroundColor: kLivinkeyGreen,
                     foregroundColor: Colors.black,
+                    elevation: 0,
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14),
@@ -518,10 +645,14 @@ class _ProfileScreenState extends State<ProfileScreen>
             minChildSize: 0.7,
             maxChildSize: 0.95,
             builder: (context, scrollController) => Container(
-              padding: const EdgeInsets.all(24),
-              decoration: const BoxDecoration(
-                color: kLivinkeyBlack,
-                borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+              padding: const EdgeInsets.fromLTRB(24, 12, 24, 24),
+              decoration: BoxDecoration(
+                color: const Color(0xFF141414),
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+                border: Border.all(
+                  color: Colors.white.withOpacity(0.06),
+                  width: 1,
+                ),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -536,16 +667,30 @@ class _ProfileScreenState extends State<ProfileScreen>
                       ),
                     ),
                   ),
-                  const SizedBox(height: 16),
-                  const Text(
-                    'Rate Your Experience',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 22,
-                      fontWeight: FontWeight.w800,
-                    ),
+                  const SizedBox(height: 18),
+                  Row(
+                    children: [
+                      Container(
+                        width: 4,
+                        height: 20,
+                        decoration: BoxDecoration(
+                          color: kLivinkeyGreen,
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      const Text(
+                        'Rate Your Experience',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 21,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: -0.3,
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 6),
                   Text(
                     'Help us improve by rating each category (0-10)',
                     style: TextStyle(
@@ -586,6 +731,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: kLivinkeyGreen,
                                 foregroundColor: Colors.black,
+                                elevation: 0,
                                 padding: const EdgeInsets.symmetric(vertical: 16),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(14),
@@ -620,20 +766,20 @@ class _ProfileScreenState extends State<ProfileScreen>
     required Function(double) onChanged,
   }) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 16),
+      margin: const EdgeInsets.only(bottom: 14),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            kLivinkeyWhite.withOpacity(0.05),
-            kLivinkeyWhite.withOpacity(0.02),
+            Colors.white.withOpacity(0.05),
+            Colors.white.withOpacity(0.02),
           ],
         ),
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: kLivinkeyWhite.withOpacity(0.08),
+          color: Colors.white.withOpacity(0.08),
           width: 1,
         ),
       ),
@@ -646,7 +792,7 @@ class _ProfileScreenState extends State<ProfileScreen>
               Text(
                 label,
                 style: TextStyle(
-                  color: Colors.white.withOpacity(0.8),
+                  color: Colors.white.withOpacity(0.85),
                   fontSize: 15,
                   fontWeight: FontWeight.w600,
                 ),
@@ -654,8 +800,12 @@ class _ProfileScreenState extends State<ProfileScreen>
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                 decoration: BoxDecoration(
-                  color: kLivinkeyGreen.withOpacity(0.15),
+                  color: kLivinkeyGreen.withOpacity(0.16),
                   borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: kLivinkeyGreen.withOpacity(0.2),
+                    width: 1,
+                  ),
                 ),
                 child: Text(
                   value.toStringAsFixed(1),
@@ -668,7 +818,7 @@ class _ProfileScreenState extends State<ProfileScreen>
               ),
             ],
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 6),
           Row(
             children: [
               Expanded(
@@ -725,13 +875,13 @@ class _ProfileScreenState extends State<ProfileScreen>
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            kLivinkeyWhite.withOpacity(0.05),
-            kLivinkeyWhite.withOpacity(0.02),
+            Colors.white.withOpacity(0.05),
+            Colors.white.withOpacity(0.02),
           ],
         ),
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: kLivinkeyWhite.withOpacity(0.08),
+          color: Colors.white.withOpacity(0.08),
           width: 1,
         ),
       ),
@@ -745,7 +895,7 @@ class _ProfileScreenState extends State<ProfileScreen>
         decoration: InputDecoration(
           labelText: 'Additional Comments (Optional)',
           labelStyle: TextStyle(
-            color: Colors.white.withOpacity(0.4),
+            color: Colors.white.withOpacity(0.45),
             fontWeight: FontWeight.w500,
             fontSize: 14,
           ),
@@ -755,18 +905,18 @@ class _ProfileScreenState extends State<ProfileScreen>
             fontSize: 14,
           ),
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(16),
             borderSide: BorderSide.none,
           ),
           focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(16),
             borderSide: BorderSide(
-              color: kLivinkeyGreen.withOpacity(0.3),
-              width: 2,
+              color: kLivinkeyGreen.withOpacity(0.4),
+              width: 1.5,
             ),
           ),
           enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(16),
             borderSide: BorderSide.none,
           ),
           contentPadding: const EdgeInsets.symmetric(
@@ -805,24 +955,41 @@ class _ProfileScreenState extends State<ProfileScreen>
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: kLivinkeyBlack,
+        backgroundColor: const Color(0xFF141414),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(20),
+          side: BorderSide(
+            color: Colors.white.withOpacity(0.06),
+            width: 1,
+          ),
         ),
         title: const Text(
           'Logout',
-          style: TextStyle(color: Colors.white),
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.w700,
+          ),
         ),
-        content: const Text(
+        content: Text(
           'Are you sure you want to logout?',
-          style: TextStyle(color: Colors.white70),
+          style: TextStyle(color: Colors.white.withOpacity(0.65)),
         ),
+        actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
+            style: TextButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
             child: Text(
               'Cancel',
-              style: TextStyle(color: Colors.white.withOpacity(0.5)),
+              style: TextStyle(
+                color: Colors.white.withOpacity(0.6),
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
           TextButton(
@@ -832,9 +999,18 @@ class _ProfileScreenState extends State<ProfileScreen>
                 MaterialPageRoute(builder: (_) => const LoginScreen()),
               );
             },
+            style: TextButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
             child: const Text(
               'Logout',
-              style: TextStyle(color: Colors.red),
+              style: TextStyle(
+                color: Colors.red,
+                fontWeight: FontWeight.w700,
+              ),
             ),
           ),
         ],

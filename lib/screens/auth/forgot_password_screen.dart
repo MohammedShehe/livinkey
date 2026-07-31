@@ -273,6 +273,19 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
     }
   }
 
+  IconData _getStepIcon() {
+    switch (_currentStep) {
+      case 0:
+        return Icons.mail_lock_rounded;
+      case 1:
+        return Icons.pin_rounded;
+      case 2:
+        return Icons.password_rounded;
+      default:
+        return Icons.help_outline_rounded;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return AnnotatedRegion<SystemUiOverlayStyle>(
@@ -305,7 +318,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
                           GestureDetector(
                             onTap: _navigateBackToLogin,
                             child: Container(
-                              padding: const EdgeInsets.all(8),
+                              padding: const EdgeInsets.all(9),
                               decoration: BoxDecoration(
                                 color: Colors.white.withOpacity(0.06),
                                 borderRadius: BorderRadius.circular(12),
@@ -316,8 +329,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
                               ),
                               child: Icon(
                                 Icons.arrow_back_rounded,
-                                color: Colors.white.withOpacity(0.7),
-                                size: 24,
+                                color: Colors.white.withOpacity(0.75),
+                                size: 22,
                               ),
                             ),
                           ),
@@ -327,32 +340,61 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
                           _buildProgressIndicator(),
                           const SizedBox(height: 32),
 
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              Text(
-                                _getStepTitle(),
-                                style: const TextStyle(
-                                  fontSize: 28,
-                                  fontWeight: FontWeight.w800,
-                                  color: Colors.white,
-                                  letterSpacing: 0.5,
+                              Container(
+                                padding: const EdgeInsets.all(11),
+                                decoration: BoxDecoration(
+                                  gradient: const LinearGradient(
+                                    colors: [Color(0xFF92C24A), Color(0xFF66BB6A)],
+                                  ),
+                                  borderRadius: BorderRadius.circular(14),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: const Color(0xFF92C24A).withOpacity(0.35),
+                                      blurRadius: 16,
+                                      offset: const Offset(0, 6),
+                                    ),
+                                  ],
+                                ),
+                                child: Icon(
+                                  _getStepIcon(),
+                                  color: Colors.black,
+                                  size: 22,
                                 ),
                               ),
-                              const SizedBox(height: 8),
-                              Text(
-                                _getStepSubtitle(),
-                                style: TextStyle(
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w400,
-                                  color: Colors.white.withOpacity(0.6),
-                                  letterSpacing: 0.3,
+                              const SizedBox(width: 14),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      _getStepTitle(),
+                                      style: const TextStyle(
+                                        fontSize: 24,
+                                        fontWeight: FontWeight.w800,
+                                        color: Colors.white,
+                                        letterSpacing: -0.4,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      _getStepSubtitle(),
+                                      style: TextStyle(
+                                        fontSize: 13.5,
+                                        fontWeight: FontWeight.w500,
+                                        color: Colors.white.withOpacity(0.5),
+                                        letterSpacing: 0.1,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
                             ],
                           ),
 
-                          const SizedBox(height: 40),
+                          const SizedBox(height: 36),
 
                           AnimatedSwitcher(
                             duration: const Duration(milliseconds: 400),
@@ -425,7 +467,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
               Row(
                 children: [
                   Expanded(
-                    child: Container(
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 300),
                       height: 3,
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(2),
@@ -435,8 +478,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
                               )
                             : LinearGradient(
                                 colors: [
-                                  Colors.white.withOpacity(0.1),
-                                  Colors.white.withOpacity(0.1),
+                                  Colors.white.withOpacity(0.08),
+                                  Colors.white.withOpacity(0.08),
                                 ],
                               ),
                       ),
@@ -445,9 +488,10 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
                 ],
               ),
               const SizedBox(height: 8),
-              Container(
-                width: 28,
-                height: 28,
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 300),
+                width: 30,
+                height: 30,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   gradient: isActive
@@ -456,8 +500,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
                         )
                       : LinearGradient(
                           colors: [
-                            Colors.white.withOpacity(0.1),
-                            Colors.white.withOpacity(0.1),
+                            Colors.white.withOpacity(0.06),
+                            Colors.white.withOpacity(0.06),
                           ],
                         ),
                   border: Border.all(
@@ -466,16 +510,31 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
                         : Colors.white.withOpacity(0.1),
                     width: 2,
                   ),
+                  boxShadow: isCurrent
+                      ? [
+                          BoxShadow(
+                            color: const Color(0xFF92C24A).withOpacity(0.4),
+                            blurRadius: 12,
+                            offset: const Offset(0, 4),
+                          ),
+                        ]
+                      : [],
                 ),
                 child: Center(
-                  child: Text(
-                    '${index + 1}',
-                    style: TextStyle(
-                      color: isActive ? Colors.black : Colors.white.withOpacity(0.4),
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
+                  child: isActive && index < _currentStep
+                      ? const Icon(
+                          Icons.check_rounded,
+                          color: Colors.black,
+                          size: 16,
+                        )
+                      : Text(
+                          '${index + 1}',
+                          style: TextStyle(
+                            color: isActive ? Colors.black : Colors.white.withOpacity(0.4),
+                            fontSize: 12,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
                 ),
               ),
               if (isCurrent)
@@ -510,6 +569,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
 
   Widget _buildEmailStep() {
     return Column(
+      key: const ValueKey('email_step'),
       children: [
         Container(
           decoration: BoxDecoration(
@@ -557,7 +617,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(16),
-                borderSide: BorderSide(
+                borderSide: const BorderSide(
                   color: Colors.transparent,
                 ),
               ),
@@ -581,6 +641,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
 
   Widget _buildOTPStep() {
     return Column(
+      key: const ValueKey('otp_step'),
       children: [
         Container(
           padding: const EdgeInsets.all(16),
@@ -589,22 +650,29 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: [
-                const Color(0xFF92C24A).withOpacity(0.08),
-                Colors.transparent,
+                const Color(0xFF92C24A).withOpacity(0.1),
+                const Color(0xFF92C24A).withOpacity(0.02),
               ],
             ),
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: const Color(0xFF92C24A).withOpacity(0.15),
+              color: const Color(0xFF92C24A).withOpacity(0.18),
               width: 1,
             ),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFF92C24A).withOpacity(0.06),
+                blurRadius: 20,
+                offset: const Offset(0, 8),
+              ),
+            ],
           ),
           child: Row(
             children: [
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF92C24A).withOpacity(0.1),
+                  color: const Color(0xFF92C24A).withOpacity(0.12),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(
@@ -623,6 +691,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
                       style: TextStyle(
                         color: Colors.white.withOpacity(0.5),
                         fontSize: 12,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
                     Text(
@@ -630,8 +699,9 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 14,
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.w700,
                       ),
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ],
                 ),
@@ -642,7 +712,10 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
                   foregroundColor: const Color(0xFF92C24A),
                   padding: const EdgeInsets.symmetric(horizontal: 12),
                 ),
-                child: const Text('Resend'),
+                child: const Text(
+                  'Resend',
+                  style: TextStyle(fontWeight: FontWeight.w700),
+                ),
               ),
             ],
           ),
@@ -666,7 +739,12 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
           ),
           child: TextField(
             controller: _otpController,
-            style: const TextStyle(color: Colors.white, fontSize: 20),
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 20,
+              letterSpacing: 4,
+              fontWeight: FontWeight.w700,
+            ),
             keyboardType: TextInputType.number,
             textInputAction: TextInputAction.done,
             onSubmitted: (_) => _handleVerifyOTP(),
@@ -696,7 +774,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(16),
-                borderSide: BorderSide(
+                borderSide: const BorderSide(
                   color: Colors.transparent,
                 ),
               ),
@@ -736,6 +814,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
 
   Widget _buildPasswordStep() {
     return Column(
+      key: const ValueKey('password_step'),
       children: [
         Container(
           decoration: BoxDecoration(
@@ -797,7 +876,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(16),
-                borderSide: BorderSide(
+                borderSide: const BorderSide(
                   color: Colors.transparent,
                 ),
               ),
@@ -870,7 +949,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(16),
-                borderSide: BorderSide(
+                borderSide: const BorderSide(
                   color: Colors.transparent,
                 ),
               ),
@@ -881,9 +960,9 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
             ),
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 10),
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
           child: Row(
             children: [
               Icon(
@@ -940,7 +1019,10 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
       duration: const Duration(milliseconds: 300),
       height: 56,
       decoration: isOutlined
-          ? null
+          ? BoxDecoration(
+              color: Colors.white.withOpacity(0.03),
+              borderRadius: BorderRadius.circular(16),
+            )
           : BoxDecoration(
               gradient: const LinearGradient(
                 colors: [Color(0xFF92C24A), Color(0xFF4CAF50)],
@@ -961,7 +1043,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
             ),
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
-          backgroundColor: isOutlined ? Colors.transparent : Colors.transparent,
+          backgroundColor: Colors.transparent,
           foregroundColor: isOutlined ? Colors.white : Colors.black,
           shadowColor: Colors.transparent,
           shape: RoundedRectangleBorder(

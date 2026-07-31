@@ -673,11 +673,11 @@ class _SignUpScreenState extends State<SignUpScreen>
                         children: [
                           const SizedBox(height: 16),
                           _buildBackButton(),
-                          const SizedBox(height: 20),
+                          const SizedBox(height: 24),
                           _buildHeader(),
                           const SizedBox(height: 18),
                           _buildGuestBadge(),
-                          const SizedBox(height: 28),
+                          const SizedBox(height: 30),
                           _buildFullNameField(),
                           const SizedBox(height: 18),
                           _buildEmailField(),
@@ -691,11 +691,11 @@ class _SignUpScreenState extends State<SignUpScreen>
                           _buildConfirmPasswordField(),
                           const SizedBox(height: 6),
                           _buildPasswordHint(),
-                          const SizedBox(height: 20),
+                          const SizedBox(height: 22),
                           _buildTermsAndConditions(),
                           const SizedBox(height: 28),
                           _buildSignUpButton(),
-                          const SizedBox(height: 20),
+                          const SizedBox(height: 22),
                           _buildSignInLink(),
                           const SizedBox(height: 20),
                         ],
@@ -737,38 +737,55 @@ class _SignUpScreenState extends State<SignUpScreen>
   Widget _buildHeader() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Create Account',
-              style: TextStyle(
-                fontSize: 28,
-                fontWeight: FontWeight.w700,
-                color: Colors.white,
-                letterSpacing: -0.5,
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              ShaderMask(
+                shaderCallback: (bounds) => LinearGradient(
+                  colors: [Colors.white, Colors.white.withOpacity(0.85)],
+                ).createShader(bounds),
+                child: const Text(
+                  'Create Account',
+                  style: TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.w800,
+                    color: Colors.white,
+                    letterSpacing: -0.6,
+                  ),
+                ),
               ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              'Join the Livinkey community',
-              style: TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w400,
-                color: Colors.white.withOpacity(0.5),
-                letterSpacing: 0.2,
+              const SizedBox(height: 5),
+              Text(
+                'Join the Livinkey community',
+                style: TextStyle(
+                  fontSize: 14.5,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.white.withOpacity(0.45),
+                  letterSpacing: 0.1,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
+        const SizedBox(width: 12),
         ScaleTransition(
           scale: _logoScaleAnimation,
-          child: Image.asset(
-            kGeneralLogo,
-            height: 60,
-            width: 60,
-            fit: BoxFit.contain,
+          child: Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.04),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: Colors.white.withOpacity(0.06)),
+            ),
+            child: Image.asset(
+              kGeneralLogo,
+              height: 44,
+              width: 44,
+              fit: BoxFit.contain,
+            ),
           ),
         ),
       ],
@@ -779,60 +796,60 @@ class _SignUpScreenState extends State<SignUpScreen>
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: 14,
-        vertical: 8,
+        vertical: 9,
       ),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            const Color(0xFFFF9800).withOpacity(0.12),
+            const Color(0xFFFF9800).withOpacity(0.16),
             const Color(0xFFFF9800).withOpacity(0.04),
           ],
         ),
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: const Color(0xFFFF9800).withOpacity(0.15),
+          color: const Color(0xFFFF9800).withOpacity(0.22),
           width: 1.5,
         ),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFFFF9800).withOpacity(0.08),
+            blurRadius: 16,
+            offset: const Offset(0, 6),
+          ),
+        ],
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Container(
-            width: 7,
-            height: 7,
-            decoration: const BoxDecoration(
-              color: Color(0xFFFF9800),
-              shape: BoxShape.circle,
-            ),
-          ),
+          const _PulsingDot(),
           const SizedBox(width: 10),
           Text(
             'Guest Account',
             style: TextStyle(
-              color: const Color(0xFFFF9800).withOpacity(0.9),
+              color: const Color(0xFFFF9800).withOpacity(0.95),
               fontSize: 13,
-              fontWeight: FontWeight.w600,
-              letterSpacing: 0.3,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 0.2,
             ),
           ),
           const SizedBox(width: 10),
           Container(
             padding: const EdgeInsets.symmetric(
               horizontal: 8,
-              vertical: 2,
+              vertical: 3,
             ),
             decoration: BoxDecoration(
-              color: const Color(0xFFFF9800).withOpacity(0.1),
-              borderRadius: BorderRadius.circular(4),
+              color: const Color(0xFFFF9800).withOpacity(0.12),
+              borderRadius: BorderRadius.circular(6),
             ),
             child: Text(
               'Fixed Role',
               style: TextStyle(
-                color: const Color(0xFFFF9800).withOpacity(0.6),
+                color: const Color(0xFFFF9800).withOpacity(0.65),
                 fontSize: 10,
-                fontWeight: FontWeight.w500,
+                fontWeight: FontWeight.w600,
                 letterSpacing: 0.3,
               ),
             ),
@@ -1232,76 +1249,84 @@ class _SignUpScreenState extends State<SignUpScreen>
   }
 
   Widget _buildTermsAndConditions() {
-    return Row(
-      children: [
-        Theme(
-          data: ThemeData(
-            checkboxTheme: CheckboxThemeData(
-              fillColor: WidgetStateProperty.resolveWith(
-                (states) => const Color(0xFF92C24A),
-              ),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(4),
-              ),
-            ),
-            unselectedWidgetColor: Colors.white.withOpacity(0.3),
-          ),
-          child: Checkbox(
-            value: _agreeToTerms,
-            onChanged: (value) {
-              setState(() {
-                _agreeToTerms = value!;
-              });
-              hapticSelection();
-            },
-            activeColor: const Color(0xFF92C24A),
-            checkColor: Colors.black,
-            side: BorderSide(
-              color: Colors.white.withOpacity(0.3),
-              width: 1.5,
-            ),
-          ),
-        ),
-        Expanded(
-          child: Text.rich(
-            TextSpan(
-              style: TextStyle(
-                color: Colors.white.withOpacity(0.5),
-                fontSize: 13,
-                fontWeight: FontWeight.w400,
-              ),
-              children: [
-                const TextSpan(text: 'I agree to the '),
-                TextSpan(
-                  text: 'Terms of Services',
-                  style: TextStyle(
-                    color: const Color(0xFF92C24A).withOpacity(0.9),
-                    fontWeight: FontWeight.w600,
-                    decoration: TextDecoration.underline,
-                    decorationColor:
-                        const Color(0xFF92C24A).withOpacity(0.3),
-                    decorationThickness: 1.5,
-                  ),
-                  recognizer: _termsRecognizer,
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.025),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.white.withOpacity(0.05)),
+      ),
+      child: Row(
+        children: [
+          Theme(
+            data: ThemeData(
+              checkboxTheme: CheckboxThemeData(
+                fillColor: WidgetStateProperty.resolveWith(
+                  (states) => const Color(0xFF92C24A),
                 ),
-                const TextSpan(text: ' and '),
-                TextSpan(
-                  text: 'Privacy Policy',
-                  style: TextStyle(
-                    color: const Color(0xFF92C24A).withOpacity(0.9),
-                    fontWeight: FontWeight.w600,
-                    decoration: TextDecoration.underline,
-                    decorationColor:
-                        const Color(0xFF92C24A).withOpacity(0.3),
-                    decorationThickness: 1.5,
-                  ),
-                  recognizer: _privacyRecognizer,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(4),
                 ),
-              ],
+              ),
+              unselectedWidgetColor: Colors.white.withOpacity(0.3),
+            ),
+            child: Checkbox(
+              value: _agreeToTerms,
+              onChanged: (value) {
+                setState(() {
+                  _agreeToTerms = value!;
+                });
+                hapticSelection();
+              },
+              activeColor: const Color(0xFF92C24A),
+              checkColor: Colors.black,
+              side: BorderSide(
+                color: Colors.white.withOpacity(0.3),
+                width: 1.5,
+              ),
             ),
           ),
-        ),
-      ],
+          Expanded(
+            child: Text.rich(
+              TextSpan(
+                style: TextStyle(
+                  color: Colors.white.withOpacity(0.5),
+                  fontSize: 13,
+                  fontWeight: FontWeight.w400,
+                ),
+                children: [
+                  const TextSpan(text: 'I agree to the '),
+                  TextSpan(
+                    text: 'Terms of Services',
+                    style: TextStyle(
+                      color: const Color(0xFF92C24A).withOpacity(0.9),
+                      fontWeight: FontWeight.w600,
+                      decoration: TextDecoration.underline,
+                      decorationColor:
+                          const Color(0xFF92C24A).withOpacity(0.3),
+                      decorationThickness: 1.5,
+                    ),
+                    recognizer: _termsRecognizer,
+                  ),
+                  const TextSpan(text: ' and '),
+                  TextSpan(
+                    text: 'Privacy Policy',
+                    style: TextStyle(
+                      color: const Color(0xFF92C24A).withOpacity(0.9),
+                      fontWeight: FontWeight.w600,
+                      decoration: TextDecoration.underline,
+                      decorationColor:
+                          const Color(0xFF92C24A).withOpacity(0.3),
+                      decorationThickness: 1.5,
+                    ),
+                    recognizer: _privacyRecognizer,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -1446,10 +1471,15 @@ class _SignUpScreenState extends State<SignUpScreen>
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
-                colors: [
-                  Colors.white.withOpacity(0.05),
-                  Colors.white.withOpacity(0.02),
-                ],
+                colors: isOpen
+                    ? [
+                        const Color(0xFF92C24A).withOpacity(0.08),
+                        const Color(0xFF92C24A).withOpacity(0.02),
+                      ]
+                    : [
+                        Colors.white.withOpacity(0.05),
+                        Colors.white.withOpacity(0.02),
+                      ],
               ),
               borderRadius: BorderRadius.circular(14),
               border: Border.all(
@@ -1490,11 +1520,14 @@ class _SignUpScreenState extends State<SignUpScreen>
                       ],
                     ),
                   ),
-                  Icon(
-                    isOpen
-                        ? Icons.arrow_drop_up_rounded
-                        : Icons.arrow_drop_down_rounded,
-                    color: Colors.white.withOpacity(0.5),
+                  AnimatedRotation(
+                    turns: isOpen ? 0.5 : 0,
+                    duration: const Duration(milliseconds: 200),
+                    child: Icon(
+                      Icons.keyboard_arrow_down_rounded,
+                      color: Colors.white.withOpacity(0.5),
+                      size: 24,
+                    ),
                   ),
                 ],
               ),
@@ -1503,14 +1536,21 @@ class _SignUpScreenState extends State<SignUpScreen>
         ),
         if (isOpen)
           Container(
-            margin: const EdgeInsets.only(top: 4),
+            margin: const EdgeInsets.only(top: 6),
             decoration: BoxDecoration(
-              color: Colors.black,
+              color: const Color(0xFF0A0A0A),
               borderRadius: BorderRadius.circular(14),
               border: Border.all(
                 color: Colors.white.withOpacity(0.08),
                 width: 1.5,
               ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.4),
+                  blurRadius: 24,
+                  offset: const Offset(0, 12),
+                ),
+              ],
             ),
             child: Column(
               children: [
@@ -1556,8 +1596,8 @@ class _SignUpScreenState extends State<SignUpScreen>
                     onChanged: onSearchChanged,
                   ),
                 ),
-                const Divider(
-                  color: Colors.white24,
+                Divider(
+                  color: Colors.white.withOpacity(0.08),
                   height: 1,
                 ),
                 ConstrainedBox(
@@ -1565,14 +1605,25 @@ class _SignUpScreenState extends State<SignUpScreen>
                     maxHeight: 200,
                   ),
                   child: items.isEmpty
-                      ? const Padding(
-                          padding: EdgeInsets.all(16.0),
-                          child: Text(
-                            'No results found',
-                            style: TextStyle(
-                              color: Colors.white38,
-                              fontSize: 14,
-                            ),
+                      ? Padding(
+                          padding: const EdgeInsets.all(20.0),
+                          child: Column(
+                            children: [
+                              Icon(
+                                Icons.search_off_rounded,
+                                color: Colors.white.withOpacity(0.2),
+                                size: 28,
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                'No results found',
+                                style: TextStyle(
+                                  color: Colors.white.withOpacity(0.3),
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
                           ),
                         )
                       : ListView.builder(
@@ -1580,6 +1631,7 @@ class _SignUpScreenState extends State<SignUpScreen>
                           itemCount: items.length,
                           itemBuilder: (context, index) {
                             final item = items[index];
+                            final isSelected = item == selectedValue;
                             return InkWell(
                               onTap: () {
                                 onChanged(item);
@@ -1590,7 +1642,7 @@ class _SignUpScreenState extends State<SignUpScreen>
                                   vertical: 12,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: item == selectedValue
+                                  color: isSelected
                                       ? const Color(0xFF92C24A)
                                           .withOpacity(0.1)
                                       : Colors.transparent,
@@ -1601,7 +1653,18 @@ class _SignUpScreenState extends State<SignUpScreen>
                                     ),
                                   ),
                                 ),
-                                child: buildItem(item),
+                                child: Row(
+                                  children: [
+                                    Expanded(child: buildItem(item)),
+                                    if (isSelected)
+                                      Icon(
+                                        Icons.check_circle_rounded,
+                                        color:
+                                            const Color(0xFF92C24A).withOpacity(0.85),
+                                        size: 18,
+                                      ),
+                                  ],
+                                ),
                               ),
                             );
                           },
@@ -1716,6 +1779,45 @@ class _SignUpScreenState extends State<SignUpScreen>
           ),
         ),
         validator: validator,
+      ),
+    );
+  }
+}
+
+/// Small pulsing status dot used in the Guest badge.
+class _PulsingDot extends StatefulWidget {
+  const _PulsingDot();
+
+  @override
+  State<_PulsingDot> createState() => _PulsingDotState();
+}
+
+class _PulsingDotState extends State<_PulsingDot>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 1400),
+  )..repeat(reverse: true);
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FadeTransition(
+      opacity: Tween<double>(begin: 0.4, end: 1.0).animate(
+        CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+      ),
+      child: Container(
+        width: 7,
+        height: 7,
+        decoration: const BoxDecoration(
+          color: Color(0xFFFF9800),
+          shape: BoxShape.circle,
+        ),
       ),
     );
   }

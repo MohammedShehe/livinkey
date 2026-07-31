@@ -42,10 +42,10 @@ class _LoginScreenState extends State<LoginScreen>
   double _getLogoSize(BuildContext context) {
     final double screenWidth = MediaQuery.of(context).size.width;
     final double screenHeight = MediaQuery.of(context).size.height;
-    
+
     // Use the smaller dimension to ensure it fits
     final double minDimension = screenWidth < screenHeight ? screenWidth : screenHeight;
-    
+
     // For tablets (width >= 600), use larger size
     if (screenWidth >= 600) {
       return minDimension * 0.12; // 12% of screen width for tablets
@@ -204,12 +204,12 @@ class _LoginScreenState extends State<LoginScreen>
 
     if (mounted) {
       SnackbarHelper.showSuccess(context, 'Login successful!');
-      
+
       await Future.delayed(const Duration(milliseconds: 500));
-      
+
       if (mounted) {
         final String? role = AuthService.getRole(email);
-        
+
         if (role == AuthService.tenantRole) {
           _navigateToScreen(const TenantScreen(), 'Tenant');
         } else if (role == AuthService.guestRole) {
@@ -235,10 +235,10 @@ class _LoginScreenState extends State<LoginScreen>
           var tween = Tween(begin: begin, end: end)
               .chain(CurveTween(curve: curve));
           var offsetAnimation = animation.drive(tween);
-          
+
           var fadeTween = Tween<double>(begin: 0.0, end: 1.0);
           var fadeAnimation = animation.drive(fadeTween);
-          
+
           return FadeTransition(
             opacity: fadeAnimation,
             child: SlideTransition(
@@ -255,7 +255,7 @@ class _LoginScreenState extends State<LoginScreen>
   Future<void> _launchUrl(String url) async {
     try {
       final Uri uri = Uri.parse(url);
-      
+
       if (await canLaunchUrl(uri)) {
         await launchUrl(
           uri,
@@ -277,10 +277,10 @@ class _LoginScreenState extends State<LoginScreen>
   Future<void> _launchWhatsApp() async {
     final String phoneNumber = kWhatsAppNumber;
     final String url = 'https://wa.me/$phoneNumber';
-    
+
     try {
       final Uri uri = Uri.parse(url);
-      
+
       if (await canLaunchUrl(uri)) {
         await launchUrl(
           uri,
@@ -307,7 +307,7 @@ class _LoginScreenState extends State<LoginScreen>
   Widget build(BuildContext context) {
     // Get responsive logo size
     final double logoSize = _getLogoSize(context);
-    
+
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: const SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
@@ -319,167 +319,187 @@ class _LoginScreenState extends State<LoginScreen>
         onTap: () => FocusScope.of(context).unfocus(),
         child: Scaffold(
           backgroundColor: Colors.black,
-          body: SafeArea(
-            child: FadeTransition(
-              opacity: _fadeAnimation,
-              child: ScaleTransition(
-                scale: _scaleAnimation,
-                child: SlideTransition(
-                  position: _slideAnimation,
-                  child: SingleChildScrollView(
-                    physics: const BouncingScrollPhysics(),
-                    padding: const EdgeInsets.symmetric(horizontal: 24),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const SizedBox(height: 20),
+          body: DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  const Color(0xFF92C24A).withOpacity(0.07),
+                  Colors.black,
+                  Colors.black,
+                ],
+                stops: const [0.0, 0.35, 1.0],
+              ),
+            ),
+            child: SafeArea(
+              child: FadeTransition(
+                opacity: _fadeAnimation,
+                child: ScaleTransition(
+                  scale: _scaleAnimation,
+                  child: SlideTransition(
+                    position: _slideAnimation,
+                    child: SingleChildScrollView(
+                      physics: const BouncingScrollPhysics(),
+                      padding: const EdgeInsets.symmetric(horizontal: 24),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const SizedBox(height: 20),
 
-                        // Top section with logo
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Welcome Back!',
-                                  style: TextStyle(
-                                    fontSize: 28,
-                                    fontWeight: FontWeight.w700,
-                                    color: Colors.white,
-                                    letterSpacing: -0.5,
+                          // Top section with logo
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text(
+                                    'Welcome Back!',
+                                    style: TextStyle(
+                                      fontSize: 29,
+                                      fontWeight: FontWeight.w800,
+                                      color: Colors.white,
+                                      letterSpacing: -0.6,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 5),
+                                  Text(
+                                    'Sign in to continue your journey',
+                                    style: TextStyle(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w400,
+                                      color: Colors.white.withOpacity(0.5),
+                                      letterSpacing: 0.2,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              ScaleTransition(
+                                scale: _logoScaleAnimation,
+                                child: Container(
+                                  padding: const EdgeInsets.all(4),
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(16),
+                                  ),
+                                  child: Image.asset(
+                                    kGeneralLogo,
+                                    height: logoSize,
+                                    width: logoSize,
+                                    fit: BoxFit.contain,
                                   ),
                                 ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  'Sign in to continue your journey',
-                                  style: TextStyle(
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.w400,
-                                    color: Colors.white.withOpacity(0.5),
-                                    letterSpacing: 0.2,
-                                  ),
-                                ),
-                              ],
+                              ),
+                            ],
+                          ),
+
+                          const SizedBox(height: 34),
+
+                          // Email Field
+                          _buildTextField(
+                            controller: _emailController,
+                            label: 'Email Address',
+                            icon: Icons.email_outlined,
+                            keyboardType: TextInputType.emailAddress,
+                            textInputAction: TextInputAction.next,
+                          ),
+
+                          const SizedBox(height: 18),
+
+                          // Password Field
+                          _buildTextField(
+                            controller: _passwordController,
+                            label: 'Password',
+                            icon: Icons.lock_outline,
+                            obscureText: _obscurePassword,
+                            textInputAction: TextInputAction.done,
+                            onSubmitted: (_) => _handleLogin(),
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                _obscurePassword
+                                    ? Icons.visibility_off_outlined
+                                    : Icons.visibility_outlined,
+                                color: Colors.white.withOpacity(0.4),
+                                size: 22,
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  _obscurePassword = !_obscurePassword;
+                                });
+                                hapticFeedback();
+                              },
                             ),
-                            ScaleTransition(
-                              scale: _logoScaleAnimation,
-                              child: Image.asset(
-                                kGeneralLogo,
-                                height: logoSize,
-                                width: logoSize,
-                                fit: BoxFit.contain,
+                          ),
+
+                          const SizedBox(height: 12),
+
+                          // Forgot Password
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: Text.rich(
+                              TextSpan(
+                                children: [
+                                  TextSpan(
+                                    text: 'Forgot Password?',
+                                    style: TextStyle(
+                                      color: const Color(0xFF92C24A).withOpacity(0.9),
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w600,
+                                      decoration: TextDecoration.underline,
+                                      decorationColor:
+                                          const Color(0xFF92C24A).withOpacity(0.3),
+                                      decorationThickness: 1.5,
+                                    ),
+                                    recognizer: _forgotPasswordRecognizer,
+                                  ),
+                                ],
                               ),
                             ),
-                          ],
-                        ),
-
-                        const SizedBox(height: 32),
-
-                        // Email Field
-                        _buildTextField(
-                          controller: _emailController,
-                          label: 'Email Address',
-                          icon: Icons.email_outlined,
-                          keyboardType: TextInputType.emailAddress,
-                          textInputAction: TextInputAction.next,
-                        ),
-
-                        const SizedBox(height: 18),
-
-                        // Password Field
-                        _buildTextField(
-                          controller: _passwordController,
-                          label: 'Password',
-                          icon: Icons.lock_outline,
-                          obscureText: _obscurePassword,
-                          textInputAction: TextInputAction.done,
-                          onSubmitted: (_) => _handleLogin(),
-                          suffixIcon: IconButton(
-                            icon: Icon(
-                              _obscurePassword
-                                  ? Icons.visibility_off_outlined
-                                  : Icons.visibility_outlined,
-                              color: Colors.white.withOpacity(0.4),
-                              size: 22,
-                            ),
-                            onPressed: () {
-                              setState(() {
-                                _obscurePassword = !_obscurePassword;
-                              });
-                              hapticFeedback();
-                            },
                           ),
-                        ),
 
-                        const SizedBox(height: 10),
+                          const SizedBox(height: 32),
 
-                        // Forgot Password
-                        Align(
-                          alignment: Alignment.centerRight,
-                          child: Text.rich(
-                            TextSpan(
-                              children: [
-                                TextSpan(
-                                  text: 'Forgot Password?',
-                                  style: TextStyle(
-                                    color: const Color(0xFF92C24A).withOpacity(0.9),
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w600,
-                                    decoration: TextDecoration.underline,
-                                    decorationColor:
-                                        const Color(0xFF92C24A).withOpacity(0.3),
-                                    decorationThickness: 1.5,
-                                  ),
-                                  recognizer: _forgotPasswordRecognizer,
+                          // Login Button
+                          _buildLoginButton(),
+
+                          const SizedBox(height: 24),
+
+                          // Sign Up Link
+                          Center(
+                            child: Text.rich(
+                              TextSpan(
+                                style: TextStyle(
+                                  color: Colors.white.withOpacity(0.5),
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w400,
                                 ),
-                              ],
-                            ),
-                          ),
-                        ),
-
-                        const SizedBox(height: 32),
-
-                        // Login Button
-                        _buildLoginButton(),
-
-                        const SizedBox(height: 24),
-
-                        // Sign Up Link
-                        Center(
-                          child: Text.rich(
-                            TextSpan(
-                              style: TextStyle(
-                                color: Colors.white.withOpacity(0.5),
-                                fontSize: 15,
-                                fontWeight: FontWeight.w400,
+                                children: [
+                                  const TextSpan(text: "Don't have an account? "),
+                                  TextSpan(
+                                    text: 'Sign Up',
+                                    style: TextStyle(
+                                      color: const Color(0xFF92C24A),
+                                      fontWeight: FontWeight.w700,
+                                      decoration: TextDecoration.underline,
+                                      decorationColor:
+                                          const Color(0xFF92C24A).withOpacity(0.3),
+                                      decorationThickness: 1.5,
+                                    ),
+                                    recognizer: _signUpRecognizer,
+                                  ),
+                                ],
                               ),
-                              children: [
-                                const TextSpan(text: "Don't have an account? "),
-                                TextSpan(
-                                  text: 'Sign Up',
-                                  style: TextStyle(
-                                    color: const Color(0xFF92C24A),
-                                    fontWeight: FontWeight.w700,
-                                    decoration: TextDecoration.underline,
-                                    decorationColor:
-                                        const Color(0xFF92C24A).withOpacity(0.3),
-                                    decorationThickness: 1.5,
-                                  ),
-                                  recognizer: _signUpRecognizer,
-                                ),
-                              ],
                             ),
                           ),
-                        ),
 
-                        const SizedBox(height: 36),
+                          const SizedBox(height: 36),
 
-                        // Social Section
-                        _buildSocialSection(),
+                          // Social Section
+                          _buildSocialSection(),
 
-                        const SizedBox(height: 24),
-                      ],
+                          const SizedBox(height: 24),
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -511,11 +531,18 @@ class _LoginScreenState extends State<LoginScreen>
             Colors.white.withOpacity(0.02),
           ],
         ),
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: Colors.white.withOpacity(0.08),
           width: 1.5,
         ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.15),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: TextField(
         controller: controller,
@@ -537,23 +564,23 @@ class _LoginScreenState extends State<LoginScreen>
           ),
           prefixIcon: Icon(
             icon,
-            color: const Color(0xFF92C24A).withOpacity(0.8),
+            color: const Color(0xFF92C24A).withOpacity(0.85),
             size: 22,
           ),
           suffixIcon: suffixIcon,
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(16),
             borderSide: BorderSide.none,
           ),
           focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(16),
             borderSide: BorderSide(
-              color: const Color(0xFF92C24A).withOpacity(0.5),
+              color: const Color(0xFF92C24A).withOpacity(0.55),
               width: 2,
             ),
           ),
           enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(16),
             borderSide: BorderSide.none,
           ),
           contentPadding: const EdgeInsets.symmetric(
@@ -580,7 +607,7 @@ class _LoginScreenState extends State<LoginScreen>
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
             color: const Color(0xFF92C24A).withOpacity(0.35),
@@ -600,18 +627,18 @@ class _LoginScreenState extends State<LoginScreen>
           foregroundColor: Colors.black,
           shadowColor: Colors.transparent,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(16),
           ),
           elevation: 0,
         ),
         onPressed: _isLoading ? null : _handleLogin,
         child: _isLoading
-            ? SizedBox(
+            ? const SizedBox(
                 height: 24,
                 width: 24,
                 child: CircularProgressIndicator(
                   strokeWidth: 2.5,
-                  valueColor: const AlwaysStoppedAnimation<Color>(
+                  valueColor: AlwaysStoppedAnimation<Color>(
                     Colors.black,
                   ),
                 ),
@@ -644,20 +671,20 @@ class _LoginScreenState extends State<LoginScreen>
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: 16,
-        vertical: 18,
+        vertical: 20,
       ),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            Colors.white.withOpacity(0.03),
-            Colors.transparent,
+            Colors.white.withOpacity(0.035),
+            Colors.white.withOpacity(0.01),
           ],
         ),
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(18),
         border: Border.all(
-          color: Colors.white.withOpacity(0.06),
+          color: Colors.white.withOpacity(0.07),
           width: 1.5,
         ),
       ),
@@ -678,9 +705,9 @@ class _LoginScreenState extends State<LoginScreen>
                 child: Text(
                   'Connect with Us',
                   style: TextStyle(
-                    color: Colors.white.withOpacity(0.35),
+                    color: Colors.white.withOpacity(0.4),
                     fontSize: 12,
-                    fontWeight: FontWeight.w500,
+                    fontWeight: FontWeight.w600,
                     letterSpacing: 0.8,
                   ),
                 ),
@@ -693,7 +720,7 @@ class _LoginScreenState extends State<LoginScreen>
               ),
             ],
           ),
-          const SizedBox(height: 18),
+          const SizedBox(height: 20),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -756,15 +783,22 @@ class _LoginScreenState extends State<LoginScreen>
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: [
-                color.withOpacity(0.15),
+                color.withOpacity(0.16),
                 color.withOpacity(0.05),
               ],
             ),
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(15),
             border: Border.all(
-              color: color.withOpacity(0.2),
+              color: color.withOpacity(0.22),
               width: 1.5,
             ),
+            boxShadow: [
+              BoxShadow(
+                color: color.withOpacity(0.15),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
           ),
           child: Center(
             child: FaIcon(

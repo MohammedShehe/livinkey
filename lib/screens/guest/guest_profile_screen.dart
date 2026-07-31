@@ -24,6 +24,7 @@ class _GuestProfileScreenState extends State<GuestProfileScreen>
 
   late AnimationController _fadeController;
   late Animation<double> _fadeAnimation;
+  late Animation<Offset> _slideAnimation;
 
   // Guest data
   GuestModel guest = GuestModel(
@@ -42,6 +43,12 @@ class _GuestProfileScreenState extends State<GuestProfileScreen>
     );
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(parent: _fadeController, curve: Curves.easeOut),
+    );
+    _slideAnimation = Tween<Offset>(
+      begin: const Offset(0, 0.04),
+      end: Offset.zero,
+    ).animate(
+      CurvedAnimation(parent: _fadeController, curve: Curves.easeOutCubic),
     );
     WidgetsBinding.instance.addPostFrameCallback((_) => _fadeController.forward());
   }
@@ -72,33 +79,52 @@ class _GuestProfileScreenState extends State<GuestProfileScreen>
         maxChildSize: 0.95,
         builder: (context, scrollController) => Container(
           padding: const EdgeInsets.all(24),
-          decoration: const BoxDecoration(
+          decoration: BoxDecoration(
             color: kLivinkeyBlack,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+            border: Border(
+              top: BorderSide(color: Colors.white.withOpacity(0.08), width: 1),
+            ),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Center(
                 child: Container(
-                  width: 40,
+                  width: 44,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
+                    color: Colors.white.withOpacity(0.18),
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
               ),
-              const SizedBox(height: 16),
-              const Text(
-                'Edit Profile',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 20,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
               const SizedBox(height: 20),
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(9),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [kLivinkeyGreen, const Color(0xFF66BB6A)],
+                      ),
+                      borderRadius: BorderRadius.circular(11),
+                    ),
+                    child: const Icon(Icons.edit_rounded, color: Colors.black, size: 18),
+                  ),
+                  const SizedBox(width: 12),
+                  const Text(
+                    'Edit Profile',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 20,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: -0.3,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
               Expanded(
                 child: SingleChildScrollView(
                   controller: scrollController,
@@ -129,38 +155,52 @@ class _GuestProfileScreenState extends State<GuestProfileScreen>
                         icon: Icons.phone_outlined,
                         keyboardType: TextInputType.phone,
                       ),
-                      const SizedBox(height: 24),
+                      const SizedBox(height: 28),
                       SizedBox(
                         width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: () {
-                            setState(() {
-                              guest = GuestModel(
-                                fullName: nameController.text.trim(),
-                                email: emailController.text.trim(),
-                                nationality: nationalityController.text.trim(),
-                                phone: phoneController.text.trim(),
-                              );
-                            });
-                            Navigator.pop(context);
-                            SnackbarHelper.showSuccess(
-                              context,
-                              'Profile updated successfully!',
-                            );
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: kLivinkeyGreen,
-                            foregroundColor: Colors.black,
-                            padding: const EdgeInsets.symmetric(vertical: 14),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(14),
-                            ),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(14),
+                            boxShadow: [
+                              BoxShadow(
+                                color: kLivinkeyGreen.withOpacity(0.3),
+                                blurRadius: 16,
+                                offset: const Offset(0, 6),
+                              ),
+                            ],
                           ),
-                          child: const Text(
-                            'Save Changes',
-                            style: TextStyle(
-                              fontWeight: FontWeight.w700,
-                              fontSize: 16,
+                          child: ElevatedButton(
+                            onPressed: () {
+                              setState(() {
+                                guest = GuestModel(
+                                  fullName: nameController.text.trim(),
+                                  email: emailController.text.trim(),
+                                  nationality: nationalityController.text.trim(),
+                                  phone: phoneController.text.trim(),
+                                );
+                              });
+                              Navigator.pop(context);
+                              SnackbarHelper.showSuccess(
+                                context,
+                                'Profile updated successfully!',
+                              );
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: kLivinkeyGreen,
+                              foregroundColor: Colors.black,
+                              elevation: 0,
+                              padding: const EdgeInsets.symmetric(vertical: 15),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                            ),
+                            child: const Text(
+                              'Save Changes',
+                              style: TextStyle(
+                                fontWeight: FontWeight.w700,
+                                fontSize: 16,
+                                letterSpacing: 0.2,
+                              ),
                             ),
                           ),
                         ),
@@ -193,33 +233,50 @@ class _GuestProfileScreenState extends State<GuestProfileScreen>
           maxChildSize: 0.85,
           builder: (context, scrollController) => Container(
             padding: const EdgeInsets.all(24),
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               color: kLivinkeyBlack,
-              borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+              border: Border(
+                top: BorderSide(color: Colors.white.withOpacity(0.08), width: 1),
+              ),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Center(
                   child: Container(
-                    width: 40,
+                    width: 44,
                     height: 4,
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
+                      color: Colors.white.withOpacity(0.18),
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
                 ),
-                const SizedBox(height: 16),
-                const Text(
-                  'Change Password',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 20,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
                 const SizedBox(height: 20),
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(9),
+                      decoration: BoxDecoration(
+                        color: Colors.blue.withOpacity(0.15),
+                        borderRadius: BorderRadius.circular(11),
+                      ),
+                      child: const Icon(Icons.lock_outline_rounded, color: Colors.blue, size: 18),
+                    ),
+                    const SizedBox(width: 12),
+                    const Text(
+                      'Change Password',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 20,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: -0.3,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 24),
                 Expanded(
                   child: SingleChildScrollView(
                     controller: scrollController,
@@ -246,65 +303,79 @@ class _GuestProfileScreenState extends State<GuestProfileScreen>
                             });
                           },
                         ),
-                        const SizedBox(height: 24),
+                        const SizedBox(height: 28),
                         SizedBox(
                           width: double.infinity,
-                          child: ElevatedButton(
-                            onPressed: () {
-                              final newPass = newPasswordController.text.trim();
-                              final confirmPass = confirmPasswordController.text.trim();
-
-                              if (newPass.isEmpty) {
-                                SnackbarHelper.showError(
-                                  context,
-                                  'Please enter a new password',
-                                );
-                                return;
-                              }
-
-                              if (newPass.length < 6) {
-                                SnackbarHelper.showError(
-                                  context,
-                                  'Password must be at least 6 characters',
-                                );
-                                return;
-                              }
-
-                              if (confirmPass.isEmpty) {
-                                SnackbarHelper.showError(
-                                  context,
-                                  'Please confirm your password',
-                                );
-                                return;
-                              }
-
-                              if (newPass != confirmPass) {
-                                SnackbarHelper.showError(
-                                  context,
-                                  'Passwords do not match',
-                                );
-                                return;
-                              }
-
-                              Navigator.pop(context);
-                              SnackbarHelper.showSuccess(
-                                context,
-                                'Password changed successfully!',
-                              );
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: kLivinkeyGreen,
-                              foregroundColor: Colors.black,
-                              padding: const EdgeInsets.symmetric(vertical: 14),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(14),
-                              ),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(14),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: kLivinkeyGreen.withOpacity(0.3),
+                                  blurRadius: 16,
+                                  offset: const Offset(0, 6),
+                                ),
+                              ],
                             ),
-                            child: const Text(
-                              'Change Password',
-                              style: TextStyle(
-                                fontWeight: FontWeight.w700,
-                                fontSize: 16,
+                            child: ElevatedButton(
+                              onPressed: () {
+                                final newPass = newPasswordController.text.trim();
+                                final confirmPass = confirmPasswordController.text.trim();
+
+                                if (newPass.isEmpty) {
+                                  SnackbarHelper.showError(
+                                    context,
+                                    'Please enter a new password',
+                                  );
+                                  return;
+                                }
+
+                                if (newPass.length < 6) {
+                                  SnackbarHelper.showError(
+                                    context,
+                                    'Password must be at least 6 characters',
+                                  );
+                                  return;
+                                }
+
+                                if (confirmPass.isEmpty) {
+                                  SnackbarHelper.showError(
+                                    context,
+                                    'Please confirm your password',
+                                  );
+                                  return;
+                                }
+
+                                if (newPass != confirmPass) {
+                                  SnackbarHelper.showError(
+                                    context,
+                                    'Passwords do not match',
+                                  );
+                                  return;
+                                }
+
+                                Navigator.pop(context);
+                                SnackbarHelper.showSuccess(
+                                  context,
+                                  'Password changed successfully!',
+                                );
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: kLivinkeyGreen,
+                                foregroundColor: Colors.black,
+                                elevation: 0,
+                                padding: const EdgeInsets.symmetric(vertical: 15),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(14),
+                                ),
+                              ),
+                              child: const Text(
+                                'Change Password',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 16,
+                                  letterSpacing: 0.2,
+                                ),
                               ),
                             ),
                           ),
@@ -325,24 +396,41 @@ class _GuestProfileScreenState extends State<GuestProfileScreen>
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: kLivinkeyBlack,
+        backgroundColor: const Color(0xFF161616),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(20),
+          side: BorderSide(color: Colors.white.withOpacity(0.08), width: 1),
         ),
-        title: const Text(
-          'Logout',
-          style: TextStyle(color: Colors.white),
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.red.withOpacity(0.12),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: const Icon(Icons.logout_rounded, color: Colors.red, size: 18),
+            ),
+            const SizedBox(width: 12),
+            const Text(
+              'Logout',
+              style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
+            ),
+          ],
         ),
-        content: const Text(
+        content: Text(
           'Are you sure you want to logout?',
-          style: TextStyle(color: Colors.white70),
+          style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 14),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: Text(
               'Cancel',
-              style: TextStyle(color: Colors.white.withOpacity(0.5)),
+              style: TextStyle(
+                color: Colors.white.withOpacity(0.5),
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
           TextButton(
@@ -354,7 +442,7 @@ class _GuestProfileScreenState extends State<GuestProfileScreen>
             },
             child: const Text(
               'Logout',
-              style: TextStyle(color: Colors.red),
+              style: TextStyle(color: Colors.red, fontWeight: FontWeight.w700),
             ),
           ),
         ],
@@ -380,41 +468,73 @@ class _GuestProfileScreenState extends State<GuestProfileScreen>
     return Scaffold(
       backgroundColor: kLivinkeyBlack,
       appBar: AppBar(
-        leading: IconButton(
-          icon: Icon(Icons.menu_rounded, color: Colors.white, size: 28),
-          onPressed: () {
-            Scaffold.of(context).openDrawer();
-          },
+        elevation: 0,
+        backgroundColor: kLivinkeyBlack,
+        surfaceTintColor: Colors.transparent,
+        leading: Builder(
+          builder: (context) => IconButton(
+            icon: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.06),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.white.withOpacity(0.08)),
+              ),
+              child: const Icon(Icons.menu_rounded, color: Colors.white, size: 20),
+            ),
+            onPressed: () {
+              Scaffold.of(context).openDrawer();
+            },
+          ),
         ),
-        title: const Text('Profile'),
+        title: const Text(
+          'Profile',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 19,
+            fontWeight: FontWeight.w700,
+            letterSpacing: -0.3,
+          ),
+        ),
         actions: [
           Container(
             margin: const EdgeInsets.only(right: 16),
             decoration: BoxDecoration(
               gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
                 colors: [
-                  const Color(0xFFFF9800).withOpacity(0.2),
-                  const Color(0xFFFF9800).withOpacity(0.05),
+                  const Color(0xFFFF9800).withOpacity(0.22),
+                  const Color(0xFFFF9800).withOpacity(0.06),
                 ],
               ),
               borderRadius: BorderRadius.circular(20),
               border: Border.all(
-                color: const Color(0xFFFF9800).withOpacity(0.15),
+                color: const Color(0xFFFF9800).withOpacity(0.25),
                 width: 1,
               ),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFFFF9800).withOpacity(0.12),
+                  blurRadius: 12,
+                  offset: const Offset(0, 3),
+                ),
+              ],
             ),
             child: const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              padding: EdgeInsets.symmetric(horizontal: 12, vertical: 7),
               child: Row(
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.circle, color: Color(0xFFFF9800), size: 8),
+                  _PulsingDot(),
                   SizedBox(width: 6),
                   Text(
                     'Guest',
                     style: TextStyle(
                       color: Color(0xFFFF9800),
                       fontSize: 11,
-                      fontWeight: FontWeight.w600,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 0.3,
                     ),
                   ),
                 ],
@@ -425,188 +545,218 @@ class _GuestProfileScreenState extends State<GuestProfileScreen>
       ),
       body: FadeTransition(
         opacity: _fadeAnimation,
-        child: SingleChildScrollView(
-          physics: const BouncingScrollPhysics(),
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 12),
+        child: SlideTransition(
+          position: _slideAnimation,
+          child: SingleChildScrollView(
+            physics: const BouncingScrollPhysics(),
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 8),
 
-              // Profile Header
-              _buildProfileHeader(),
-              const SizedBox(height: 20),
+                // Profile Header
+                _buildProfileHeader(),
+                const SizedBox(height: 24),
 
-              // Guest Details
-              const Text(
-                'Guest Details',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 18,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              const SizedBox(height: 12),
+                // Guest Details
+                _buildSectionLabel('Guest Details'),
+                const SizedBox(height: 12),
 
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      Colors.white.withOpacity(0.03),
-                      Colors.transparent,
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        Colors.white.withOpacity(0.045),
+                        Colors.white.withOpacity(0.01),
+                      ],
+                    ),
+                    borderRadius: BorderRadius.circular(18),
+                    border: Border.all(
+                      color: Colors.white.withOpacity(0.08),
+                      width: 1,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.15),
+                        blurRadius: 16,
+                        offset: const Offset(0, 6),
+                      ),
                     ],
                   ),
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                    color: Colors.white.withOpacity(0.06),
-                    width: 1,
+                  child: Column(
+                    children: [
+                      ProfileRow(label: 'Full Name', value: guest.fullName),
+                      ProfileRow(label: 'Email', value: guest.email),
+                      ProfileRow(label: 'Nationality', value: guest.nationality),
+                      ProfileRow(label: 'Phone', value: guest.phone),
+                    ],
                   ),
                 ),
-                child: Column(
-                  children: [
-                    ProfileRow(label: 'Full Name', value: guest.fullName),
-                    ProfileRow(label: 'Email', value: guest.email),
-                    ProfileRow(label: 'Nationality', value: guest.nationality),
-                    ProfileRow(label: 'Phone', value: guest.phone),
-                  ],
-                ),
-              ),
 
-              const SizedBox(height: 20),
+                const SizedBox(height: 20),
 
-              // Edit Profile Button
-              SizedBox(
-                width: double.infinity,
-                child: OutlinedButton.icon(
-                  onPressed: _showEditProfile,
-                  icon: Icon(
-                    Icons.edit_rounded,
-                    color: kLivinkeyGreen,
-                    size: 20,
-                  ),
-                  label: const Text(
-                    'Edit Profile',
-                    style: TextStyle(
+                // Edit Profile Button
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton.icon(
+                    onPressed: () {
+                      HapticFeedback.selectionClick();
+                      _showEditProfile();
+                    },
+                    icon: Icon(
+                      Icons.edit_rounded,
                       color: kLivinkeyGreen,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 16,
+                      size: 20,
                     ),
-                  ),
-                  style: OutlinedButton.styleFrom(
-                    side: BorderSide(
-                      color: kLivinkeyGreen.withOpacity(0.3),
-                      width: 1.5,
+                    label: const Text(
+                      'Edit Profile',
+                      style: TextStyle(
+                        color: kLivinkeyGreen,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 15.5,
+                      ),
                     ),
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
+                    style: OutlinedButton.styleFrom(
+                      backgroundColor: kLivinkeyGreen.withOpacity(0.06),
+                      side: BorderSide(
+                        color: kLivinkeyGreen.withOpacity(0.35),
+                        width: 1.5,
+                      ),
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
                     ),
                   ),
                 ),
-              ),
 
-              const SizedBox(height: 16),
+                const SizedBox(height: 12),
 
-              // Change Password Button
-              SizedBox(
-                width: double.infinity,
-                child: OutlinedButton.icon(
-                  onPressed: _showChangePassword,
-                  icon: Icon(
-                    Icons.lock_outline_rounded,
-                    color: Colors.blue,
-                    size: 20,
-                  ),
-                  label: const Text(
-                    'Change Password',
-                    style: TextStyle(
+                // Change Password Button
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton.icon(
+                    onPressed: () {
+                      HapticFeedback.selectionClick();
+                      _showChangePassword();
+                    },
+                    icon: const Icon(
+                      Icons.lock_outline_rounded,
                       color: Colors.blue,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 16,
+                      size: 20,
                     ),
-                  ),
-                  style: OutlinedButton.styleFrom(
-                    side: BorderSide(
-                      color: Colors.blue.withOpacity(0.3),
-                      width: 1.5,
+                    label: const Text(
+                      'Change Password',
+                      style: TextStyle(
+                        color: Colors.blue,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 15.5,
+                      ),
                     ),
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                  ),
-                ),
-              ),
-
-              const SizedBox(height: 20),
-
-              // Links Section
-              const Text(
-                'Quick Links',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              const SizedBox(height: 12),
-
-              _buildLinkItem(
-                icon: Icons.description_rounded,
-                title: 'Terms of Service',
-                onTap: () {
-                  SnackbarHelper.show(context, 'Terms of Service');
-                },
-              ),
-              _buildLinkItem(
-                icon: Icons.privacy_tip_rounded,
-                title: 'Privacy Policy',
-                onTap: () {
-                  SnackbarHelper.show(context, 'Privacy Policy');
-                },
-              ),
-              _buildLinkItem(
-                icon: Icons.contact_support_rounded,
-                title: 'Contact Us',
-                onTap: () {
-                  _showContactOptions();
-                },
-              ),
-
-              const SizedBox(height: 20),
-
-              // Logout Button
-              SizedBox(
-                width: double.infinity,
-                child: OutlinedButton.icon(
-                  onPressed: _handleLogout,
-                  icon: const Icon(Icons.logout_rounded, color: Colors.red),
-                  label: const Text(
-                    'Logout',
-                    style: TextStyle(
-                      color: Colors.red,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 16,
-                    ),
-                  ),
-                  style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: Colors.red, width: 1.5),
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
+                    style: OutlinedButton.styleFrom(
+                      backgroundColor: Colors.blue.withOpacity(0.06),
+                      side: BorderSide(
+                        color: Colors.blue.withOpacity(0.35),
+                        width: 1.5,
+                      ),
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
                     ),
                   ),
                 ),
-              ),
 
-              const SizedBox(height: 32),
-            ],
+                const SizedBox(height: 24),
+
+                // Links Section
+                _buildSectionLabel('Quick Links'),
+                const SizedBox(height: 12),
+
+                _buildLinkItem(
+                  icon: Icons.description_rounded,
+                  title: 'Terms of Service',
+                  onTap: () {
+                    SnackbarHelper.show(context, 'Terms of Service');
+                  },
+                ),
+                _buildLinkItem(
+                  icon: Icons.privacy_tip_rounded,
+                  title: 'Privacy Policy',
+                  onTap: () {
+                    SnackbarHelper.show(context, 'Privacy Policy');
+                  },
+                ),
+                _buildLinkItem(
+                  icon: Icons.contact_support_rounded,
+                  title: 'Contact Us',
+                  onTap: () {
+                    _showContactOptions();
+                  },
+                ),
+
+                const SizedBox(height: 20),
+
+                // Logout Button
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton.icon(
+                    onPressed: _handleLogout,
+                    icon: const Icon(Icons.logout_rounded, color: Colors.red, size: 20),
+                    label: const Text(
+                      'Logout',
+                      style: TextStyle(
+                        color: Colors.red,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 15.5,
+                      ),
+                    ),
+                    style: OutlinedButton.styleFrom(
+                      backgroundColor: Colors.red.withOpacity(0.05),
+                      side: BorderSide(color: Colors.red.withOpacity(0.35), width: 1.5),
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 32),
+              ],
+            ),
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildSectionLabel(String text) {
+    return Row(
+      children: [
+        Container(
+          width: 3,
+          height: 15,
+          decoration: BoxDecoration(
+            color: kLivinkeyGreen,
+            borderRadius: BorderRadius.circular(4),
+          ),
+        ),
+        const SizedBox(width: 8),
+        Text(
+          text,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 16.5,
+            fontWeight: FontWeight.w700,
+            letterSpacing: -0.2,
+          ),
+        ),
+      ],
     );
   }
 
@@ -618,26 +768,42 @@ class _GuestProfileScreenState extends State<GuestProfileScreen>
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            const Color(0xFFFF9800).withOpacity(0.08),
-            Colors.transparent,
+            const Color(0xFFFF9800).withOpacity(0.14),
+            const Color(0xFFFF9800).withOpacity(0.02),
           ],
         ),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: const Color(0xFFFF9800).withOpacity(0.1),
+          color: const Color(0xFFFF9800).withOpacity(0.18),
           width: 1,
         ),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFFFF9800).withOpacity(0.08),
+            blurRadius: 24,
+            offset: const Offset(0, 10),
+          ),
+        ],
       ),
       child: Row(
         children: [
           Container(
-            width: 64,
-            height: 64,
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
+            width: 68,
+            height: 68,
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
                 colors: [Color(0xFFFF9800), Color(0xFFFFA726)],
               ),
-              borderRadius: BorderRadius.all(Radius.circular(16)),
+              borderRadius: BorderRadius.circular(18),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFFFF9800).withOpacity(0.4),
+                  blurRadius: 16,
+                  offset: const Offset(0, 6),
+                ),
+              ],
             ),
             child: Center(
               child: Text(
@@ -645,7 +811,7 @@ class _GuestProfileScreenState extends State<GuestProfileScreen>
                 style: const TextStyle(
                   color: Colors.black,
                   fontSize: 24,
-                  fontWeight: FontWeight.w700,
+                  fontWeight: FontWeight.w800,
                 ),
               ),
             ),
@@ -660,32 +826,42 @@ class _GuestProfileScreenState extends State<GuestProfileScreen>
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 20,
-                    fontWeight: FontWeight.w700,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -0.3,
                   ),
+                  overflow: TextOverflow.ellipsis,
                 ),
+                const SizedBox(height: 2),
                 Text(
                   guest.email,
                   style: TextStyle(
                     color: Colors.white.withOpacity(0.5),
                     fontSize: 13,
+                    fontWeight: FontWeight.w500,
                   ),
+                  overflow: TextOverflow.ellipsis,
                 ),
                 Container(
-                  margin: const EdgeInsets.only(top: 4),
+                  margin: const EdgeInsets.only(top: 8),
                   padding: const EdgeInsets.symmetric(
                     horizontal: 10,
-                    vertical: 2,
+                    vertical: 3,
                   ),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFFF9800).withOpacity(0.15),
+                    color: const Color(0xFFFF9800).withOpacity(0.16),
                     borderRadius: BorderRadius.circular(10),
+                    border: Border.all(
+                      color: const Color(0xFFFF9800).withOpacity(0.2),
+                      width: 1,
+                    ),
                   ),
                   child: const Text(
                     'Guest',
                     style: TextStyle(
                       color: Color(0xFFFF9800),
                       fontSize: 11,
-                      fontWeight: FontWeight.w600,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 0.2,
                     ),
                   ),
                 ),
@@ -703,42 +879,66 @@ class _GuestProfileScreenState extends State<GuestProfileScreen>
     required VoidCallback onTap,
   }) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 8),
+      margin: const EdgeInsets.only(bottom: 10),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            Colors.white.withOpacity(0.03),
-            Colors.transparent,
+            Colors.white.withOpacity(0.04),
+            Colors.white.withOpacity(0.01),
           ],
         ),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(14),
         border: Border.all(
-          color: Colors.white.withOpacity(0.06),
+          color: Colors.white.withOpacity(0.07),
           width: 1,
         ),
       ),
-      child: ListTile(
-        leading: Icon(
-          icon,
-          color: kLivinkeyGreen.withOpacity(0.7),
-          size: 22,
-        ),
-        title: Text(
-          title,
-          style: TextStyle(
-            color: Colors.white.withOpacity(0.8),
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(14),
+          onTap: () {
+            HapticFeedback.selectionClick();
+            onTap();
+          },
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(9),
+                  decoration: BoxDecoration(
+                    color: kLivinkeyGreen.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Icon(
+                    icon,
+                    color: kLivinkeyGreen.withOpacity(0.85),
+                    size: 19,
+                  ),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Text(
+                    title,
+                    style: TextStyle(
+                      color: Colors.white.withOpacity(0.85),
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+                Icon(
+                  Icons.chevron_right_rounded,
+                  color: Colors.white.withOpacity(0.2),
+                  size: 20,
+                ),
+              ],
+            ),
           ),
         ),
-        trailing: Icon(
-          Icons.chevron_right_rounded,
-          color: Colors.white.withOpacity(0.2),
-          size: 20,
-        ),
-        onTap: onTap,
       ),
     );
   }
@@ -891,8 +1091,9 @@ class _GuestProfileScreenState extends State<GuestProfileScreen>
     showModalBottomSheet(
       context: context,
       backgroundColor: kLivinkeyBlack,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      shape: RoundedRectangleBorder(
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+        side: BorderSide(color: Colors.white.withOpacity(0.08), width: 1),
       ),
       builder: (context) => Container(
         padding: const EdgeInsets.all(24),
@@ -900,10 +1101,10 @@ class _GuestProfileScreenState extends State<GuestProfileScreen>
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
-              width: 40,
+              width: 44,
               height: 4,
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.2),
+                color: Colors.white.withOpacity(0.18),
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -913,7 +1114,8 @@ class _GuestProfileScreenState extends State<GuestProfileScreen>
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 20,
-                fontWeight: FontWeight.w700,
+                fontWeight: FontWeight.w800,
+                letterSpacing: -0.3,
               ),
             ),
             const SizedBox(height: 20),
@@ -947,8 +1149,11 @@ class _GuestProfileScreenState extends State<GuestProfileScreen>
     required VoidCallback onTap,
   }) {
     return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
+      onTap: () {
+        HapticFeedback.selectionClick();
+        onTap();
+      },
+      borderRadius: BorderRadius.circular(14),
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
@@ -956,13 +1161,13 @@ class _GuestProfileScreenState extends State<GuestProfileScreen>
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              color.withOpacity(0.1),
-              Colors.transparent,
+              color.withOpacity(0.12),
+              color.withOpacity(0.02),
             ],
           ),
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(14),
           border: Border.all(
-            color: color.withOpacity(0.15),
+            color: color.withOpacity(0.2),
             width: 1,
           ),
         ),
@@ -971,8 +1176,8 @@ class _GuestProfileScreenState extends State<GuestProfileScreen>
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: color.withOpacity(0.15),
-                borderRadius: BorderRadius.circular(10),
+                color: color.withOpacity(0.16),
+                borderRadius: BorderRadius.circular(11),
               ),
               child: Icon(icon, color: color, size: 22),
             ),
@@ -986,14 +1191,15 @@ class _GuestProfileScreenState extends State<GuestProfileScreen>
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 15,
-                      fontWeight: FontWeight.w600,
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
                   Text(
                     subtitle,
                     style: TextStyle(
                       color: Colors.white.withOpacity(0.5),
-                      fontSize: 13,
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
                 ],
@@ -1002,11 +1208,43 @@ class _GuestProfileScreenState extends State<GuestProfileScreen>
             Icon(
               Icons.arrow_forward_ios_rounded,
               color: Colors.white.withOpacity(0.2),
-              size: 16,
+              size: 15,
             ),
           ],
         ),
       ),
+    );
+  }
+}
+
+/// Small pulsing status dot used in the Guest badge.
+class _PulsingDot extends StatefulWidget {
+  const _PulsingDot();
+
+  @override
+  State<_PulsingDot> createState() => _PulsingDotState();
+}
+
+class _PulsingDotState extends State<_PulsingDot>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 1400),
+  )..repeat(reverse: true);
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FadeTransition(
+      opacity: Tween<double>(begin: 0.4, end: 1.0).animate(
+        CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+      ),
+      child: const Icon(Icons.circle, color: Color(0xFFFF9800), size: 8),
     );
   }
 }
