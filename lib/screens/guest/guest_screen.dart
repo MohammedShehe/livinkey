@@ -47,6 +47,88 @@ class GuestScreenState extends State<GuestScreen> {
     HapticFeedback.lightImpact();
   }
 
+  // Helper methods for floating tabs
+  IconData _getIcon(int index) {
+    const icons = [
+      Icons.home_rounded,
+      Icons.search_rounded,
+      Icons.person_rounded,
+    ];
+    return icons[index];
+  }
+
+  String _getLabel(int index) {
+    const labels = ['Home', 'Search', 'Profile'];
+    return labels[index];
+  }
+
+  Widget _buildFloatingTab({
+    required IconData icon,
+    required String label,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    return Expanded(
+      child: GestureDetector(
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 350),
+          curve: Curves.easeOutCubic,
+          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
+          decoration: BoxDecoration(
+            gradient: isSelected
+                ? const LinearGradient(
+                    colors: [kLivinkeyGreen, Color(0xFF66BB6A)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  )
+                : null,
+            borderRadius: BorderRadius.circular(22),
+            boxShadow: isSelected
+                ? [
+                    BoxShadow(
+                      color: kLivinkeyGreen.withOpacity(0.4),
+                      blurRadius: 16,
+                      offset: const Offset(0, 4),
+                    ),
+                    BoxShadow(
+                      color: kLivinkeyGreen.withOpacity(0.2),
+                      blurRadius: 24,
+                      offset: const Offset(0, 0),
+                    ),
+                  ]
+                : null,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.easeOutCubic,
+                padding: const EdgeInsets.all(4),
+                child: Icon(
+                  icon,
+                  color: isSelected ? Colors.black : Colors.white.withOpacity(0.4),
+                  size: isSelected ? 24 : 22,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                label,
+                style: TextStyle(
+                  color: isSelected ? Colors.black : Colors.white.withOpacity(0.4),
+                  fontSize: isSelected ? 10 : 9,
+                  fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                  letterSpacing: 0.2,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -127,44 +209,39 @@ class GuestScreenState extends State<GuestScreen> {
         ],
       ),
       bottomNavigationBar: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        padding: const EdgeInsets.all(6),
         decoration: BoxDecoration(
-          border: Border(
-            top: BorderSide(
-              color: Colors.white.withOpacity(0.05),
-              width: 1,
-            ),
+          color: Colors.white.withOpacity(0.06),
+          borderRadius: BorderRadius.circular(30),
+          border: Border.all(
+            color: Colors.white.withOpacity(0.08),
+            width: 1.5,
           ),
-        ),
-        child: BottomNavigationBar(
-          currentIndex: _selectedIndex,
-          onTap: navigateToTab,
-          backgroundColor: kLivinkeyBlack,
-          selectedItemColor: kLivinkeyGreen,
-          unselectedItemColor: Colors.white.withOpacity(0.4),
-          selectedLabelStyle: const TextStyle(
-            fontWeight: FontWeight.w600,
-            fontSize: 11,
-          ),
-          unselectedLabelStyle: const TextStyle(
-            fontWeight: FontWeight.w400,
-            fontSize: 11,
-          ),
-          type: BottomNavigationBarType.fixed,
-          elevation: 0,
-          items: const [
-            BottomNavigationBarItem(
-              icon: Icon(Icons.home_rounded),
-              label: 'Home',
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.4),
+              blurRadius: 25,
+              offset: const Offset(0, -5),
             ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.search_rounded),
-              label: 'Search',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.person_rounded),
-              label: 'Profile',
+            BoxShadow(
+              color: kLivinkeyGreen.withOpacity(0.1),
+              blurRadius: 30,
+              offset: const Offset(0, -2),
             ),
           ],
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: List.generate(_screens.length, (index) {
+            final isSelected = _selectedIndex == index;
+            return _buildFloatingTab(
+              icon: _getIcon(index),
+              label: _getLabel(index),
+              isSelected: isSelected,
+              onTap: () => navigateToTab(index),
+            );
+          }),
         ),
       ),
     );
