@@ -100,172 +100,235 @@ class _GetStartedScreenState extends State<GetStartedScreen>
     super.dispose();
   }
 
+  // Prevent back navigation from GetStartedScreen
+  Future<bool> _onWillPop() async {
+    // Show exit dialog when back button is pressed on GetStartedScreen
+    return await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: kLivinkeyBlack,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        title: const Text(
+          'Exit App?',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 20,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        content: Text(
+          'Are you sure you want to exit the app?',
+          style: TextStyle(
+            color: Colors.white.withOpacity(0.7),
+            fontSize: 15,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text(
+              'Cancel',
+              style: TextStyle(
+                color: Colors.white.withOpacity(0.6),
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [kLivinkeyGreen, Color(0xFF7CB342)],
+                ),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Text(
+                'Exit',
+                style: TextStyle(
+                  color: Colors.black,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    ) ?? false;
+  }
+
   @override
   Widget build(BuildContext context) {
-    return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: const SystemUiOverlayStyle(
-        statusBarColor: Colors.transparent,
-        statusBarIconBrightness: Brightness.light,
-        systemNavigationBarColor: kLivinkeyBlack,
-        systemNavigationBarIconBrightness: Brightness.light,
-      ),
-      child: Scaffold(
-        backgroundColor: kLivinkeyBlack,
-        body: SafeArea(
-          child: FadeTransition(
-            opacity: _fadeAnimation,
-            child: AnimatedBuilder(
-              animation: _mainController,
-              builder: (context, _) {
-                return Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 28),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Spacer(flex: 1),
+    return WillPopScope(
+      onWillPop: _onWillPop,
+      child: AnnotatedRegion<SystemUiOverlayStyle>(
+        value: const SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness: Brightness.light,
+          systemNavigationBarColor: kLivinkeyBlack,
+          systemNavigationBarIconBrightness: Brightness.light,
+        ),
+        child: Scaffold(
+          backgroundColor: kLivinkeyBlack,
+          body: SafeArea(
+            child: FadeTransition(
+              opacity: _fadeAnimation,
+              child: AnimatedBuilder(
+                animation: _mainController,
+                builder: (context, _) {
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 28),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Spacer(flex: 1),
 
-                      ScaleTransition(
-                        scale: _scaleAnimation,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 20,
-                            vertical: 30,
-                          ),
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                              colors: [
-                                kLivinkeyGreen.withOpacity(0.08),
-                                Colors.transparent,
-                                kLivinkeyGreen.withOpacity(0.05),
-                              ],
+                        ScaleTransition(
+                          scale: _scaleAnimation,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 20,
+                              vertical: 30,
                             ),
-                            borderRadius: BorderRadius.circular(24),
-                            border: Border.all(
-                              color: kLivinkeyGreen.withOpacity(0.1),
-                              width: 1,
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                                colors: [
+                                  kLivinkeyGreen.withOpacity(0.08),
+                                  Colors.transparent,
+                                  kLivinkeyGreen.withOpacity(0.05),
+                                ],
+                              ),
+                              borderRadius: BorderRadius.circular(24),
+                              border: Border.all(
+                                color: kLivinkeyGreen.withOpacity(0.1),
+                                width: 1,
+                              ),
                             ),
-                          ),
-                          child: LivinkeyLogoKeyFlip(
-                            keyAnimation: _keyRotationAnimation,
-                            width: 280,
+                            child: LivinkeyLogoKeyFlip(
+                              keyAnimation: _keyRotationAnimation,
+                              width: 280,
+                            ),
                           ),
                         ),
-                      ),
 
-                      const SizedBox(height: 24),
+                        const SizedBox(height: 24),
 
-                      Transform.translate(
-                        offset: Offset(0, _slideAnimation.value),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 24,
-                            vertical: 16,
-                          ),
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                              colors: [
-                                kLivinkeyWhite.withOpacity(0.06),
-                                Colors.transparent,
-                              ],
+                        Transform.translate(
+                          offset: Offset(0, _slideAnimation.value),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 24,
+                              vertical: 16,
                             ),
-                            borderRadius: BorderRadius.circular(20),
-                            border: Border.all(
-                              color: kLivinkeyWhite.withOpacity(0.05),
-                              width: 1,
-                            ),
-                          ),
-                          child: Column(
-                            children: [
-                              Text(
-                                'Start your living journey with',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  color: kLivinkeyWhite.withOpacity(0.7),
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w400,
-                                  letterSpacing: 0.5,
-                                ),
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                                colors: [
+                                  kLivinkeyWhite.withOpacity(0.06),
+                                  Colors.transparent,
+                                ],
                               ),
-                              const SizedBox(height: 8),
-                              ShaderMask(
-                                shaderCallback: (bounds) => LinearGradient(
-                                  colors: [
-                                    kLivinkeyGreen,
-                                    const Color(0xFF66BB6A),
-                                    kLivinkeyGreen,
-                                  ],
-                                  stops: const [0.0, 0.5, 1.0],
-                                ).createShader(bounds),
-                                child: Text(
-                                  'Livinkey',
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(
+                                color: kLivinkeyWhite.withOpacity(0.05),
+                                width: 1,
+                              ),
+                            ),
+                            child: Column(
+                              children: [
+                                Text(
+                                  'Start your living journey with',
                                   textAlign: TextAlign.center,
-                                  style: const TextStyle(
-                                    color: kLivinkeyWhite,
-                                    fontSize: 38,
-                                    fontWeight: FontWeight.w800,
-                                    letterSpacing: 1.2,
+                                  style: TextStyle(
+                                    color: kLivinkeyWhite.withOpacity(0.7),
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w400,
+                                    letterSpacing: 0.5,
                                   ),
                                 ),
+                                const SizedBox(height: 8),
+                                ShaderMask(
+                                  shaderCallback: (bounds) => LinearGradient(
+                                    colors: [
+                                      kLivinkeyGreen,
+                                      const Color(0xFF66BB6A),
+                                      kLivinkeyGreen,
+                                    ],
+                                    stops: const [0.0, 0.5, 1.0],
+                                  ).createShader(bounds),
+                                  child: Text(
+                                    'Livinkey',
+                                    textAlign: TextAlign.center,
+                                    style: const TextStyle(
+                                      color: kLivinkeyWhite,
+                                      fontSize: 38,
+                                      fontWeight: FontWeight.w800,
+                                      letterSpacing: 1.2,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+
+                        const SizedBox(height: 16),
+
+                        Transform.translate(
+                          offset: Offset(0, _slideAnimation.value * 0.5),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 20,
+                              vertical: 14,
+                            ),
+                            decoration: BoxDecoration(
+                              color: kLivinkeyWhite.withOpacity(0.04),
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(
+                                color: kLivinkeyWhite.withOpacity(0.06),
+                                width: 1,
                               ),
-                            ],
-                          ),
-                        ),
-                      ),
-
-                      const SizedBox(height: 16),
-
-                      Transform.translate(
-                        offset: Offset(0, _slideAnimation.value * 0.5),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 20,
-                            vertical: 14,
-                          ),
-                          decoration: BoxDecoration(
-                            color: kLivinkeyWhite.withOpacity(0.04),
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(
-                              color: kLivinkeyWhite.withOpacity(0.06),
-                              width: 1,
                             ),
-                          ),
-                          child: Text(
-                            'Find and manage your PG stay in LPU,\nhassle-free.',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              color: Colors.white.withOpacity(0.8),
-                              fontSize: 15,
-                              height: 1.6,
-                              fontWeight: FontWeight.w400,
+                            child: Text(
+                              'Find and manage your PG stay in LPU,\nhassle-free.',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                color: Colors.white.withOpacity(0.8),
+                                fontSize: 15,
+                                height: 1.6,
+                                fontWeight: FontWeight.w400,
+                              ),
                             ),
                           ),
                         ),
-                      ),
 
-                      const Spacer(flex: 2),
+                        const Spacer(flex: 2),
 
-                      Transform.translate(
-                        offset: Offset(0, _slideAnimation.value * 0.3),
-                        child: _buildGetStartedButton(),
-                      ),
+                        Transform.translate(
+                          offset: Offset(0, _slideAnimation.value * 0.3),
+                          child: _buildGetStartedButton(),
+                        ),
 
-                      const SizedBox(height: 24),
+                        const SizedBox(height: 24),
 
-                      Transform.translate(
-                        offset: Offset(0, _slideAnimation.value * 0.2),
-                        child: _buildTermsText(),
-                      ),
+                        Transform.translate(
+                          offset: Offset(0, _slideAnimation.value * 0.2),
+                          child: _buildTermsText(),
+                        ),
 
-                      const SizedBox(height: 20),
-                      const Spacer(flex: 1),
-                    ],
-                  ),
-                );
-              },
+                        const SizedBox(height: 20),
+                        const Spacer(flex: 1),
+                      ],
+                    ),
+                  );
+                },
+              ),
             ),
           ),
         ),
@@ -313,7 +376,8 @@ class _GetStartedScreenState extends State<GetStartedScreen>
           onPressed: () {
             HapticFeedback.lightImpact();
             AudioService.stopBackgroundMusic();
-            Navigator.of(context).push(
+            // 🔥 KEY CHANGE: Use pushReplacement to prevent going back
+            Navigator.of(context).pushReplacement(
               PageRouteBuilder(
                 pageBuilder: (context, animation, secondaryAnimation) =>
                     const LoginScreen(),

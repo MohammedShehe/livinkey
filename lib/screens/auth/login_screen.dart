@@ -38,6 +38,28 @@ class _LoginScreenState extends State<LoginScreen>
   late final TapGestureRecognizer _signUpRecognizer;
   late final TapGestureRecognizer _forgotPasswordRecognizer;
 
+  // Helper method to get responsive logo size
+  double _getLogoSize(BuildContext context) {
+    final double screenWidth = MediaQuery.of(context).size.width;
+    final double screenHeight = MediaQuery.of(context).size.height;
+    
+    // Use the smaller dimension to ensure it fits
+    final double minDimension = screenWidth < screenHeight ? screenWidth : screenHeight;
+    
+    // For tablets (width >= 600), use larger size
+    if (screenWidth >= 600) {
+      return minDimension * 0.12; // 12% of screen width for tablets
+    }
+    // For large phones
+    else if (screenWidth >= 400) {
+      return minDimension * 0.08; // 8% of screen width for large phones
+    }
+    // For small phones
+    else {
+      return minDimension * 0.06; // 6% of screen width for small phones
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -169,7 +191,7 @@ class _LoginScreenState extends State<LoginScreen>
     if (!AuthService.isValidCredentials(email, password)) {
       SnackbarHelper.showError(
         context,
-        'Invalid credentials. Please use the demo accounts.',
+        'Invalid credentials. Please try again.',
       );
       return;
     }
@@ -283,6 +305,9 @@ class _LoginScreenState extends State<LoginScreen>
 
   @override
   Widget build(BuildContext context) {
+    // Get responsive logo size
+    final double logoSize = _getLogoSize(context);
+    
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: const SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
@@ -341,8 +366,8 @@ class _LoginScreenState extends State<LoginScreen>
                               scale: _logoScaleAnimation,
                               child: Image.asset(
                                 kGeneralLogo,
-                                height: 60,
-                                width: 60,
+                                height: logoSize,
+                                width: logoSize,
                                 fit: BoxFit.contain,
                               ),
                             ),
@@ -350,68 +375,6 @@ class _LoginScreenState extends State<LoginScreen>
                         ),
 
                         const SizedBox(height: 32),
-
-                        // Demo Credentials Info Box - Improved
-                        Container(
-                          padding: const EdgeInsets.all(14),
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                              colors: [
-                                const Color(0xFF92C24A).withOpacity(0.12),
-                                const Color(0xFF92C24A).withOpacity(0.03),
-                              ],
-                            ),
-                            borderRadius: BorderRadius.circular(14),
-                            border: Border.all(
-                              color: const Color(0xFF92C24A).withOpacity(0.15),
-                              width: 1.5,
-                            ),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  Icon(
-                                    Icons.info_outline_rounded,
-                                    color: const Color(0xFF92C24A).withOpacity(0.8),
-                                    size: 16,
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    'Demo Credentials',
-                                    style: TextStyle(
-                                      color: const Color(0xFF92C24A).withOpacity(0.8),
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w600,
-                                      letterSpacing: 0.3,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 10),
-                              Row(
-                                children: [
-                                  _buildCredentialChip(
-                                    'Tenant',
-                                    kTenantEmail,
-                                    kTenantPassword,
-                                  ),
-                                  const SizedBox(width: 10),
-                                  _buildCredentialChip(
-                                    'Guest',
-                                    kGuestEmail,
-                                    kGuestPassword,
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-
-                        const SizedBox(height: 28),
 
                         // Email Field
                         _buildTextField(
@@ -512,7 +475,7 @@ class _LoginScreenState extends State<LoginScreen>
 
                         const SizedBox(height: 36),
 
-                        // Social Section - Improved
+                        // Social Section
                         _buildSocialSection(),
 
                         const SizedBox(height: 24),
@@ -524,45 +487,6 @@ class _LoginScreenState extends State<LoginScreen>
             ),
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildCredentialChip(String label, String email, String password) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.06),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: Colors.white.withOpacity(0.08),
-          width: 1,
-        ),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 7,
-            height: 7,
-            decoration: BoxDecoration(
-              color: label == 'Tenant' 
-                  ? const Color(0xFF92C24A)
-                  : const Color(0xFFFFA726),
-              shape: BoxShape.circle,
-            ),
-          ),
-          const SizedBox(width: 6),
-          Text(
-            label,
-            style: TextStyle(
-              color: Colors.white.withOpacity(0.7),
-              fontSize: 11,
-              fontWeight: FontWeight.w600,
-              letterSpacing: 0.3,
-            ),
-          ),
-        ],
       ),
     );
   }

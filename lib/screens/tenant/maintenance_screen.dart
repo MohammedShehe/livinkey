@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'dart:io';
+import 'package:image_picker/image_picker.dart';
 import '../../utils/constants.dart';
 import '../../widgets/tenant/maintenance_item.dart';
 import '../../widgets/common/snackbar_helper.dart';
@@ -44,6 +46,65 @@ class _MaintenanceScreenState extends State<MaintenanceScreen>
     super.dispose();
   }
 
+  // Show exit dialog when back button is pressed
+  Future<bool> _onWillPop() async {
+    return await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: kLivinkeyBlack,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        title: const Text(
+          'Exit App?',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 20,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        content: Text(
+          'Are you sure you want to exit the app?',
+          style: TextStyle(
+            color: Colors.white.withOpacity(0.7),
+            fontSize: 15,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text(
+              'Cancel',
+              style: TextStyle(
+                color: Colors.white.withOpacity(0.6),
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [kLivinkeyGreen, Color(0xFF7CB342)],
+                ),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Text(
+                'Exit',
+                style: TextStyle(
+                  color: Colors.black,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    ) ?? false;
+  }
+
   List<Map<String, String>> get _filteredRequests {
     if (_selectedFilter == 'All') return _requests;
     return _requests.where((r) => r['status'] == _selectedFilter).toList();
@@ -51,98 +112,101 @@ class _MaintenanceScreenState extends State<MaintenanceScreen>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: kLivinkeyBlack,
-      appBar: AppBar(
-        leading: IconButton(
-          icon: Icon(Icons.menu_rounded, color: Colors.white, size: 28),
-          onPressed: () {
-            Scaffold.of(context).openDrawer();
-          },
+    return WillPopScope(
+      onWillPop: _onWillPop,
+      child: Scaffold(
+        backgroundColor: kLivinkeyBlack,
+        appBar: AppBar(
+          leading: IconButton(
+            icon: Icon(Icons.menu_rounded, color: Colors.white, size: 28),
+            onPressed: () {
+              Scaffold.of(context).openDrawer();
+            },
+          ),
+          title: const Text('Maintenance'),
         ),
-        title: const Text('Maintenance'),
-      ),
-      body: FadeTransition(
-        opacity: _fadeAnimation,
-        child: SingleChildScrollView(
-          physics: const BouncingScrollPhysics(),
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 12),
+        body: FadeTransition(
+          opacity: _fadeAnimation,
+          child: SingleChildScrollView(
+            physics: const BouncingScrollPhysics(),
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 12),
 
-              // Stats Row
-              Row(
-                children: [
-                  _buildMaintenanceStat('Pending', 3, Colors.red),
-                  _buildMaintenanceStat('In Progress', 2, Colors.orange),
-                  _buildMaintenanceStat('Solved', 5, kLivinkeyGreen),
-                ],
-              ),
-
-              const SizedBox(height: 20),
-
-              // Filter Row
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
+                // Stats Row
+                Row(
                   children: [
-                    _buildFilterChip('All'),
-                    const SizedBox(width: 8),
-                    _buildFilterChip('Pending'),
-                    const SizedBox(width: 8),
-                    _buildFilterChip('In Progress'),
-                    const SizedBox(width: 8),
-                    _buildFilterChip('Solved'),
+                    _buildMaintenanceStat('Pending', 3, Colors.red),
+                    _buildMaintenanceStat('In Progress', 2, Colors.orange),
+                    _buildMaintenanceStat('Solved', 5, kLivinkeyGreen),
                   ],
                 ),
-              ),
 
-              const SizedBox(height: 16),
+                const SizedBox(height: 20),
 
-              // Maintenance List
-              ListView.separated(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: _filteredRequests.length,
-                separatorBuilder: (context, index) => Divider(
-                  color: Colors.white.withOpacity(0.05),
-                  height: 12,
-                ),
-                itemBuilder: (context, index) {
-                  return MaintenanceItem(request: _filteredRequests[index]);
-                },
-              ),
-
-              const SizedBox(height: 16),
-
-              // Submit Request Button
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton.icon(
-                  onPressed: () => _showSubmitRequest(context),
-                  icon: const Icon(Icons.add_rounded, color: Colors.black),
-                  label: const Text(
-                    'Submit Request',
-                    style: TextStyle(
-                      color: Colors.black,
-                      fontWeight: FontWeight.w700,
-                      fontSize: 16,
-                    ),
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: kLivinkeyGreen,
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
-                    ),
+                // Filter Row
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: [
+                      _buildFilterChip('All'),
+                      const SizedBox(width: 8),
+                      _buildFilterChip('Pending'),
+                      const SizedBox(width: 8),
+                      _buildFilterChip('In Progress'),
+                      const SizedBox(width: 8),
+                      _buildFilterChip('Solved'),
+                    ],
                   ),
                 ),
-              ),
 
-              const SizedBox(height: 32),
-            ],
+                const SizedBox(height: 16),
+
+                // Maintenance List
+                ListView.separated(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: _filteredRequests.length,
+                  separatorBuilder: (context, index) => Divider(
+                    color: Colors.white.withOpacity(0.05),
+                    height: 12,
+                  ),
+                  itemBuilder: (context, index) {
+                    return MaintenanceItem(request: _filteredRequests[index]);
+                  },
+                ),
+
+                const SizedBox(height: 16),
+
+                // Submit Request Button
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    onPressed: () => _showSubmitRequest(context),
+                    icon: const Icon(Icons.add_rounded, color: Colors.black),
+                    label: const Text(
+                      'Submit Request',
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 16,
+                      ),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: kLivinkeyGreen,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 32),
+              ],
+            ),
           ),
         ),
       ),
@@ -238,102 +302,289 @@ class _MaintenanceScreenState extends State<MaintenanceScreen>
     final TextEditingController roomController = TextEditingController(text: '101');
     final TextEditingController typeController = TextEditingController();
     final TextEditingController descController = TextEditingController();
+    File? _selectedImage;
 
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => DraggableScrollableSheet(
-        initialChildSize: 0.85,
-        minChildSize: 0.6,
-        maxChildSize: 0.95,
-        builder: (context, scrollController) => Container(
-          padding: const EdgeInsets.all(24),
-          decoration: const BoxDecoration(
-            color: kLivinkeyBlack,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(2),
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) {
+          return DraggableScrollableSheet(
+            initialChildSize: 0.92,
+            minChildSize: 0.6,
+            maxChildSize: 0.95,
+            builder: (context, scrollController) => Container(
+              padding: const EdgeInsets.all(24),
+              decoration: const BoxDecoration(
+                color: kLivinkeyBlack,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 40,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  const Text(
+                    'Submit Maintenance Request',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 20,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Expanded(
+                    child: SingleChildScrollView(
+                      controller: scrollController,
+                      child: Column(
+                        children: [
+                          _buildFormField(
+                            label: 'Room No',
+                            controller: roomController,
+                            enabled: false,
+                            icon: Icons.meeting_room_rounded,
+                          ),
+                          const SizedBox(height: 12),
+                          _buildFormField(
+                            label: 'Type of Issue',
+                            controller: typeController,
+                            hint: 'e.g., Plumbing, Electrical, AC',
+                            icon: Icons.build_rounded,
+                          ),
+                          const SizedBox(height: 12),
+                          _buildFormField(
+                            label: 'Description',
+                            controller: descController,
+                            hint: 'Describe the issue in detail',
+                            icon: Icons.description_rounded,
+                            maxLines: 3,
+                          ),
+                          const SizedBox(height: 16),
+                          
+                          // Image Upload Section
+                          _buildImageUploadSection(
+                            selectedImage: _selectedImage,
+                            onImageSelected: (File? image) {
+                              setState(() {
+                                _selectedImage = image;
+                              });
+                            },
+                          ),
+                          
+                          const SizedBox(height: 16),
+                          SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton(
+                              onPressed: () {
+                                Navigator.pop(context);
+                                SnackbarHelper.show(
+                                  context, 
+                                  'Request submitted successfully!${_selectedImage != null ? ' 📸' : ''}'
+                                );
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: kLivinkeyGreen,
+                                foregroundColor: Colors.black,
+                                padding: const EdgeInsets.symmetric(vertical: 14),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(14),
+                                ),
+                              ),
+                              child: const Text(
+                                'Submit Request',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildImageUploadSection({
+    required File? selectedImage,
+    required Function(File?) onImageSelected,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            kLivinkeyWhite.withOpacity(0.05),
+            kLivinkeyWhite.withOpacity(0.02),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: kLivinkeyWhite.withOpacity(0.08),
+          width: 1,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.image_rounded,
+                  color: kLivinkeyGreen.withOpacity(0.7),
+                  size: 20,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  'Attach Image (Optional)',
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.5),
+                    fontWeight: FontWeight.w500,
+                    fontSize: 14,
                   ),
                 ),
-              ),
-              const SizedBox(height: 16),
-              const Text(
-                'Submit Maintenance Request',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 20,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              const SizedBox(height: 16),
-              Expanded(
-                child: SingleChildScrollView(
-                  controller: scrollController,
-                  child: Column(
-                    children: [
-                      _buildFormField(
-                        label: 'Room No',
-                        controller: roomController,
-                        enabled: false,
-                        icon: Icons.meeting_room_rounded,
-                      ),
-                      const SizedBox(height: 12),
-                      _buildFormField(
-                        label: 'Type of Issue',
-                        controller: typeController,
-                        hint: 'e.g., Plumbing, Electrical, AC',
-                        icon: Icons.build_rounded,
-                      ),
-                      const SizedBox(height: 12),
-                      _buildFormField(
-                        label: 'Description',
-                        controller: descController,
-                        hint: 'Describe the issue in detail',
-                        icon: Icons.description_rounded,
-                        maxLines: 3,
-                      ),
-                      const SizedBox(height: 16),
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: () {
-                            Navigator.pop(context);
-                            SnackbarHelper.show(context, 'Request submitted successfully!');
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: kLivinkeyGreen,
-                            foregroundColor: Colors.black,
-                            padding: const EdgeInsets.symmetric(vertical: 14),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(14),
-                            ),
-                          ),
-                          child: const Text(
-                            'Submit Request',
-                            style: TextStyle(
-                              fontWeight: FontWeight.w700,
-                              fontSize: 16,
-                            ),
-                          ),
+              ],
+            ),
+          ),
+          if (selectedImage != null)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Stack(
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: Image.file(
+                      selectedImage,
+                      height: 100,
+                      width: double.infinity,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                  Positioned(
+                    top: 8,
+                    right: 8,
+                    child: GestureDetector(
+                      onTap: () {
+                        onImageSelected(null);
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                          color: Colors.black.withOpacity(0.7),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.close_rounded,
+                          color: Colors.white,
+                          size: 16,
                         ),
                       ),
-                    ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            child: Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: () async {
+                      final picker = ImagePicker();
+                      final pickedFile = await picker.pickImage(
+                        source: ImageSource.gallery,
+                        imageQuality: 80,
+                      );
+                      if (pickedFile != null) {
+                        onImageSelected(File(pickedFile.path));
+                      }
+                    },
+                    icon: Icon(
+                      Icons.photo_library_rounded,
+                      color: kLivinkeyGreen,
+                      size: 20,
+                    ),
+                    label: Text(
+                      'Gallery',
+                      style: TextStyle(
+                        color: Colors.white.withOpacity(0.7),
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    style: OutlinedButton.styleFrom(
+                      side: BorderSide(
+                        color: kLivinkeyGreen.withOpacity(0.3),
+                        width: 1,
+                      ),
+                      padding: const EdgeInsets.symmetric(vertical: 10),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
                   ),
                 ),
-              ),
-            ],
+                const SizedBox(width: 12),
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: () async {
+                      final picker = ImagePicker();
+                      final pickedFile = await picker.pickImage(
+                        source: ImageSource.camera,
+                        imageQuality: 80,
+                      );
+                      if (pickedFile != null) {
+                        onImageSelected(File(pickedFile.path));
+                      }
+                    },
+                    icon: Icon(
+                      Icons.camera_alt_rounded,
+                      color: kLivinkeyGreen,
+                      size: 20,
+                    ),
+                    label: Text(
+                      'Camera',
+                      style: TextStyle(
+                        color: Colors.white.withOpacity(0.7),
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    style: OutlinedButton.styleFrom(
+                      side: BorderSide(
+                        color: kLivinkeyGreen.withOpacity(0.3),
+                        width: 1,
+                      ),
+                      padding: const EdgeInsets.symmetric(vertical: 10),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
-        ),
+        ],
       ),
     );
   }

@@ -52,175 +52,237 @@ class _DocumentsScreenState extends State<DocumentsScreen>
     super.dispose();
   }
 
-  List<Map<String, String>> get _docs => _isInternational ? _internationalDocs : _nationalDocs;
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: kLivinkeyBlack,
-      appBar: AppBar(
-        leading: IconButton(
-          icon: Icon(Icons.menu_rounded, color: Colors.white, size: 28),
-          onPressed: () {
-            Scaffold.of(context).openDrawer();
-          },
+  // Show exit dialog when back button is pressed
+  Future<bool> _onWillPop() async {
+    return await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: kLivinkeyBlack,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
         ),
-        title: const Text('Documents'),
+        title: const Text(
+          'Exit App?',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 20,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        content: Text(
+          'Are you sure you want to exit the app?',
+          style: TextStyle(
+            color: Colors.white.withOpacity(0.7),
+            fontSize: 15,
+          ),
+        ),
         actions: [
-          Container(
-            margin: const EdgeInsets.only(right: 8),
-            child: DropdownButton<String>(
-              value: _isInternational ? 'International' : 'National',
-              dropdownColor: kLivinkeyBlack,
-              underline: const SizedBox.shrink(),
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 13,
-                fontWeight: FontWeight.w500,
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text(
+              'Cancel',
+              style: TextStyle(
+                color: Colors.white.withOpacity(0.6),
+                fontWeight: FontWeight.w600,
               ),
-              items: const [
-                DropdownMenuItem(
-                  value: 'International',
-                  child: Text('🌍 International'),
+            ),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [kLivinkeyGreen, Color(0xFF7CB342)],
                 ),
-                DropdownMenuItem(
-                  value: 'National',
-                  child: Text('🇮🇳 National'),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Text(
+                'Exit',
+                style: TextStyle(
+                  color: Colors.black,
+                  fontWeight: FontWeight.w700,
                 ),
-              ],
-              onChanged: (value) {
-                setState(() {
-                  _isInternational = value == 'International';
-                });
-                HapticFeedback.selectionClick();
-              },
+              ),
             ),
           ),
         ],
       ),
-      body: FadeTransition(
-        opacity: _fadeAnimation,
-        child: SingleChildScrollView(
-          physics: const BouncingScrollPhysics(),
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 12),
+    ) ?? false;
+  }
 
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      kLivinkeyGreen.withOpacity(0.06),
-                      Colors.transparent,
+  List<Map<String, String>> get _docs => _isInternational ? _internationalDocs : _nationalDocs;
+
+  @override
+  Widget build(BuildContext context) {
+    return WillPopScope(
+      onWillPop: _onWillPop,
+      child: Scaffold(
+        backgroundColor: kLivinkeyBlack,
+        appBar: AppBar(
+          leading: IconButton(
+            icon: Icon(Icons.menu_rounded, color: Colors.white, size: 28),
+            onPressed: () {
+              Scaffold.of(context).openDrawer();
+            },
+          ),
+          title: const Text('Documents'),
+          actions: [
+            Container(
+              margin: const EdgeInsets.only(right: 8),
+              child: DropdownButton<String>(
+                value: _isInternational ? 'International' : 'National',
+                dropdownColor: kLivinkeyBlack,
+                underline: const SizedBox.shrink(),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                ),
+                items: const [
+                  DropdownMenuItem(
+                    value: 'International',
+                    child: Text('🌍 International'),
+                  ),
+                  DropdownMenuItem(
+                    value: 'National',
+                    child: Text('🇮🇳 National'),
+                  ),
+                ],
+                onChanged: (value) {
+                  setState(() {
+                    _isInternational = value == 'International';
+                  });
+                  HapticFeedback.selectionClick();
+                },
+              ),
+            ),
+          ],
+        ),
+        body: FadeTransition(
+          opacity: _fadeAnimation,
+          child: SingleChildScrollView(
+            physics: const BouncingScrollPhysics(),
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 12),
+
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        kLivinkeyGreen.withOpacity(0.06),
+                        Colors.transparent,
+                      ],
+                    ),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: kLivinkeyGreen.withOpacity(0.08),
+                      width: 1,
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.info_outline_rounded,
+                        color: kLivinkeyGreen.withOpacity(0.7),
+                        size: 18,
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          'Tap on any document to view it in full screen',
+                          style: TextStyle(
+                            color: Colors.white.withOpacity(0.6),
+                            fontSize: 13,
+                          ),
+                        ),
+                      ),
                     ],
                   ),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: kLivinkeyGreen.withOpacity(0.08),
-                    width: 1,
-                  ),
                 ),
-                child: Row(
+
+                const SizedBox(height: 16),
+
+                // Document Grid
+                GridView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 12,
+                    mainAxisSpacing: 12,
+                    childAspectRatio: 0.85,
+                  ),
+                  itemCount: _docs.length,
+                  itemBuilder: (context, index) {
+                    final hasPhoto = DateTime.now().millisecondsSinceEpoch % 3 != 0;
+                    return DocumentCard(
+                      doc: _docs[index],
+                      hasPhoto: hasPhoto,
+                      onTap: () => _showDocumentPreview(_docs[index]['label']!),
+                    );
+                  },
+                ),
+
+                const SizedBox(height: 16),
+
+                // Download Buttons
+                Row(
                   children: [
-                    Icon(
-                      Icons.info_outline_rounded,
-                      color: kLivinkeyGreen.withOpacity(0.7),
-                      size: 18,
-                    ),
-                    const SizedBox(width: 10),
                     Expanded(
-                      child: Text(
-                        'Tap on any document to view it in full screen',
-                        style: TextStyle(
-                          color: Colors.white.withOpacity(0.6),
-                          fontSize: 13,
+                      child: OutlinedButton.icon(
+                        onPressed: () {
+                          SnackbarHelper.show(context, 'All documents selected for download');
+                        },
+                        icon: const Icon(Icons.download_rounded, color: Colors.white),
+                        label: const Text(
+                          'Download Selected',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                        style: OutlinedButton.styleFrom(
+                          side: BorderSide(
+                            color: kLivinkeyGreen.withOpacity(0.3),
+                            width: 1,
+                          ),
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: ElevatedButton.icon(
+                        onPressed: () {
+                          SnackbarHelper.show(context, 'Downloading all documents...');
+                        },
+                        icon: const Icon(Icons.download_rounded, color: Colors.black),
+                        label: const Text(
+                          'Download All',
+                          style: TextStyle(color: Colors.black, fontWeight: FontWeight.w600),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: kLivinkeyGreen,
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
                         ),
                       ),
                     ),
                   ],
                 ),
-              ),
 
-              const SizedBox(height: 16),
-
-              // Document Grid
-              GridView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 12,
-                  mainAxisSpacing: 12,
-                  childAspectRatio: 0.85,
-                ),
-                itemCount: _docs.length,
-                itemBuilder: (context, index) {
-                  final hasPhoto = DateTime.now().millisecondsSinceEpoch % 3 != 0;
-                  return DocumentCard(
-                    doc: _docs[index],
-                    hasPhoto: hasPhoto,
-                    onTap: () => _showDocumentPreview(_docs[index]['label']!),
-                  );
-                },
-              ),
-
-              const SizedBox(height: 16),
-
-              // Download Buttons
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      onPressed: () {
-                        SnackbarHelper.show(context, 'All documents selected for download');
-                      },
-                      icon: const Icon(Icons.download_rounded, color: Colors.white),
-                      label: const Text(
-                        'Download Selected',
-                        style: TextStyle(color: Colors.white),
-                      ),
-                      style: OutlinedButton.styleFrom(
-                        side: BorderSide(
-                          color: kLivinkeyGreen.withOpacity(0.3),
-                          width: 1,
-                        ),
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: ElevatedButton.icon(
-                      onPressed: () {
-                        SnackbarHelper.show(context, 'Downloading all documents...');
-                      },
-                      icon: const Icon(Icons.download_rounded, color: Colors.black),
-                      label: const Text(
-                        'Download All',
-                        style: TextStyle(color: Colors.black, fontWeight: FontWeight.w600),
-                      ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: kLivinkeyGreen,
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 32),
-            ],
+                const SizedBox(height: 32),
+              ],
+            ),
           ),
         ),
       ),

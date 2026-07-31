@@ -54,138 +54,200 @@ class _ProfileScreenState extends State<ProfileScreen>
     super.dispose();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: kLivinkeyBlack,
-      appBar: AppBar(
-        leading: IconButton(
-          icon: Icon(Icons.menu_rounded, color: Colors.white, size: 28),
-          onPressed: () {
-            Scaffold.of(context).openDrawer();
-          },
+  // Show exit dialog when back button is pressed
+  Future<bool> _onWillPop() async {
+    return await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: kLivinkeyBlack,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
         ),
-        title: const Text('Profile'),
-      ),
-      body: FadeTransition(
-        opacity: _fadeAnimation,
-        child: SingleChildScrollView(
-          physics: const BouncingScrollPhysics(),
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 12),
-
-              _buildProfileHeader(),
-              const SizedBox(height: 20),
-
-              const Text(
-                'Details',
+        title: const Text(
+          'Exit App?',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 20,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        content: Text(
+          'Are you sure you want to exit the app?',
+          style: TextStyle(
+            color: Colors.white.withOpacity(0.7),
+            fontSize: 15,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text(
+              'Cancel',
+              style: TextStyle(
+                color: Colors.white.withOpacity(0.6),
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [kLivinkeyGreen, Color(0xFF7CB342)],
+                ),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Text(
+                'Exit',
                 style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 18,
+                  color: Colors.black,
                   fontWeight: FontWeight.w700,
                 ),
               ),
-              const SizedBox(height: 12),
+            ),
+          ),
+        ],
+      ),
+    ) ?? false;
+  }
 
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      kLivinkeyWhite.withOpacity(0.03),
-                      Colors.transparent,
-                    ],
-                  ),
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                    color: kLivinkeyWhite.withOpacity(0.06),
-                    width: 1,
+  @override
+  Widget build(BuildContext context) {
+    return WillPopScope(
+      onWillPop: _onWillPop,
+      child: Scaffold(
+        backgroundColor: kLivinkeyBlack,
+        appBar: AppBar(
+          leading: IconButton(
+            icon: Icon(Icons.menu_rounded, color: Colors.white, size: 28),
+            onPressed: () {
+              Scaffold.of(context).openDrawer();
+            },
+          ),
+          title: const Text('Profile'),
+        ),
+        body: FadeTransition(
+          opacity: _fadeAnimation,
+          child: SingleChildScrollView(
+            physics: const BouncingScrollPhysics(),
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 12),
+
+                _buildProfileHeader(),
+                const SizedBox(height: 20),
+
+                const Text(
+                  'Details',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
-                child: Column(
-                  children: _details.map((d) => ProfileRow(
-                    label: d['label']!,
-                    value: d['value']!,
-                  )).toList(),
-                ),
-              ),
+                const SizedBox(height: 12),
 
-              const SizedBox(height: 20),
-
-              // Enter as Guest
-              Center(
-                child: TextButton.icon(
-                  onPressed: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(builder: (_) => const GuestScreen()),
-                    );
-                  },
-                  icon: Icon(
-                    Icons.switch_account_rounded,
-                    color: kLivinkeyGreen,
-                    size: 20,
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        kLivinkeyWhite.withOpacity(0.03),
+                        Colors.transparent,
+                      ],
+                    ),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: kLivinkeyWhite.withOpacity(0.06),
+                      width: 1,
+                    ),
                   ),
-                  label: Text(
-                    'Enter as Guest',
-                    style: TextStyle(
+                  child: Column(
+                    children: _details.map((d) => ProfileRow(
+                      label: d['label']!,
+                      value: d['value']!,
+                    )).toList(),
+                  ),
+                ),
+
+                const SizedBox(height: 20),
+
+                // Enter as Guest
+                Center(
+                  child: TextButton.icon(
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(builder: (_) => const GuestScreen()),
+                      );
+                    },
+                    icon: Icon(
+                      Icons.switch_account_rounded,
                       color: kLivinkeyGreen,
-                      fontSize: 15,
-                      fontWeight: FontWeight.w600,
+                      size: 20,
                     ),
-                  ),
-                  style: TextButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                    backgroundColor: kLivinkeyGreen.withOpacity(0.05),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                    label: Text(
+                      'Enter as Guest',
+                      style: TextStyle(
+                        color: kLivinkeyGreen,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
-                  ),
-                ),
-              ),
-
-              const SizedBox(height: 20),
-
-              _buildLinkItem('Terms of Service', Icons.description_rounded),
-              _buildLinkItem('Privacy Policy', Icons.privacy_tip_rounded),
-
-              const SizedBox(height: 20),
-
-              // Feedback Button
-              _buildFeedbackButton(),
-
-              const SizedBox(height: 12),
-
-              // Logout Button
-              SizedBox(
-                width: double.infinity,
-                child: OutlinedButton.icon(
-                  onPressed: _handleLogout,
-                  icon: const Icon(Icons.logout_rounded, color: Colors.red),
-                  label: const Text(
-                    'Logout',
-                    style: TextStyle(
-                      color: Colors.red,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 16,
-                    ),
-                  ),
-                  style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: Colors.red, width: 1),
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
+                    style: TextButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                      backgroundColor: kLivinkeyGreen.withOpacity(0.05),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
                   ),
                 ),
-              ),
 
-              const SizedBox(height: 32),
-            ],
+                const SizedBox(height: 20),
+
+                _buildLinkItem('Terms of Service', Icons.description_rounded),
+                _buildLinkItem('Privacy Policy', Icons.privacy_tip_rounded),
+
+                const SizedBox(height: 20),
+
+                // Feedback Button
+                _buildFeedbackButton(),
+
+                const SizedBox(height: 12),
+
+                // Logout Button
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton.icon(
+                    onPressed: _handleLogout,
+                    icon: const Icon(Icons.logout_rounded, color: Colors.red),
+                    label: const Text(
+                      'Logout',
+                      style: TextStyle(
+                        color: Colors.red,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 16,
+                      ),
+                    ),
+                    style: OutlinedButton.styleFrom(
+                      side: const BorderSide(color: Colors.red, width: 1),
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 32),
+              ],
+            ),
           ),
         ),
       ),

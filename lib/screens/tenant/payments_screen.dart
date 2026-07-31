@@ -37,78 +37,140 @@ class _PaymentsScreenState extends State<PaymentsScreen>
     super.dispose();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: kLivinkeyBlack,
-      appBar: AppBar(
-        leading: IconButton(
-          icon: Icon(Icons.menu_rounded, color: Colors.white, size: 28),
-          onPressed: () {
-            Scaffold.of(context).openDrawer();
-          },
+  // Show exit dialog when back button is pressed
+  Future<bool> _onWillPop() async {
+    return await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: kLivinkeyBlack,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
         ),
-        title: const Text('Payments'),
-        actions: [
-          IconButton(
-            icon: Icon(
-              Icons.history_rounded,
-              color: Colors.white.withOpacity(0.7),
-              size: 26,
-            ),
-            onPressed: () => _showPaymentHistory(context),
+        title: const Text(
+          'Exit App?',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 20,
+            fontWeight: FontWeight.w700,
           ),
-        ],
-      ),
-      body: FadeTransition(
-        opacity: _fadeAnimation,
-        child: SingleChildScrollView(
-          physics: const BouncingScrollPhysics(),
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 12),
-
-              _buildPaymentStats(),
-              const SizedBox(height: 24),
-
-              const Text(
-                'Payment Method',
+        ),
+        content: Text(
+          'Are you sure you want to exit the app?',
+          style: TextStyle(
+            color: Colors.white.withOpacity(0.7),
+            fontSize: 15,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text(
+              'Cancel',
+              style: TextStyle(
+                color: Colors.white.withOpacity(0.6),
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [kLivinkeyGreen, Color(0xFF7CB342)],
+                ),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Text(
+                'Exit',
                 style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 18,
+                  color: Colors.black,
                   fontWeight: FontWeight.w700,
                 ),
               ),
-              const SizedBox(height: 12),
+            ),
+          ),
+        ],
+      ),
+    ) ?? false;
+  }
 
-              Row(
-                children: [
-                  PaymentChip(
-                    label: 'Pay Online',
-                    isSelected: _selectedPaymentMethod == 0,
-                    onTap: () => setState(() => _selectedPaymentMethod = 0),
-                  ),
-                  const SizedBox(width: 10),
-                  PaymentChip(
-                    label: 'Pay Cash',
-                    isSelected: _selectedPaymentMethod == 1,
-                    onTap: () => setState(() => _selectedPaymentMethod = 1),
-                  ),
-                  const SizedBox(width: 10),
-                  PaymentChip(
-                    label: 'Half Payment',
-                    isSelected: _selectedPaymentMethod == 2,
-                    onTap: () => setState(() => _selectedPaymentMethod = 2),
-                  ),
-                ],
+  @override
+  Widget build(BuildContext context) {
+    return WillPopScope(
+      onWillPop: _onWillPop,
+      child: Scaffold(
+        backgroundColor: kLivinkeyBlack,
+        appBar: AppBar(
+          leading: IconButton(
+            icon: Icon(Icons.menu_rounded, color: Colors.white, size: 28),
+            onPressed: () {
+              Scaffold.of(context).openDrawer();
+            },
+          ),
+          title: const Text('Payments'),
+          actions: [
+            IconButton(
+              icon: Icon(
+                Icons.history_rounded,
+                color: Colors.white.withOpacity(0.7),
+                size: 26,
               ),
+              onPressed: () => _showPaymentHistory(context),
+            ),
+          ],
+        ),
+        body: FadeTransition(
+          opacity: _fadeAnimation,
+          child: SingleChildScrollView(
+            physics: const BouncingScrollPhysics(),
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 12),
 
-              const SizedBox(height: 20),
-              _buildQRSection(),
-              const SizedBox(height: 40),
-            ],
+                _buildPaymentStats(),
+                const SizedBox(height: 24),
+
+                const Text(
+                  'Payment Method',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 12),
+
+                Row(
+                  children: [
+                    PaymentChip(
+                      label: 'Pay Online',
+                      isSelected: _selectedPaymentMethod == 0,
+                      onTap: () => setState(() => _selectedPaymentMethod = 0),
+                    ),
+                    const SizedBox(width: 10),
+                    PaymentChip(
+                      label: 'Pay Cash',
+                      isSelected: _selectedPaymentMethod == 1,
+                      onTap: () => setState(() => _selectedPaymentMethod = 1),
+                    ),
+                    const SizedBox(width: 10),
+                    PaymentChip(
+                      label: 'Partial Payment',
+                      isSelected: _selectedPaymentMethod == 2,
+                      onTap: () => setState(() => _selectedPaymentMethod = 2),
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 20),
+                _buildQRSection(),
+                const SizedBox(height: 40),
+              ],
+            ),
           ),
         ),
       ),
@@ -216,8 +278,8 @@ class _PaymentsScreenState extends State<PaymentsScreen>
         return _buildCashPaymentCard();
       case 2:
         return _buildQRCard(
-          title: 'Half Payment',
-          subtitle: 'Scan QR to pay 50% advance',
+          title: 'Partial Payment',
+          subtitle: 'Scan QR to pay partial amount',
           qrColor: Colors.orange,
         );
       default:

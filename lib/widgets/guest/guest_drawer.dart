@@ -8,14 +8,39 @@ import '../../widgets/common/snackbar_helper.dart';
 class GuestDrawer extends StatelessWidget {
   const GuestDrawer({super.key});
 
+  // Helper method to get responsive logo size
+  double _getLogoSize(BuildContext context) {
+    final double screenWidth = MediaQuery.of(context).size.width;
+    final double screenHeight = MediaQuery.of(context).size.height;
+    
+    // Use the smaller dimension to ensure it fits
+    final double minDimension = screenWidth < screenHeight ? screenWidth : screenHeight;
+    
+    // For tablets (width >= 600), use larger size
+    if (screenWidth >= 600) {
+      return minDimension * 0.25; // 25% of screen width for tablets
+    }
+    // For large phones
+    else if (screenWidth >= 400) {
+      return minDimension * 0.20; // 20% of screen width for large phones
+    }
+    // For small phones
+    else {
+      return minDimension * 0.18; // 18% of screen width for small phones
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    // Get responsive logo size
+    final double logoSize = _getLogoSize(context);
+    
     return Drawer(
       backgroundColor: kLivinkeyBlack,
       child: SafeArea(
         child: Column(
           children: [
-            _buildHeader(),
+            _buildHeader(logoSize),
             Expanded(
               child: Column(
                 children: [
@@ -95,7 +120,7 @@ class GuestDrawer extends StatelessWidget {
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(double logoSize) {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 20),
       decoration: BoxDecoration(
@@ -114,43 +139,12 @@ class GuestDrawer extends StatelessWidget {
           ),
         ),
       ),
-      child: Column(
-        children: [
-          Image.asset(
-            kGeneralLogo,
-            height: 60,
-            width: 60,
-          ),
-          const SizedBox(height: 12),
-          const Text(
-            'Livinkey',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 20,
-              fontWeight: FontWeight.w700,
-              letterSpacing: 1,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 12,
-              vertical: 4,
-            ),
-            decoration: BoxDecoration(
-              color: const Color(0xFFFF9800).withOpacity(0.15),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: const Text(
-              'Guest Access',
-              style: TextStyle(
-                color: Color(0xFFFF9800),
-                fontSize: 11,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-        ],
+      child: Center(
+        child: Image.asset(
+          kGeneralLogo,
+          height: logoSize,
+          width: logoSize,
+        ),
       ),
     );
   }

@@ -160,8 +160,29 @@ class _GuestHomeScreenState extends State<GuestHomeScreen>
     );
   }
 
+  // Helper method to get responsive logo size
+  double _getLogoSize(BuildContext context) {
+    final double screenWidth = MediaQuery.of(context).size.width;
+    
+    // For tablets (width >= 600), use larger size
+    if (screenWidth >= 600) {
+      return 80.0; // Perfect for tablets
+    }
+    // For phones, use smaller size
+    else if (screenWidth >= 400) {
+      return 40.0;
+    }
+    // For small phones
+    else {
+      return 32.0;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    // Get responsive logo size
+    final double logoSize = _getLogoSize(context);
+    
     return Scaffold(
       backgroundColor: kLivinkeyBlack,
       appBar: AppBar(
@@ -171,19 +192,10 @@ class _GuestHomeScreenState extends State<GuestHomeScreen>
             Scaffold.of(context).openDrawer();
           },
         ),
-        title: Row(
-          children: [
-            Image.asset(kGeneralLogo, height: 28, width: 28),
-            const SizedBox(width: 10),
-            const Text(
-              'Livinkey',
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.w600,
-                fontSize: 18,
-              ),
-            ),
-          ],
+        title: Image.asset(
+          kGeneralLogo,
+          height: logoSize,
+          width: logoSize,
         ),
         actions: [
           Container(
