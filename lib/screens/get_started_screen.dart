@@ -19,7 +19,7 @@ class _GetStartedScreenState extends State<GetStartedScreen>
   late Animation<double> _fadeAnimation;
   late Animation<double> _slideAnimation;
   late Animation<double> _scaleAnimation;
-  late Animation<double> _keyRotationAnimation;
+  late Animation<double> _keyBounceAnimation;
   late final TapGestureRecognizer _termsRecognizer;
   late final TapGestureRecognizer _privacyRecognizer;
 
@@ -36,8 +36,10 @@ class _GetStartedScreenState extends State<GetStartedScreen>
       vsync: this,
     );
 
+    // Drives the ring+dot's idle up/down bounce above the key. It repeats
+    // forever (reverse: true), so the value oscillates 0 -> 1 -> 0 -> 1 ...
     _logoController = AnimationController(
-      duration: const Duration(milliseconds: 2000),
+      duration: const Duration(milliseconds: 900),
       vsync: this,
     );
 
@@ -62,11 +64,9 @@ class _GetStartedScreenState extends State<GetStartedScreen>
       ),
     );
 
-    _keyRotationAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _logoController,
-        curve: const Interval(0.0, 1.0, curve: Curves.easeInOutCubic),
-      ),
+    _keyBounceAnimation = CurvedAnimation(
+      parent: _logoController,
+      curve: Curves.easeInOut,
     );
 
     _termsRecognizer = TapGestureRecognizer()
@@ -81,7 +81,7 @@ class _GetStartedScreenState extends State<GetStartedScreen>
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _mainController.forward();
       Future.delayed(const Duration(milliseconds: 300), () {
-        if (mounted) _logoController.forward();
+        if (mounted) _logoController.repeat(reverse: true);
       });
     });
   }
@@ -209,8 +209,8 @@ class _GetStartedScreenState extends State<GetStartedScreen>
                                 width: 1,
                               ),
                             ),
-                            child: LivinkeyLogoKeyFlip(
-                              keyAnimation: _keyRotationAnimation,
+                            child: LivinkeyLogoKeyBounce(
+                              bounceAnimation: _keyBounceAnimation,
                               width: 280,
                             ),
                           ),

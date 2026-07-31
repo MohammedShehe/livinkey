@@ -112,6 +112,8 @@ const double kLogoAspectRatio = _canvasW / _canvasH;
 /// bounces across the letters of "Livinke" until it lands exactly in the
 /// gap left for it at the top of the key, where it stays — completing the
 /// logo. Use this ONLY on the Splash screen.
+///
+/// !! DO NOT MODIFY — the splash screen animation is final. !!
 class LivinkeyLogo extends StatelessWidget {
   final Animation<double> keyAnimation;
   final double width;
@@ -310,18 +312,28 @@ class _DotState {
   _DotState(this.position, this.scaleX, this.scaleY, this.opacity);
 }
 
-/// Static-position logo used on the Get Started screen (and anywhere else
-/// that only wants a rotation, not the bounce). The key sits fixed at its
-/// natural resting spot next to the "e" and rotates in place from
-/// straight (0) to fully upside down (pi) as `keyAnimation` goes from 0 -> 1.
-class LivinkeyLogoKeyFlip extends StatelessWidget {
-  final Animation<double> keyAnimation; // 0 = straight, 1 = upside down
+/// Static-position logo used on the Get Started screen. The key sits
+/// fixed at its natural resting spot, always upright — it never rotates
+/// and never moves. Only the ring+dot piece animates, and it only bounces
+/// straight up and down in place, directly above the key's bow (its
+/// natural resting spot on the artwork). It never travels sideways and
+/// never leaves that spot.
+///
+/// Drive `bounceAnimation` with a repeating (reverse: true) controller so
+/// the value oscillates 0 -> 1 -> 0 -> 1 ... for a continuous idle bounce.
+class LivinkeyLogoKeyBounce extends StatelessWidget {
+  final Animation<double> bounceAnimation; // 0 = resting, 1 = peak of bounce
   final double width;
 
-  const LivinkeyLogoKeyFlip({
+  /// How far (in canvas px, pre-scale) the ring+dot lifts off its resting
+  /// spot at the peak of the bounce.
+  final double bounceHeight;
+
+  const LivinkeyLogoKeyBounce({
     super.key,
-    required this.keyAnimation,
+    required this.bounceAnimation,
     this.width = 300,
+    this.bounceHeight = 18,
   });
 
   @override
@@ -331,8 +343,13 @@ class LivinkeyLogoKeyFlip extends StatelessWidget {
 
     final double keyW = _keyNativeW * scale;
     final double keyH = _keyNativeH * scale;
-    final double screenX = restPosition.dx * scale;
-    final double screenY = restPosition.dy * scale;
+    final double keyScreenX = restPosition.dx * scale;
+    final double keyScreenY = restPosition.dy * scale;
+
+    final double topW = _ringDotNativeW * scale;
+    final double topH = _ringDotNativeH * scale;
+    final double topScreenX = _topRestCenter.dx * scale;
+    final double topScreenY = _topRestCenter.dy * scale;
 
     return SizedBox(
       width: width,
@@ -340,6 +357,7 @@ class LivinkeyLogoKeyFlip extends StatelessWidget {
       child: Stack(
         fit: StackFit.expand,
         children: [
+          // Base logo image
           Image.asset(
             kLogoBaseAsset,
             fit: BoxFit.fill,
@@ -352,27 +370,60 @@ class LivinkeyLogoKeyFlip extends StatelessWidget {
               );
             },
           ),
+
+          // Static key, always upright at its natural resting position —
+          // no rotation, no sliding. It never moves.
+          Positioned(
+            left: keyScreenX - (keyW / 2),
+            top: keyScreenY - (keyH / 2),
+            child: SizedBox(
+              width: keyW,
+              height: keyH,
+              child: Image.asset(
+                kLogoKeyAsset,
+                fit: BoxFit.contain,
+                errorBuilder: (context, error, stackTrace) {
+                  return Container(
+                    color: Colors.red.withOpacity(0.3),
+                    child: const Icon(Icons.vpn_key,
+                        color: Colors.red, size: 50),
+                  );
+                },
+              ),
+            ),
+          ),
+
+          // Bouncing ring+dot piece: fixed horizontally at its natural
+          // resting spot directly above the key's bow, only ever moving
+          // up and down in place.
           AnimatedBuilder(
-            animation: keyAnimation,
+            animation: bounceAnimation,
             builder: (context, child) {
-              final double rotation = keyAnimation.value * math.pi;
+              final double lift = bounceAnimation.value * bounceHeight * scale;
+
+              // Subtle squash-and-stretch to sell the bounce: stretches
+              // tall at the peak, settles back to normal at rest.
+              final double peak = bounceAnimation.value;
+              final double scaleY = 1.0 + 0.12 * peak;
+              final double scaleX = 1.0 - 0.08 * peak;
 
               return Positioned(
-                left: screenX - (keyW / 2),
-                top: screenY - (keyH / 2),
-                child: Transform.rotate(
-                  angle: rotation,
+                left: topScreenX - (topW / 2),
+                top: topScreenY - (topH / 2) - lift,
+                child: Transform.scale(
+                  scaleX: scaleX,
+                  scaleY: scaleY,
                   child: SizedBox(
-                    width: keyW,
-                    height: keyH,
+                    width: topW,
+                    height: topH,
                     child: Image.asset(
-                      kLogoKeyAsset,
-                      fit: BoxFit.contain,
+                      kLogoRingDotAsset,
+                      fit: BoxFit.fill,
                       errorBuilder: (context, error, stackTrace) {
                         return Container(
                           color: Colors.red.withOpacity(0.3),
-                          child: const Icon(Icons.vpn_key,
-                              color: Colors.red, size: 50),
+                          child: const Icon(Icons.circle_outlined,
+                              color: Colors.red, size: 30),
                         );
                       },
                     ),
