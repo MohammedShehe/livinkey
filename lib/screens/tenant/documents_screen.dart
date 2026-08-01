@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import '../../utils/constants.dart';
 import '../../widgets/tenant/document_card.dart';
 import '../../widgets/common/snackbar_helper.dart';
+import '../../widgets/common/loading_indicator.dart';
 import 'tenant_screen.dart';
 
 class DocumentsScreen extends StatefulWidget {
@@ -29,6 +30,14 @@ class _DocumentsScreenState extends State<DocumentsScreen>
   // are selected. Selection mode is simply "is this set non-empty".
   final Set<int> _selectedIndices = {};
   bool get _isSelectionMode => _selectedIndices.isNotEmpty;
+
+  // ---- Download / loading state ---------------------------------------
+  // Tracks whether the "Download All" or "Download (n)" action is
+  // in-flight, so the pinned bar can show a spinner in place of its
+  // icon+label and ignore further taps until the (simulated) download
+  // finishes.
+  bool _isDownloadingAll = false;
+  bool _isDownloadingSelected = false;
 
   final List<Map<String, String>> _internationalDocs = [
     {'label': 'Passport Size Photo', 'icon': '📸'},
@@ -199,6 +208,42 @@ class _DocumentsScreenState extends State<DocumentsScreen>
 
   void _clearSelection() {
     setState(() => _selectedIndices.clear());
+  }
+
+  // ---- Download actions --------------------------------------------------
+  // Both of these flip a loading flag on, simulate the download with a
+  // short delay (swap this for your real download/upload-to-device call),
+  // then flip it back off and surface a confirmation snackbar. The
+  // pinned bar below reads these flags to show a spinner instead of its
+  // normal icon+label while the action is in flight.
+
+  Future<void> _handleDownloadAll() async {
+    if (_isDownloadingAll) return;
+    setState(() => _isDownloadingAll = true);
+    try {
+      await Future.delayed(const Duration(milliseconds: 1400));
+      if (!mounted) return;
+      SnackbarHelper.show(context, 'Downloading all documents...');
+    } finally {
+      if (mounted) setState(() => _isDownloadingAll = false);
+    }
+  }
+
+  Future<void> _handleDownloadSelected() async {
+    if (_isDownloadingSelected) return;
+    final int count = _selectedIndices.length;
+    setState(() => _isDownloadingSelected = true);
+    try {
+      await Future.delayed(const Duration(milliseconds: 1400));
+      if (!mounted) return;
+      SnackbarHelper.show(
+        context,
+        'Downloading $count selected document${count == 1 ? '' : 's'}...',
+      );
+      _clearSelection();
+    } finally {
+      if (mounted) setState(() => _isDownloadingSelected = false);
+    }
   }
 
   @override
@@ -501,21 +546,17 @@ class _DocumentsScreenState extends State<DocumentsScreen>
   }
 
   // Bar shown normally (no selection active): "Download All" front and
-  // center, always reachable.
+  // center, always reachable. While the download is in flight, the
+  // icon+label are swapped for a small spinner and the button ignores
+  // further taps (onPressed: null).
   Widget _buildDefaultBar({Key? key}) {
     return _FloatingBarShell(
       key: key,
-      child: ElevatedButton.icon(
-        onPressed: () {
-          SnackbarHelper.show(context, 'Downloading all documents...');
-        },
-        icon: const Icon(Icons.download_rounded, color: Colors.black, size: 20),
-        label: const Text(
-          'Download All',
-          style: TextStyle(color: Colors.black, fontWeight: FontWeight.w700),
-        ),
+      child: ElevatedButton(
+        onPressed: _isDownloadingAll ? null : _handleDownloadAll,
         style: ElevatedButton.styleFrom(
           backgroundColor: kLivinkeyGreen,
+          disabledBackgroundColor: kLivinkeyGreen.withOpacity(0.6),
           elevation: 0,
           minimumSize: const Size.fromHeight(50),
           padding: const EdgeInsets.symmetric(vertical: 14),
@@ -523,12 +564,37 @@ class _DocumentsScreenState extends State<DocumentsScreen>
             borderRadius: BorderRadius.circular(14),
           ),
         ),
+        child: AnimatedSwitcher(
+          duration: const Duration(milliseconds: 160),
+          child: _isDownloadingAll
+              ? const SizedBox(
+                  key: ValueKey('spinner'),
+                  height: 20,
+                  width: 20,
+                  child: LoadingIndicator(size: 20, color: Colors.black),
+                )
+              : const Row(
+                  key: ValueKey('label'),
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.download_rounded, color: Colors.black, size: 20),
+                    SizedBox(width: 8),
+                    Text(
+                      'Download All',
+                      style: TextStyle(color: Colors.black, fontWeight: FontWeight.w700),
+                    ),
+                  ],
+                ),
+        ),
       ),
     );
   }
 
   // Bar shown while one or more documents are selected: lets the user
   // download just the selection, or bail out back to the default bar.
+  // The Download button shows a spinner in place of its icon+label
+  // while the (simulated) download is running; Cancel is disabled at
+  // the same time so the user can't clear the selection mid-download.
   Widget _buildSelectionBar({Key? key}) {
     return _FloatingBarShell(
       key: key,
@@ -536,7 +602,7 @@ class _DocumentsScreenState extends State<DocumentsScreen>
         children: [
           Expanded(
             child: OutlinedButton.icon(
-              onPressed: _clearSelection,
+              onPressed: _isDownloadingSelected ? null : _clearSelection,
               icon: const Icon(Icons.close_rounded, color: Colors.white, size: 20),
               label: const Text(
                 'Cancel',
@@ -557,27 +623,38 @@ class _DocumentsScreenState extends State<DocumentsScreen>
           const SizedBox(width: 12),
           Expanded(
             flex: 2,
-            child: ElevatedButton.icon(
-              onPressed: () {
-                final count = _selectedIndices.length;
-                SnackbarHelper.show(
-                  context,
-                  'Downloading $count selected document${count == 1 ? '' : 's'}...',
-                );
-                _clearSelection();
-              },
-              icon: const Icon(Icons.download_rounded, color: Colors.black, size: 20),
-              label: Text(
-                'Download (${_selectedIndices.length})',
-                style: const TextStyle(color: Colors.black, fontWeight: FontWeight.w700),
-              ),
+            child: ElevatedButton(
+              onPressed: _isDownloadingSelected ? null : _handleDownloadSelected,
               style: ElevatedButton.styleFrom(
                 backgroundColor: kLivinkeyGreen,
+                disabledBackgroundColor: kLivinkeyGreen.withOpacity(0.6),
                 elevation: 0,
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(14),
                 ),
+              ),
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 160),
+                child: _isDownloadingSelected
+                    ? const SizedBox(
+                        key: ValueKey('spinner'),
+                        height: 20,
+                        width: 20,
+                        child: LoadingIndicator(size: 20, color: Colors.black),
+                      )
+                    : Row(
+                        key: const ValueKey('label'),
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.download_rounded, color: Colors.black, size: 20),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Download (${_selectedIndices.length})',
+                            style: const TextStyle(color: Colors.black, fontWeight: FontWeight.w700),
+                          ),
+                        ],
+                      ),
               ),
             ),
           ),
@@ -611,108 +688,145 @@ class _DocumentsScreenState extends State<DocumentsScreen>
     );
   }
 
+  // Preview dialog now manages its own tiny bit of loading state via
+  // StatefulBuilder, so tapping "Download" inside it swaps the button's
+  // icon+label for a spinner instead of just firing the snackbar
+  // instantly. The dialog can't use setState() from the parent screen
+  // (it isn't rebuilt with it), so StatefulBuilder's own setState is
+  // what's used here.
   void _showDocumentPreview(String label) {
     showDialog(
       context: context,
-      builder: (context) => Dialog(
-        backgroundColor: const Color(0xFF141414),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(24),
-          side: BorderSide(color: Colors.white.withOpacity(0.06)),
-        ),
-        child: Container(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) {
+          bool isDownloading = false;
+
+          Future<void> handleDownload() async {
+            if (isDownloading) return;
+            setDialogState(() => isDownloading = true);
+            await Future.delayed(const Duration(milliseconds: 1200));
+            if (!context.mounted) return;
+            SnackbarHelper.show(context, 'Document downloaded');
+            setDialogState(() => isDownloading = false);
+          }
+
+          return Dialog(
+            backgroundColor: const Color(0xFF141414),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(24),
+              side: BorderSide(color: Colors.white.withOpacity(0.06)),
+            ),
+            child: Container(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  Expanded(
-                    child: Text(
-                      label,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 17.5,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: -0.2,
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          label,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 17.5,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: -0.2,
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
-                  IconButton(
-                    onPressed: () => Navigator.pop(context),
-                    icon: Container(
-                      padding: const EdgeInsets.all(4),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.06),
-                        borderRadius: BorderRadius.circular(8),
+                      IconButton(
+                        onPressed: () => Navigator.pop(context),
+                        icon: Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.06),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Icon(
+                            Icons.close_rounded,
+                            color: Colors.white.withOpacity(0.6),
+                            size: 18,
+                          ),
+                        ),
                       ),
-                      child: Icon(
-                        Icons.close_rounded,
-                        color: Colors.white.withOpacity(0.6),
-                        size: 18,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              Container(
-                width: 200,
-                height: 200,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      kLivinkeyGreen.withOpacity(0.12),
-                      Colors.white.withOpacity(0.02),
                     ],
                   ),
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                    color: kLivinkeyGreen.withOpacity(0.14),
-                    width: 1,
-                  ),
-                ),
-                child: Center(
-                  child: Text(
-                    '📄',
-                    style: TextStyle(
-                      fontSize: 60,
-                      color: kLivinkeyGreen.withOpacity(0.4),
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20),
-              Row(
-                children: [
-                  Expanded(
-                    child: ElevatedButton.icon(
-                      onPressed: () {
-                        SnackbarHelper.show(context, 'Document downloaded');
-                      },
-                      icon: const Icon(Icons.download_rounded, color: Colors.black, size: 20),
-                      label: const Text(
-                        'Download',
-                        style: TextStyle(color: Colors.black, fontWeight: FontWeight.w700),
+                  const SizedBox(height: 16),
+                  Container(
+                    width: 200,
+                    height: 200,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          kLivinkeyGreen.withOpacity(0.12),
+                          Colors.white.withOpacity(0.02),
+                        ],
                       ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: kLivinkeyGreen,
-                        elevation: 0,
-                        padding: const EdgeInsets.symmetric(vertical: 13),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: kLivinkeyGreen.withOpacity(0.14),
+                        width: 1,
+                      ),
+                    ),
+                    child: Center(
+                      child: Text(
+                        '📄',
+                        style: TextStyle(
+                          fontSize: 60,
+                          color: kLivinkeyGreen.withOpacity(0.4),
                         ),
                       ),
                     ),
                   ),
+                  const SizedBox(height: 20),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: isDownloading ? null : handleDownload,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: kLivinkeyGreen,
+                            disabledBackgroundColor: kLivinkeyGreen.withOpacity(0.6),
+                            elevation: 0,
+                            padding: const EdgeInsets.symmetric(vertical: 13),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                          ),
+                          child: AnimatedSwitcher(
+                            duration: const Duration(milliseconds: 160),
+                            child: isDownloading
+                                ? const SizedBox(
+                                    key: ValueKey('spinner'),
+                                    height: 20,
+                                    width: 20,
+                                    child: LoadingIndicator(size: 20, color: Colors.black),
+                                  )
+                                : const Row(
+                                    key: ValueKey('label'),
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(Icons.download_rounded, color: Colors.black, size: 20),
+                                      SizedBox(width: 8),
+                                      Text(
+                                        'Download',
+                                        style: TextStyle(color: Colors.black, fontWeight: FontWeight.w700),
+                                      ),
+                                    ],
+                                  ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ],
               ),
-            ],
-          ),
-        ),
+            ),
+          );
+        },
       ),
     );
   }

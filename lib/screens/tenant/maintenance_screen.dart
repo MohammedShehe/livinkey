@@ -436,6 +436,7 @@ class _MaintenanceScreenState extends State<MaintenanceScreen>
     final TextEditingController typeController = TextEditingController();
     final TextEditingController descController = TextEditingController();
     File? _selectedImage;
+    bool _isSubmitting = false;
 
     showModalBottomSheet(
       context: context,
@@ -511,6 +512,7 @@ class _MaintenanceScreenState extends State<MaintenanceScreen>
                             controller: typeController,
                             hint: 'e.g., Plumbing, Electrical, AC',
                             icon: Icons.build_rounded,
+                            enabled: !_isSubmitting,
                           ),
                           const SizedBox(height: 12),
                           _buildFormField(
@@ -519,6 +521,7 @@ class _MaintenanceScreenState extends State<MaintenanceScreen>
                             hint: 'Describe the issue in detail',
                             icon: Icons.description_rounded,
                             maxLines: 3,
+                            enabled: !_isSubmitting,
                           ),
                           const SizedBox(height: 16),
 
@@ -534,16 +537,27 @@ class _MaintenanceScreenState extends State<MaintenanceScreen>
                           const SizedBox(height: 20),
                           SizedBox(
                             width: double.infinity,
+                            height: 50,
                             child: ElevatedButton(
-                              onPressed: () {
-                                Navigator.pop(context);
-                                SnackbarHelper.show(
-                                  context,
-                                  'Request submitted successfully!${_selectedImage != null ? ' 📸' : ''}',
-                                );
-                              },
+                              onPressed: _isSubmitting
+                                  ? null
+                                  : () async {
+                                      setState(() => _isSubmitting = true);
+
+                                      // Simulate the network call for submitting the request.
+                                      await Future.delayed(const Duration(seconds: 2));
+
+                                      if (!context.mounted) return;
+
+                                      Navigator.pop(context);
+                                      SnackbarHelper.show(
+                                        context,
+                                        'Request submitted successfully!${_selectedImage != null ? ' 📸' : ''}',
+                                      );
+                                    },
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: kLivinkeyGreen,
+                                disabledBackgroundColor: kLivinkeyGreen.withOpacity(0.6),
                                 foregroundColor: Colors.black,
                                 elevation: 0,
                                 padding: const EdgeInsets.symmetric(vertical: 15),
@@ -551,12 +565,28 @@ class _MaintenanceScreenState extends State<MaintenanceScreen>
                                   borderRadius: BorderRadius.circular(14),
                                 ),
                               ),
-                              child: const Text(
-                                'Submit Request',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.w700,
-                                  fontSize: 16,
-                                ),
+                              child: AnimatedSwitcher(
+                                duration: const Duration(milliseconds: 200),
+                                transitionBuilder: (child, anim) =>
+                                    FadeTransition(opacity: anim, child: child),
+                                child: _isSubmitting
+                                    ? const SizedBox(
+                                        key: ValueKey('loading'),
+                                        height: 22,
+                                        width: 22,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2.4,
+                                          valueColor: AlwaysStoppedAnimation<Color>(Colors.black),
+                                        ),
+                                      )
+                                    : const Text(
+                                        'Submit Request',
+                                        key: ValueKey('label'),
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.w700,
+                                          fontSize: 16,
+                                        ),
+                                      ),
                               ),
                             ),
                           ),

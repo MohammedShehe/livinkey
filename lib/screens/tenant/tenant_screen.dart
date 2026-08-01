@@ -93,7 +93,9 @@ class TenantScreenState extends State<TenantScreen> {
           duration: const Duration(milliseconds: 380),
           curve: Curves.easeOutCubic,
           margin: const EdgeInsets.symmetric(horizontal: 2),
-          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
+          // Tighter horizontal padding so long labels (e.g. "Maintenance")
+          // have more room before needing to shrink.
+          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 2),
           decoration: BoxDecoration(
             gradient: isSelected
                 ? const LinearGradient(
@@ -127,6 +129,7 @@ class TenantScreenState extends State<TenantScreen> {
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               AnimatedScale(
                 duration: const Duration(milliseconds: 300),
@@ -149,17 +152,28 @@ class TenantScreenState extends State<TenantScreen> {
                 ),
               ),
               const SizedBox(height: 4),
-              AnimatedDefaultTextStyle(
-                duration: const Duration(milliseconds: 300),
-                style: TextStyle(
-                  color: isSelected
-                      ? Colors.black.withOpacity(0.85)
-                      : Colors.white.withOpacity(0.38),
-                  fontSize: isSelected ? 10.5 : 9.5,
-                  fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                  letterSpacing: 0.2,
+              // Wrapping the label in a FittedBox lets it auto-scale down to
+              // fit the tab's available width instead of clipping/wrapping
+              // for longer words like "Maintenance", while short labels
+              // like "Home" keep rendering at full size.
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                child: AnimatedDefaultTextStyle(
+                  duration: const Duration(milliseconds: 300),
+                  style: TextStyle(
+                    color: isSelected
+                        ? Colors.black.withOpacity(0.85)
+                        : Colors.white.withOpacity(0.38),
+                    fontSize: isSelected ? 10.5 : 9.5,
+                    fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                    letterSpacing: 0.2,
+                  ),
+                  child: Text(
+                    label,
+                    maxLines: 1,
+                    softWrap: false,
+                  ),
                 ),
-                child: Text(label),
               ),
             ],
           ),
