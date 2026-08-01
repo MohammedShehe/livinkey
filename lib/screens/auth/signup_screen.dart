@@ -482,7 +482,7 @@ class _SignUpScreenState extends State<SignUpScreen>
       CurvedAnimation(parent: _fadeController, curve: Curves.easeOutBack),
     );
 
-    _logoScaleAnimation = Tween<double>(begin: 0.5, end: 1.0).animate(
+    _logoScaleAnimation = Tween<double>(begin: 0.4, end: 1.0).animate(
       CurvedAnimation(
         parent: _fadeController,
         curve: Curves.easeOutBack,
@@ -665,7 +665,7 @@ class _SignUpScreenState extends State<SignUpScreen>
                   position: _slideAnimation,
                   child: SingleChildScrollView(
                     physics: const BouncingScrollPhysics(),
-                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: Form(
                       key: _formKey,
                       child: Column(
@@ -673,31 +673,31 @@ class _SignUpScreenState extends State<SignUpScreen>
                         children: [
                           const SizedBox(height: 16),
                           _buildBackButton(),
-                          const SizedBox(height: 24),
+                          const SizedBox(height: 20),
                           _buildHeader(),
-                          const SizedBox(height: 18),
+                          const SizedBox(height: 16),
                           _buildGuestBadge(),
-                          const SizedBox(height: 30),
+                          const SizedBox(height: 24),
                           _buildFullNameField(),
-                          const SizedBox(height: 18),
+                          const SizedBox(height: 16),
                           _buildEmailField(),
-                          const SizedBox(height: 18),
+                          const SizedBox(height: 16),
                           _buildNationalityDropdown(),
-                          const SizedBox(height: 18),
+                          const SizedBox(height: 16),
                           _buildPhoneField(),
-                          const SizedBox(height: 18),
+                          const SizedBox(height: 16),
                           _buildPasswordField(),
-                          const SizedBox(height: 18),
+                          const SizedBox(height: 16),
                           _buildConfirmPasswordField(),
                           const SizedBox(height: 6),
                           _buildPasswordHint(),
-                          const SizedBox(height: 22),
-                          _buildTermsAndConditions(),
-                          const SizedBox(height: 28),
-                          _buildSignUpButton(),
-                          const SizedBox(height: 22),
-                          _buildSignInLink(),
                           const SizedBox(height: 20),
+                          _buildTermsAndConditions(),
+                          const SizedBox(height: 24),
+                          _buildSignUpButton(),
+                          const SizedBox(height: 20),
+                          _buildSignInLink(),
+                          const SizedBox(height: 16),
                         ],
                       ),
                     ),
@@ -716,10 +716,10 @@ class _SignUpScreenState extends State<SignUpScreen>
     return GestureDetector(
       onTap: _navigateBackToLogin,
       child: Container(
-        padding: const EdgeInsets.all(10),
+        padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
           color: Colors.white.withOpacity(0.06),
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(10),
           border: Border.all(
             color: Colors.white.withOpacity(0.08),
             width: 1.5,
@@ -728,7 +728,7 @@ class _SignUpScreenState extends State<SignUpScreen>
         child: Icon(
           Icons.arrow_back_rounded,
           color: Colors.white.withOpacity(0.7),
-          size: 22,
+          size: 20,
         ),
       ),
     );
@@ -750,18 +750,18 @@ class _SignUpScreenState extends State<SignUpScreen>
                 child: const Text(
                   'Create Account',
                   style: TextStyle(
-                    fontSize: 28,
+                    fontSize: 24,
                     fontWeight: FontWeight.w800,
                     color: Colors.white,
                     letterSpacing: -0.6,
                   ),
                 ),
               ),
-              const SizedBox(height: 5),
+              const SizedBox(height: 4),
               Text(
                 'Join the Livinkey community',
                 style: TextStyle(
-                  fontSize: 14.5,
+                  fontSize: 13,
                   fontWeight: FontWeight.w500,
                   color: Colors.white.withOpacity(0.45),
                   letterSpacing: 0.1,
@@ -770,7 +770,7 @@ class _SignUpScreenState extends State<SignUpScreen>
             ],
           ),
         ),
-        const SizedBox(width: 12),
+        const SizedBox(width: 10),
         ScaleTransition(
           scale: _logoScaleAnimation,
           child: Container(
@@ -782,8 +782,8 @@ class _SignUpScreenState extends State<SignUpScreen>
             ),
             child: Image.asset(
               kGeneralLogo,
-              height: 44,
-              width: 44,
+              height: 50,
+              width: 50,
               fit: BoxFit.contain,
             ),
           ),
@@ -795,8 +795,8 @@ class _SignUpScreenState extends State<SignUpScreen>
   Widget _buildGuestBadge() {
     return Container(
       padding: const EdgeInsets.symmetric(
-        horizontal: 14,
-        vertical: 9,
+        horizontal: 12,
+        vertical: 7,
       ),
       decoration: BoxDecoration(
         gradient: LinearGradient(
@@ -807,7 +807,7 @@ class _SignUpScreenState extends State<SignUpScreen>
             const Color(0xFFFF9800).withOpacity(0.04),
           ],
         ),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(10),
         border: Border.all(
           color: const Color(0xFFFF9800).withOpacity(0.22),
           width: 1.5,
@@ -824,31 +824,31 @@ class _SignUpScreenState extends State<SignUpScreen>
         mainAxisSize: MainAxisSize.min,
         children: [
           const _PulsingDot(),
-          const SizedBox(width: 10),
+          const SizedBox(width: 8),
           Text(
             'Guest Account',
             style: TextStyle(
               color: const Color(0xFFFF9800).withOpacity(0.95),
-              fontSize: 13,
+              fontSize: 12,
               fontWeight: FontWeight.w700,
               letterSpacing: 0.2,
             ),
           ),
-          const SizedBox(width: 10),
+          const SizedBox(width: 8),
           Container(
             padding: const EdgeInsets.symmetric(
-              horizontal: 8,
-              vertical: 3,
+              horizontal: 6,
+              vertical: 2,
             ),
             decoration: BoxDecoration(
               color: const Color(0xFFFF9800).withOpacity(0.12),
-              borderRadius: BorderRadius.circular(6),
+              borderRadius: BorderRadius.circular(4),
             ),
             child: Text(
               'Fixed Role',
               style: TextStyle(
                 color: const Color(0xFFFF9800).withOpacity(0.65),
-                fontSize: 10,
+                fontSize: 9,
                 fontWeight: FontWeight.w600,
                 letterSpacing: 0.3,
               ),
@@ -930,7 +930,7 @@ class _SignUpScreenState extends State<SignUpScreen>
         item,
         style: const TextStyle(
           color: Colors.white,
-          fontSize: 14,
+          fontSize: 13,
           fontWeight: FontWeight.w500,
         ),
       ),
@@ -938,7 +938,7 @@ class _SignUpScreenState extends State<SignUpScreen>
         item,
         style: const TextStyle(
           color: Colors.white,
-          fontSize: 14,
+          fontSize: 13,
           fontWeight: FontWeight.w500,
         ),
       ),
@@ -955,8 +955,10 @@ class _SignUpScreenState extends State<SignUpScreen>
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Expanded(
-          flex: 3,
+        // Country code dropdown - using Flexible with fit loose
+        Flexible(
+          flex: 2,
+          fit: FlexFit.loose,
           child: _buildCustomDropdown<String>(
             label: 'Code',
             icon: Icons.phone_outlined,
@@ -996,29 +998,29 @@ class _SignUpScreenState extends State<SignUpScreen>
                 children: [
                   Container(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 4,
+                      horizontal: 4,
+                      vertical: 2,
                     ),
                     decoration: BoxDecoration(
                       color: const Color(0xFF92C24A).withOpacity(0.15),
-                      borderRadius: BorderRadius.circular(6),
+                      borderRadius: BorderRadius.circular(3),
                     ),
                     child: Text(
                       code,
                       style: const TextStyle(
                         color: Color(0xFF92C24A),
-                        fontSize: 14,
+                        fontSize: 10,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: 4),
                   Expanded(
                     child: Text(
                       country['country']!,
                       style: TextStyle(
                         color: Colors.white.withOpacity(0.8),
-                        fontSize: 14,
+                        fontSize: 11,
                         fontWeight: FontWeight.w400,
                       ),
                       overflow: TextOverflow.ellipsis,
@@ -1029,43 +1031,23 @@ class _SignUpScreenState extends State<SignUpScreen>
             },
             buildSelectedItem: (item) {
               final code = item as String;
-              final country = _allCountryCodes.firstWhere(
-                (c) => c['code'] == code,
-                orElse: () => {'code': code, 'country': 'Unknown'},
-              );
-              return Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF92C24A).withOpacity(0.15),
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    child: Text(
-                      code,
-                      style: const TextStyle(
-                        color: Color(0xFF92C24A),
-                        fontSize: 14,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
+              return Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 4,
+                  vertical: 2,
+                ),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF92C24A).withOpacity(0.15),
+                  borderRadius: BorderRadius.circular(3),
+                ),
+                child: Text(
+                  code,
+                  style: const TextStyle(
+                    color: Color(0xFF92C24A),
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
                   ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Text(
-                      country['country']!,
-                      style: TextStyle(
-                        color: Colors.white.withOpacity(0.8),
-                        fontSize: 13,
-                        fontWeight: FontWeight.w400,
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                ],
+                ),
               );
             },
             validator: (value) {
@@ -1076,9 +1058,11 @@ class _SignUpScreenState extends State<SignUpScreen>
             },
           ),
         ),
-        const SizedBox(width: 12),
-        Expanded(
-          flex: 7,
+        const SizedBox(width: 4),
+        // Phone number field
+        Flexible(
+          flex: 5,
+          fit: FlexFit.loose,
           child: Container(
             decoration: BoxDecoration(
               gradient: LinearGradient(
@@ -1089,7 +1073,7 @@ class _SignUpScreenState extends State<SignUpScreen>
                   Colors.white.withOpacity(0.02),
                 ],
               ),
-              borderRadius: BorderRadius.circular(14),
+              borderRadius: BorderRadius.circular(12),
               border: Border.all(
                 color: Colors.white.withOpacity(0.08),
                 width: 1.5,
@@ -1099,7 +1083,7 @@ class _SignUpScreenState extends State<SignUpScreen>
               controller: _phoneController,
               style: const TextStyle(
                 color: Colors.white,
-                fontSize: 15,
+                fontSize: 13,
                 fontWeight: FontWeight.w500,
               ),
               keyboardType: TextInputType.phone,
@@ -1112,31 +1096,31 @@ class _SignUpScreenState extends State<SignUpScreen>
                 labelStyle: TextStyle(
                   color: Colors.white.withOpacity(0.4),
                   fontWeight: FontWeight.w500,
-                  fontSize: 14,
+                  fontSize: 11,
                 ),
                 prefixIcon: Icon(
                   Icons.phone_outlined,
                   color: const Color(0xFF92C24A).withOpacity(0.8),
-                  size: 22,
+                  size: 16,
                 ),
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(14),
+                  borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide.none,
                 ),
                 focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(14),
+                  borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide(
                     color: const Color(0xFF92C24A).withOpacity(0.5),
                     width: 2,
                   ),
                 ),
                 enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(14),
+                  borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide.none,
                 ),
                 contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 18,
-                  vertical: 16,
+                  horizontal: 8,
+                  vertical: 12,
                 ),
                 isDense: true,
               ),
@@ -1169,7 +1153,7 @@ class _SignUpScreenState extends State<SignUpScreen>
               ? Icons.visibility_off_outlined
               : Icons.visibility_outlined,
           color: Colors.white.withOpacity(0.4),
-          size: 22,
+          size: 18,
         ),
         onPressed: () {
           setState(() {
@@ -1203,7 +1187,7 @@ class _SignUpScreenState extends State<SignUpScreen>
               ? Icons.visibility_off_outlined
               : Icons.visibility_outlined,
           color: Colors.white.withOpacity(0.4),
-          size: 22,
+          size: 18,
         ),
         onPressed: () {
           setState(() {
@@ -1232,14 +1216,14 @@ class _SignUpScreenState extends State<SignUpScreen>
           Icon(
             Icons.info_outline_rounded,
             color: Colors.white.withOpacity(0.3),
-            size: 14,
+            size: 12,
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: 6),
           Text(
             'Password must be at least 6 characters',
             style: TextStyle(
               color: Colors.white.withOpacity(0.3),
-              fontSize: 12,
+              fontSize: 11,
               fontWeight: FontWeight.w400,
             ),
           ),
@@ -1250,10 +1234,10 @@ class _SignUpScreenState extends State<SignUpScreen>
 
   Widget _buildTermsAndConditions() {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
       decoration: BoxDecoration(
         color: Colors.white.withOpacity(0.025),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(10),
         border: Border.all(color: Colors.white.withOpacity(0.05)),
       ),
       child: Row(
@@ -1265,7 +1249,7 @@ class _SignUpScreenState extends State<SignUpScreen>
                   (states) => const Color(0xFF92C24A),
                 ),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(4),
+                  borderRadius: BorderRadius.circular(3),
                 ),
               ),
               unselectedWidgetColor: Colors.white.withOpacity(0.3),
@@ -1284,6 +1268,8 @@ class _SignUpScreenState extends State<SignUpScreen>
                 color: Colors.white.withOpacity(0.3),
                 width: 1.5,
               ),
+              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              visualDensity: VisualDensity.compact,
             ),
           ),
           Expanded(
@@ -1291,7 +1277,7 @@ class _SignUpScreenState extends State<SignUpScreen>
               TextSpan(
                 style: TextStyle(
                   color: Colors.white.withOpacity(0.5),
-                  fontSize: 13,
+                  fontSize: 11,
                   fontWeight: FontWeight.w400,
                 ),
                 children: [
@@ -1334,7 +1320,7 @@ class _SignUpScreenState extends State<SignUpScreen>
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
       width: double.infinity,
-      height: 56,
+      height: 48,
       decoration: BoxDecoration(
         gradient: _agreeToTerms
             ? const LinearGradient(
@@ -1351,7 +1337,7 @@ class _SignUpScreenState extends State<SignUpScreen>
                   Colors.white.withOpacity(0.04),
                 ],
               ),
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(12),
         boxShadow: _agreeToTerms
             ? [
                 BoxShadow(
@@ -1374,15 +1360,15 @@ class _SignUpScreenState extends State<SignUpScreen>
               _agreeToTerms ? Colors.black : Colors.white.withOpacity(0.3),
           shadowColor: Colors.transparent,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(12),
           ),
           elevation: 0,
         ),
         onPressed: _isLoading || !_agreeToTerms ? null : _handleSignUp,
         child: _isLoading
             ? SizedBox(
-                height: 24,
-                width: 24,
+                height: 20,
+                width: 20,
                 child: CircularProgressIndicator(
                   strokeWidth: 2.5,
                   valueColor: const AlwaysStoppedAnimation<Color>(
@@ -1396,7 +1382,7 @@ class _SignUpScreenState extends State<SignUpScreen>
                   Text(
                     'Sign Up',
                     style: TextStyle(
-                      fontSize: 18,
+                      fontSize: 16,
                       fontWeight: FontWeight.w700,
                       color: _agreeToTerms
                           ? Colors.black
@@ -1404,13 +1390,13 @@ class _SignUpScreenState extends State<SignUpScreen>
                       letterSpacing: 0.5,
                     ),
                   ),
-                  const SizedBox(width: 10),
+                  const SizedBox(width: 6),
                   Icon(
                     Icons.arrow_forward_rounded,
                     color: _agreeToTerms
                         ? Colors.black
                         : Colors.white.withOpacity(0.3),
-                    size: 22,
+                    size: 18,
                   ),
                 ],
               ),
@@ -1424,7 +1410,7 @@ class _SignUpScreenState extends State<SignUpScreen>
         TextSpan(
           style: TextStyle(
             color: Colors.white.withOpacity(0.5),
-            fontSize: 15,
+            fontSize: 13,
             fontWeight: FontWeight.w400,
           ),
           children: [
@@ -1481,7 +1467,7 @@ class _SignUpScreenState extends State<SignUpScreen>
                         Colors.white.withOpacity(0.02),
                       ],
               ),
-              borderRadius: BorderRadius.circular(14),
+              borderRadius: BorderRadius.circular(12),
               border: Border.all(
                 color: isOpen
                     ? const Color(0xFF92C24A).withOpacity(0.5)
@@ -1491,17 +1477,17 @@ class _SignUpScreenState extends State<SignUpScreen>
             ),
             child: Padding(
               padding: const EdgeInsets.symmetric(
-                horizontal: 18,
-                vertical: 14,
+                horizontal: 8,
+                vertical: 6,
               ),
               child: Row(
                 children: [
                   Icon(
                     icon,
                     color: const Color(0xFF92C24A).withOpacity(0.8),
-                    size: 22,
+                    size: 14,
                   ),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: 4),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1512,10 +1498,10 @@ class _SignUpScreenState extends State<SignUpScreen>
                           style: TextStyle(
                             color: Colors.white.withOpacity(0.4),
                             fontWeight: FontWeight.w500,
-                            fontSize: 14,
+                            fontSize: 10,
                           ),
                         ),
-                        const SizedBox(height: 2),
+                        const SizedBox(height: 1),
                         buildSelectedItem(selectedValue),
                       ],
                     ),
@@ -1526,7 +1512,7 @@ class _SignUpScreenState extends State<SignUpScreen>
                     child: Icon(
                       Icons.keyboard_arrow_down_rounded,
                       color: Colors.white.withOpacity(0.5),
-                      size: 24,
+                      size: 16,
                     ),
                   ),
                 ],
@@ -1536,10 +1522,10 @@ class _SignUpScreenState extends State<SignUpScreen>
         ),
         if (isOpen)
           Container(
-            margin: const EdgeInsets.only(top: 6),
+            margin: const EdgeInsets.only(top: 4),
             decoration: BoxDecoration(
               color: const Color(0xFF0A0A0A),
-              borderRadius: BorderRadius.circular(14),
+              borderRadius: BorderRadius.circular(12),
               border: Border.all(
                 color: Colors.white.withOpacity(0.08),
                 width: 1.5,
@@ -1555,41 +1541,41 @@ class _SignUpScreenState extends State<SignUpScreen>
             child: Column(
               children: [
                 Container(
-                  padding: const EdgeInsets.all(8),
+                  padding: const EdgeInsets.all(6),
                   child: TextField(
                     controller: searchController,
                     autofocus: true,
                     style: const TextStyle(
                       color: Colors.white,
-                      fontSize: 14,
+                      fontSize: 12,
                     ),
                     decoration: InputDecoration(
                       hintText: 'Search ${label.toLowerCase()}...',
                       hintStyle: TextStyle(
                         color: Colors.white.withOpacity(0.3),
-                        fontSize: 13,
+                        fontSize: 11,
                       ),
                       prefixIcon: Icon(
                         Icons.search_rounded,
                         color: const Color(0xFF92C24A).withOpacity(0.6),
-                        size: 20,
+                        size: 16,
                       ),
                       filled: true,
                       fillColor: Colors.white.withOpacity(0.06),
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius: BorderRadius.circular(8),
                         borderSide: BorderSide.none,
                       ),
                       focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius: BorderRadius.circular(8),
                         borderSide: BorderSide(
                           color: const Color(0xFF92C24A).withOpacity(0.3),
                           width: 1.5,
                         ),
                       ),
                       contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 10,
+                        horizontal: 8,
+                        vertical: 6,
                       ),
                       isDense: true,
                     ),
@@ -1602,24 +1588,24 @@ class _SignUpScreenState extends State<SignUpScreen>
                 ),
                 ConstrainedBox(
                   constraints: const BoxConstraints(
-                    maxHeight: 200,
+                    maxHeight: 180,
                   ),
                   child: items.isEmpty
                       ? Padding(
-                          padding: const EdgeInsets.all(20.0),
+                          padding: const EdgeInsets.all(16.0),
                           child: Column(
                             children: [
                               Icon(
                                 Icons.search_off_rounded,
                                 color: Colors.white.withOpacity(0.2),
-                                size: 28,
+                                size: 24,
                               ),
-                              const SizedBox(height: 8),
+                              const SizedBox(height: 6),
                               Text(
                                 'No results found',
                                 style: TextStyle(
                                   color: Colors.white.withOpacity(0.3),
-                                  fontSize: 13,
+                                  fontSize: 12,
                                   fontWeight: FontWeight.w500,
                                 ),
                               ),
@@ -1638,8 +1624,8 @@ class _SignUpScreenState extends State<SignUpScreen>
                               },
                               child: Container(
                                 padding: const EdgeInsets.symmetric(
-                                  horizontal: 16,
-                                  vertical: 12,
+                                  horizontal: 10,
+                                  vertical: 6,
                                 ),
                                 decoration: BoxDecoration(
                                   color: isSelected
@@ -1661,7 +1647,7 @@ class _SignUpScreenState extends State<SignUpScreen>
                                         Icons.check_circle_rounded,
                                         color:
                                             const Color(0xFF92C24A).withOpacity(0.85),
-                                        size: 18,
+                                        size: 14,
                                       ),
                                   ],
                                 ),
@@ -1675,12 +1661,12 @@ class _SignUpScreenState extends State<SignUpScreen>
           ),
         if (validator(selectedValue) != null)
           Padding(
-            padding: const EdgeInsets.only(top: 6, left: 4),
+            padding: const EdgeInsets.only(top: 4, left: 4),
             child: Text(
               validator(selectedValue)!,
               style: TextStyle(
                 color: Colors.red.shade300,
-                fontSize: 12,
+                fontSize: 10,
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -1710,7 +1696,7 @@ class _SignUpScreenState extends State<SignUpScreen>
             Colors.white.withOpacity(0.02),
           ],
         ),
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: Colors.white.withOpacity(0.08),
           width: 1.5,
@@ -1720,7 +1706,7 @@ class _SignUpScreenState extends State<SignUpScreen>
         controller: controller,
         style: const TextStyle(
           color: Colors.white,
-          fontSize: 15,
+          fontSize: 13,
           fontWeight: FontWeight.w500,
         ),
         keyboardType: keyboardType,
@@ -1731,50 +1717,50 @@ class _SignUpScreenState extends State<SignUpScreen>
           labelStyle: TextStyle(
             color: Colors.white.withOpacity(0.4),
             fontWeight: FontWeight.w500,
-            fontSize: 14,
+            fontSize: 12,
           ),
           prefixIcon: Icon(
             icon,
             color: const Color(0xFF92C24A).withOpacity(0.8),
-            size: 22,
+            size: 18,
           ),
           suffixIcon: suffixIcon,
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(12),
             borderSide: BorderSide.none,
           ),
           focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(12),
             borderSide: BorderSide(
               color: const Color(0xFF92C24A).withOpacity(0.5),
               width: 2,
             ),
           ),
           enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(12),
             borderSide: BorderSide.none,
           ),
           errorBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(12),
             borderSide: BorderSide(
               color: Colors.red.withOpacity(0.4),
               width: 1.5,
             ),
           ),
           focusedErrorBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(12),
             borderSide: BorderSide(
               color: Colors.red.withOpacity(0.5),
               width: 2,
             ),
           ),
           contentPadding: const EdgeInsets.symmetric(
-            horizontal: 18,
-            vertical: 16,
+            horizontal: 14,
+            vertical: 12,
           ),
           errorStyle: TextStyle(
             color: Colors.red.shade300,
-            fontSize: 12,
+            fontSize: 10,
             fontWeight: FontWeight.w500,
           ),
         ),
@@ -1812,8 +1798,8 @@ class _PulsingDotState extends State<_PulsingDot>
         CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
       ),
       child: Container(
-        width: 7,
-        height: 7,
+        width: 6,
+        height: 6,
         decoration: const BoxDecoration(
           color: Color(0xFFFF9800),
           shape: BoxShape.circle,

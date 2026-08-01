@@ -48,15 +48,11 @@ class _LoginScreenState extends State<LoginScreen>
 
     // For tablets (width >= 600), use larger size
     if (screenWidth >= 600) {
-      return minDimension * 0.12; // 12% of screen width for tablets
-    }
-    // For large phones
-    else if (screenWidth >= 400) {
-      return minDimension * 0.08; // 8% of screen width for large phones
-    }
-    // For small phones
-    else {
-      return minDimension * 0.06; // 6% of screen width for small phones
+      return minDimension * 0.25; // 25% for tablets
+    } else if (screenWidth >= 400) {
+      return minDimension * 0.18; // 18% for large phones
+    } else {
+      return minDimension * 0.14; // 14% for small phones
     }
   }
 
