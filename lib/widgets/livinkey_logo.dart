@@ -78,32 +78,66 @@ final Offset _topRestCenter = Offset(
 /// ------------------------------------------------------------------
 /// Bounce path waypoints for the small dot.
 ///
-/// Horizontal (dx) values are the ACTUAL measured letter centers, taken
-/// directly from livinkey_base_white.png's pixel data (alpha-channel
-/// connected-component analysis):
-///   L -> x=137   v -> x=366   n -> x=611   k -> x=784   e -> x=950
+/// These were RE-MEASURED directly against livinkey_base_white.png's
+/// alpha channel (the actual 1231x487 canvas) using connected-component
+/// labeling to isolate each glyph, then a column-by-column scan for the
+/// topmost opaque pixel across each glyph's width. That's a different
+/// (and more precise) thing than each glyph's overall bounding-box
+/// center, which is what was used before — and the difference matters
+/// for three of these five letters:
 ///
-/// Vertical (dy) values have been shifted UP from the letters' measured
-/// centers to sit on the TOP EDGE of each letterform instead of landing
-/// mid-letter, per request. Ascender letters (L, k) got a bigger lift
-/// than x-height letters (v, n, e) since they're taller:
-///   L: 215 -> 150 (-65)    k: 210 -> 145 (-65)
-///   v: 244 -> 210 (-34)    n: 242 -> 208 (-34)   e: 244 -> 210 (-34)
-/// If you want this pixel-perfect, re-run the same connected-component
-/// scan and grab each glyph's min-y (top of its bounding box) instead of
-/// its centroid — these are close approximations of that.
+///   • 'v' is TWO strokes. The column scan shows a flat top from
+///     x=291-339 (the FIRST/left leg's own flat top), then a dip down
+///     to the vertex around x=366, then a second flat top from
+///     x=394-440 (the SECOND/last leg's own flat top). You asked for
+///     the LAST leg specifically, so we land on the x=394-440 plateau,
+///     centered at x=417 — not the glyph's overall midpoint (~365),
+///     which falls in the dip between the two legs, and not the first
+///     leg either.
+///   • 'n' has no flat plateau on top — it's a smooth arch connecting
+///     both legs. Its topmost point (the "bow") is a rounded peak
+///     measured at x=632, y=175. That's noticeably right of the
+///     glyph's raw bounding-box center (~611) because the right leg
+///     carries slightly further before the arch crests.
+///   • 'k' has arms flaring out to the right, which drags its bounding-
+///     box center well right of the ascender itself. The column scan
+///     isolates just the ascender's own flat top, x=708-753, centered
+///     at x=730 — not the average of the ascender + arms (~784, the
+///     old value, which was actually landing out past the ascender and
+///     into empty space above the arms).
+///   • 'L' and 'e' didn't have this ambiguity (a single flat-topped
+///     stroke for L, a single rounded crest for e), so their measured
+///     flat-top centers are used directly: L at x=105, e at x=951.
+///
+/// Measured topmost-pixel y for each, in canvas px (before the landing
+/// clearance below is subtracted):
+///   L: y=122   v (last leg): y=180   n (bow): y=175   k: y=111   e: y=176
 ///
 /// Both "i"s are skipped as stops — the dot hops right past each i's stem
 /// without landing on it. The final waypoint is computed above so the dot
 /// lands exactly on the real dot already drawn on the key artwork.
 /// ------------------------------------------------------------------
+
+/// Lifts every letter-landing waypoint up off its glyph's measured top
+/// pixel by roughly the bouncing piece's own squashed radius. Without
+/// this, the ring/dot graphic's CENTER (not its edge) would sit exactly
+/// on the measured top pixel, and the lower half of the graphic would
+/// visibly bury itself into the letter instead of appearing to rest on
+/// top of it. This is one fixed visual constant applied identically to
+/// every letter — it is not a per-letter position guess. It is NOT
+/// applied to the final key-landing waypoint (_topRestCenter), since
+/// that point is already computed to align pixel-for-pixel with the gap
+/// left in the static key artwork, and adding clearance there would
+/// throw that alignment off.
+const double _dotRestClearance = 21; // ≈ (_ringDotNativeH / 2) * squash-at-rest
+
 final List<Offset> _dotPath = [
-  const Offset(133, 15), // 0: Start - directly above the roof apex
-  const Offset(137, 150), // 1: 'L' — top edge
-  const Offset(366, 210), // 2: 'v' — top edge (hops right over the first 'i')
-  const Offset(611, 208), // 3: 'n' — top edge (hops right over the second 'i')
-  const Offset(784, 145), // 4: 'k' — top edge
-  const Offset(950, 210), // 5: 'e' — top edge
+  const Offset(134, 15), // 0: Start - directly above the measured roof apex (x=134)
+  const Offset(105, 122 - _dotRestClearance), // 1: 'L' — top of its vertical stroke
+  const Offset(417, 180 - _dotRestClearance), // 2: 'v' — top of its LAST (right) leg
+  const Offset(632, 175 - _dotRestClearance), // 3: 'n' — top of its bow/arch
+  const Offset(730, 111 - _dotRestClearance), // 4: 'k' — top of its ascender
+  const Offset(951, 176 - _dotRestClearance), // 5: 'e' — top of its crest
   _topRestCenter, // 6: End - lands exactly on the key's own ring + dot
 ];
 
