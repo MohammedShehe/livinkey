@@ -178,6 +178,11 @@ class _GuestSearchScreenState extends State<GuestSearchScreen>
   Widget build(BuildContext context) {
     super.build(context);
     
+    // Get the height of the bottom navigation bar (floating tabs)
+    // This ensures our content clears the navigation bar
+    final double bottomNavHeight = 76.0; // Approximate height of the floating nav bar
+    final double bottomSafeArea = MediaQuery.of(context).padding.bottom;
+
     return Scaffold(
       backgroundColor: kLivinkeyBlack,
       appBar: AppBar(
@@ -402,7 +407,12 @@ class _GuestSearchScreenState extends State<GuestSearchScreen>
 
               Expanded(
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  padding: EdgeInsets.fromLTRB(
+                    20, 
+                    0, 
+                    20, 
+                    bottomNavHeight + bottomSafeArea + 16,
+                  ),
                   child: _searchResults.isEmpty
                       ? Center(
                           child: Column(

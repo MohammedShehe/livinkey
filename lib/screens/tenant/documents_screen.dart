@@ -473,7 +473,10 @@ class _DocumentsScreenState extends State<DocumentsScreen>
             Positioned(
               left: 20,
               right: 20,
-              bottom: navBarClearance + bottomSafeArea,
+              // Lowered the button by increasing the bottom offset
+              // Changed from navBarClearance + bottomSafeArea to 
+              // navBarClearance + bottomSafeArea - 16
+              bottom: navBarClearance + bottomSafeArea - 16,
               child: AnimatedSwitcher(
                 duration: const Duration(milliseconds: 220),
                 transitionBuilder: (child, anim) => FadeTransition(

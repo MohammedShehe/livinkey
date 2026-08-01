@@ -147,6 +147,11 @@ class _MaintenanceScreenState extends State<MaintenanceScreen>
   Widget build(BuildContext context) {
     super.build(context);
 
+    // Get the height of the bottom navigation bar (floating tabs)
+    // This ensures our content clears the navigation bar
+    final double bottomNavHeight = 76.0; // Approximate height of the floating nav bar
+    final double bottomSafeArea = MediaQuery.of(context).padding.bottom;
+
     return WillPopScope(
       onWillPop: _onWillPop,
       child: Scaffold(
@@ -201,7 +206,18 @@ class _MaintenanceScreenState extends State<MaintenanceScreen>
               position: _slideAnimation,
               child: SingleChildScrollView(
                 physics: const BouncingScrollPhysics(),
-                padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
+                // Add extra bottom padding to clear the floating navigation bar
+                // The padding includes: 
+                // - 32 (base bottom padding for the scroll view)
+                // - bottomNavHeight (to clear the floating nav bar)
+                // - bottomSafeArea (to account for device safe areas)
+                // - Extra 16 for comfortable spacing
+                padding: EdgeInsets.fromLTRB(
+                  20, 
+                  8, 
+                  20, 
+                  32 + bottomNavHeight + bottomSafeArea + 16,
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -544,6 +560,7 @@ class _MaintenanceScreenState extends State<MaintenanceScreen>
                               ),
                             ),
                           ),
+                          const SizedBox(height: 20), // Extra bottom padding for the sheet
                         ],
                       ),
                     ),

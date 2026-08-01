@@ -208,6 +208,10 @@ class _GuestHomeScreenState extends State<GuestHomeScreen>
     super.build(context);
 
     final double logoSize = _getLogoSize(context);
+    // Get the height of the bottom navigation bar (floating tabs)
+    // This ensures our content clears the navigation bar
+    final double bottomNavHeight = 76.0; // Approximate height of the floating nav bar
+    final double bottomSafeArea = MediaQuery.of(context).padding.bottom;
 
     return Scaffold(
       backgroundColor: kLivinkeyBlack,
@@ -443,7 +447,12 @@ class _GuestHomeScreenState extends State<GuestHomeScreen>
 
               Expanded(
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  padding: EdgeInsets.fromLTRB(
+                    20, 
+                    0, 
+                    20, 
+                    bottomNavHeight + bottomSafeArea + 16,
+                  ),
                   child: _filteredPgs.isEmpty
                       ? Center(
                           child: Column(
