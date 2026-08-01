@@ -18,15 +18,15 @@ class GuestDrawer extends StatelessWidget {
     
     // For tablets (width >= 600), use larger size
     if (screenWidth >= 600) {
-      return minDimension * 0.25; // 25% of screen width for tablets
+      return minDimension * 0.35; // Increased from 0.25 to 0.35
     }
     // For large phones
     else if (screenWidth >= 400) {
-      return minDimension * 0.20; // 20% of screen width for large phones
+      return minDimension * 0.30; // Increased from 0.20 to 0.30
     }
     // For small phones
     else {
-      return minDimension * 0.18; // 18% of screen width for small phones
+      return minDimension * 0.25; // Increased from 0.18 to 0.25
     }
   }
 
@@ -122,7 +122,7 @@ class GuestDrawer extends StatelessWidget {
 
   Widget _buildHeader(double logoSize) {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 20),
+      padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 20), // Increased vertical padding from 32 to 40
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
@@ -208,6 +208,15 @@ class GuestDrawer extends StatelessWidget {
                 fontWeight: FontWeight.w700,
               ),
             ),
+            const SizedBox(height: 8),
+            Text(
+              'Get in touch with us',
+              style: TextStyle(
+                color: Colors.white.withOpacity(0.5),
+                fontSize: 14,
+                fontWeight: FontWeight.w400,
+              ),
+            ),
             const SizedBox(height: 20),
             _buildContactOption(
               icon: FontAwesomeIcons.whatsapp,
@@ -222,7 +231,15 @@ class GuestDrawer extends StatelessWidget {
               color: const Color(0xFFE4405F),
               title: 'Instagram',
               subtitle: '@livinkey',
-              onTap: () => _launchUrl('https://www.instagram.com/livinkey?igsh=MTc0eWdyeTNvcmFtZA=='),
+              onTap: () => _launchUrl(kGuestInstagramUrl),
+            ),
+            const SizedBox(height: 12),
+            _buildContactOption(
+              icon: FontAwesomeIcons.envelope,
+              color: const Color(0xFFEA4335),
+              title: 'Email',
+              subtitle: 'livinkey@gmail.com',
+              onTap: () => _launchUrl('mailto:livinkey@gmail.com'),
             ),
             const SizedBox(height: 20),
           ],

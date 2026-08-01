@@ -194,12 +194,13 @@ class _GuestHomeScreenState extends State<GuestHomeScreen>
 
   double _getLogoSize(BuildContext context) {
     final double screenWidth = MediaQuery.of(context).size.width;
+    // Even larger logo sizes for all screen types
     if (screenWidth >= 600) {
-      return 72.0;
+      return 120.0; // Increased from 100 to 120
     } else if (screenWidth >= 400) {
-      return 38.0;
+      return 64.0; // Increased from 52 to 64
     } else {
-      return 30.0;
+      return 50.0; // Increased from 42 to 50
     }
   }
 
@@ -220,6 +221,7 @@ class _GuestHomeScreenState extends State<GuestHomeScreen>
         elevation: 0,
         backgroundColor: kLivinkeyBlack,
         surfaceTintColor: Colors.transparent,
+        toolbarHeight: 72, // Increased toolbar height to accommodate larger logo
         leading: IconButton(
           icon: Container(
             padding: const EdgeInsets.all(8),

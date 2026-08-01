@@ -54,12 +54,13 @@ class _HomeScreenState extends State<HomeScreen>
 
   double _getLogoSize(BuildContext context) {
     final double screenWidth = MediaQuery.of(context).size.width;
+    // Much larger logo sizes
     if (screenWidth >= 600) {
-      return 80.0;
+      return 120.0; // Increased from 80 to 120
     } else if (screenWidth >= 400) {
-      return 40.0;
+      return 64.0; // Increased from 40 to 64
     } else {
-      return 32.0;
+      return 50.0; // Increased from 32 to 50
     }
   }
 
@@ -168,12 +169,14 @@ class _HomeScreenState extends State<HomeScreen>
           backgroundColor: kLivinkeyBlack,
           elevation: 0,
           scrolledUnderElevation: 0,
+          toolbarHeight: 80, // Increased toolbar height for larger logo
           leading: IconButton(
             icon: Container(
-              padding: const EdgeInsets.all(6),
+              padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
                 color: Colors.white.withOpacity(0.06),
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.white.withOpacity(0.08)),
               ),
               child: const Icon(Icons.menu_rounded, color: Colors.white, size: 22),
             ),
@@ -194,7 +197,7 @@ class _HomeScreenState extends State<HomeScreen>
           actions: [
             Container(
               margin: const EdgeInsets.only(right: 16),
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.topLeft,
