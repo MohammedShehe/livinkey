@@ -24,6 +24,11 @@ class _PaymentsScreenState extends State<PaymentsScreen>
   late Animation<Offset> _slideAnimation;
   int _selectedPaymentMethod = 0;
 
+  // Payment proof form controllers
+  final TextEditingController _transactionIdController = TextEditingController();
+  final TextEditingController _amountController = TextEditingController();
+  bool _isSubmittingProof = false;
+
   @override
   void initState() {
     super.initState();
@@ -46,6 +51,8 @@ class _PaymentsScreenState extends State<PaymentsScreen>
   @override
   void dispose() {
     _fadeController.dispose();
+    _transactionIdController.dispose();
+    _amountController.dispose();
     super.dispose();
   }
 
@@ -133,6 +140,11 @@ class _PaymentsScreenState extends State<PaymentsScreen>
   Widget build(BuildContext context) {
     super.build(context);
 
+    // Get bottom padding for navigation bar
+    final double bottomSafeArea = MediaQuery.of(context).padding.bottom;
+    // Height reserved so content clears the TenantScreen's floating glass nav bar
+    const double navBarClearance = 96.0;
+
     return WillPopScope(
       onWillPop: _onWillPop,
       child: Scaffold(
@@ -205,7 +217,13 @@ class _PaymentsScreenState extends State<PaymentsScreen>
               position: _slideAnimation,
               child: SingleChildScrollView(
                 physics: const BouncingScrollPhysics(),
-                padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
+                // Add extra bottom padding to ensure content clears the nav bar
+                padding: EdgeInsets.fromLTRB(
+                  20, 
+                  8, 
+                  20, 
+                  32 + navBarClearance + bottomSafeArea,
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -242,6 +260,16 @@ class _PaymentsScreenState extends State<PaymentsScreen>
                     const SizedBox(height: 20),
                     _buildQRSection(),
                     const SizedBox(height: 16),
+
+                    // Meter Section
+                    _buildSectionHeader('Electricity Meter'),
+                    const SizedBox(height: 12),
+                    _buildMeterCard(),
+                    const SizedBox(height: 20),
+
+                    // Submit Payment Proof Button - Now with proper spacing
+                    _buildSubmitProofButton(),
+                    const SizedBox(height: 8),
                   ],
                 ),
               ),
@@ -559,6 +587,197 @@ class _PaymentsScreenState extends State<PaymentsScreen>
     );
   }
 
+  Widget _buildMeterCard() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Colors.blue.withOpacity(0.08),
+            Colors.white.withOpacity(0.02),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: Colors.blue.withOpacity(0.15),
+          width: 1,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.blue.withOpacity(0.12),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Icon(
+                  Icons.electric_bolt_rounded,
+                  color: Colors.blue,
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Current Meter Reading',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    Text(
+                      'August 2026',
+                      style: TextStyle(
+                        color: Colors.white.withOpacity(0.4),
+                        fontSize: 11,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          GestureDetector(
+            onTap: () => _showMeterPreview(),
+            child: Container(
+              width: double.infinity,
+              height: 140,
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.05),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: Colors.white.withOpacity(0.08),
+                  width: 1,
+                ),
+                image: const DecorationImage(
+                  image: NetworkImage(
+                    'https://images.unsplash.com/photo-1563206767-5b18f218e8de?w=400&h=300&fit=crop',
+                  ),
+                  fit: BoxFit.cover,
+                ),
+              ),
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.transparent,
+                      Colors.black.withOpacity(0.5),
+                    ],
+                  ),
+                ),
+                child: Align(
+                  alignment: Alignment.bottomCenter,
+                  child: Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.visibility_rounded,
+                          color: Colors.white.withOpacity(0.8),
+                          size: 18,
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          'Tap to preview',
+                          style: TextStyle(
+                            color: Colors.white.withOpacity(0.8),
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        GestureDetector(
+                          onTap: () {
+                            SnackbarHelper.show(context, 'Meter image downloaded');
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.15),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.download_rounded,
+                                  color: Colors.white.withOpacity(0.8),
+                                  size: 14,
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  'Download',
+                                  style: TextStyle(
+                                    color: Colors.white.withOpacity(0.8),
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSubmitProofButton() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: ElevatedButton(
+        onPressed: () => _showSubmitProofDialog(),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: kLivinkeyGreen,
+          foregroundColor: Colors.black,
+          elevation: 0,
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(14),
+          ),
+        ),
+        child: const Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.upload_file_rounded, size: 20),
+            SizedBox(width: 10),
+            Text(
+              'Submit Payment Proof',
+              style: TextStyle(
+                fontWeight: FontWeight.w700,
+                fontSize: 15,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   void _showQRPreview(Color color) {
     showDialog(
       context: context,
@@ -645,6 +864,373 @@ class _PaymentsScreenState extends State<PaymentsScreen>
     );
   }
 
+  void _showMeterPreview() {
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        backgroundColor: const Color(0xFF141414),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(24),
+          side: BorderSide(color: Colors.white.withOpacity(0.06)),
+        ),
+        child: Container(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                'Electricity Meter',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: -0.2,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Container(
+                width: double.infinity,
+                height: 280,
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.05),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: Colors.white.withOpacity(0.08),
+                    width: 1,
+                  ),
+                  image: const DecorationImage(
+                    image: NetworkImage(
+                      'https://images.unsplash.com/photo-1563206767-5b18f218e8de?w=600&h=400&fit=crop',
+                    ),
+                    fit: BoxFit.cover,
+                  ),
+                ),
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(16),
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Colors.transparent,
+                        Colors.black.withOpacity(0.3),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: () {
+                        SnackbarHelper.show(context, 'Meter image downloaded');
+                      },
+                      icon: const Icon(Icons.download_rounded, color: Colors.black, size: 20),
+                      label: const Text(
+                        'Download',
+                        style: TextStyle(color: Colors.black, fontWeight: FontWeight.w700),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: kLivinkeyGreen,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        elevation: 0,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 6),
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text(
+                  'Close',
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.5),
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showSubmitProofDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) {
+          return Dialog(
+            backgroundColor: const Color(0xFF141414),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(24),
+              side: BorderSide(color: Colors.white.withOpacity(0.06)),
+            ),
+            child: Container(
+              padding: const EdgeInsets.all(24),
+              constraints: const BoxConstraints(maxWidth: 400),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: kLivinkeyGreen.withOpacity(0.12),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: const Icon(
+                          Icons.upload_file_rounded,
+                          color: kLivinkeyGreen,
+                          size: 22,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      const Expanded(
+                        child: Text(
+                          'Submit Payment Proof',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: -0.2,
+                          ),
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: _isSubmittingProof ? null : () => Navigator.pop(context),
+                        icon: Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.06),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Icon(
+                            Icons.close_rounded,
+                            color: Colors.white.withOpacity(0.6),
+                            size: 18,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  
+                  // Transaction ID
+                  TextField(
+                    controller: _transactionIdController,
+                    style: const TextStyle(color: Colors.white),
+                    decoration: InputDecoration(
+                      labelText: 'Transaction ID',
+                      labelStyle: TextStyle(
+                        color: Colors.white.withOpacity(0.5),
+                        fontSize: 13,
+                      ),
+                      filled: true,
+                      fillColor: Colors.white.withOpacity(0.05),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(
+                          color: Colors.white.withOpacity(0.1),
+                        ),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(
+                          color: Colors.white.withOpacity(0.1),
+                        ),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(
+                          color: kLivinkeyGreen,
+                        ),
+                      ),
+                      prefixIcon: Icon(
+                        Icons.receipt_rounded,
+                        color: Colors.white.withOpacity(0.4),
+                        size: 20,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  
+                  // Amount
+                  TextField(
+                    controller: _amountController,
+                    style: const TextStyle(color: Colors.white),
+                    keyboardType: TextInputType.number,
+                    decoration: InputDecoration(
+                      labelText: 'Amount Paid (₹)',
+                      labelStyle: TextStyle(
+                        color: Colors.white.withOpacity(0.5),
+                        fontSize: 13,
+                      ),
+                      filled: true,
+                      fillColor: Colors.white.withOpacity(0.05),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(
+                          color: Colors.white.withOpacity(0.1),
+                        ),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(
+                          color: Colors.white.withOpacity(0.1),
+                        ),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(
+                          color: kLivinkeyGreen,
+                        ),
+                      ),
+                      prefixIcon: Icon(
+                        Icons.currency_rupee_rounded,
+                        color: Colors.white.withOpacity(0.4),
+                        size: 20,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  
+                  // Payment Screenshot Upload
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.05),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: Colors.white.withOpacity(0.1),
+                        width: 1,
+                        style: BorderStyle.solid,
+                      ),
+                    ),
+                    child: Column(
+                      children: [
+                        Icon(
+                          Icons.image_rounded,
+                          color: kLivinkeyGreen.withOpacity(0.6),
+                          size: 32,
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          'Tap to upload payment screenshot',
+                          style: TextStyle(
+                            color: Colors.white.withOpacity(0.5),
+                            fontSize: 12,
+                          ),
+                        ),
+                        Text(
+                          'PNG, JPG up to 5MB',
+                          style: TextStyle(
+                            color: Colors.white.withOpacity(0.3),
+                            fontSize: 10,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextButton(
+                          onPressed: _isSubmittingProof ? null : () {
+                            _transactionIdController.clear();
+                            _amountController.clear();
+                            Navigator.pop(context);
+                          },
+                          child: Text(
+                            'Cancel',
+                            style: TextStyle(
+                              color: Colors.white.withOpacity(0.5),
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        flex: 2,
+                        child: ElevatedButton(
+                          onPressed: _isSubmittingProof ? null : () {
+                            setDialogState(() => _isSubmittingProof = true);
+                            Future.delayed(const Duration(milliseconds: 1200), () {
+                              if (context.mounted) {
+                                setDialogState(() => _isSubmittingProof = false);
+                                Navigator.pop(context);
+                                _transactionIdController.clear();
+                                _amountController.clear();
+                                SnackbarHelper.show(
+                                  context,
+                                  'Payment proof submitted successfully!',
+                                );
+                              }
+                            });
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: kLivinkeyGreen,
+                            foregroundColor: Colors.black,
+                            elevation: 0,
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          child: AnimatedSwitcher(
+                            duration: const Duration(milliseconds: 160),
+                            child: _isSubmittingProof
+                                ? const SizedBox(
+                                    key: ValueKey('spinner'),
+                                    height: 20,
+                                    width: 20,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      color: Colors.black,
+                                    ),
+                                  )
+                                : const Row(
+                                    key: ValueKey('label'),
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(Icons.check_rounded, size: 18),
+                                      SizedBox(width: 8),
+                                      Text(
+                                        'Submit Proof',
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.w700,
+                                          fontSize: 14,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
   void _showPaymentHistory(BuildContext context) {
     showModalBottomSheet(
       context: context,
@@ -691,6 +1277,15 @@ class _PaymentsScreenState extends State<PaymentsScreen>
                       letterSpacing: -0.2,
                     ),
                   ),
+                  const Spacer(),
+                  Text(
+                    '5 payments',
+                    style: TextStyle(
+                      color: Colors.white.withOpacity(0.3),
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
                 ],
               ),
               const SizedBox(height: 16),
@@ -714,14 +1309,54 @@ class _PaymentsScreenState extends State<PaymentsScreen>
 
   Widget _buildHistoryItem(int index) {
     final payments = [
-      {'amount': '₹8,500', 'date': '14 Jul, 2026', 'id': 'TXN-2026-07-14', 'mode': 'UPI'},
-      {'amount': '₹8,500', 'date': '14 Jun, 2026', 'id': 'TXN-2026-06-14', 'mode': 'Cash'},
-      {'amount': '₹8,500', 'date': '14 May, 2026', 'id': 'TXN-2026-05-14', 'mode': 'UPI'},
-      {'amount': '₹8,500', 'date': '14 Apr, 2026', 'id': 'TXN-2026-04-14', 'mode': 'Bank Transfer'},
-      {'amount': '₹8,500', 'date': '14 Mar, 2026', 'id': 'TXN-2026-03-14', 'mode': 'UPI'},
+      {
+        'amount': '₹8,500',
+        'date': '14 Jul, 2026',
+        'id': 'TXN-2026-07-14',
+        'mode': 'UPI',
+        'status': 'paid',
+        'statusLabel': 'Paid',
+      },
+      {
+        'amount': '₹8,500',
+        'date': '14 Jun, 2026',
+        'id': 'TXN-2026-06-14',
+        'mode': 'Cash',
+        'status': 'paid',
+        'statusLabel': 'Paid',
+      },
+      {
+        'amount': '₹8,500',
+        'date': '14 May, 2026',
+        'id': 'TXN-2026-05-14',
+        'mode': 'UPI',
+        'status': 'verifying',
+        'statusLabel': 'Verifying...',
+      },
+      {
+        'amount': '₹8,500',
+        'date': '14 Apr, 2026',
+        'id': 'TXN-2026-04-14',
+        'mode': 'Bank Transfer',
+        'status': 'paid',
+        'statusLabel': 'Paid',
+      },
+      {
+        'amount': '₹8,500',
+        'date': '14 Mar, 2026',
+        'id': 'TXN-2026-03-14',
+        'mode': 'UPI',
+        'status': 'verifying',
+        'statusLabel': 'Verifying...',
+      },
     ];
 
     final payment = payments[index % payments.length];
+    final isPaid = payment['status'] == 'paid';
+    final statusColor = isPaid ? kLivinkeyGreen : Colors.orange;
+    final statusBgColor = isPaid 
+        ? kLivinkeyGreen.withOpacity(0.15) 
+        : Colors.orange.withOpacity(0.15);
 
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 14),
@@ -744,13 +1379,33 @@ class _PaymentsScreenState extends State<PaymentsScreen>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  payment['amount']!,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                  ),
+                Row(
+                  children: [
+                    Text(
+                      payment['amount']!,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: statusBgColor,
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Text(
+                        payment['statusLabel']!,
+                        style: TextStyle(
+                          color: statusColor,
+                          fontSize: 10,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 2),
                 Text(
@@ -843,7 +1498,7 @@ class _PaymentsScreenState extends State<PaymentsScreen>
                     _buildReceiptRow('Date', payment['date']!),
                     _buildReceiptRow('Transaction ID', payment['id']!),
                     _buildReceiptRow('Payment Mode', payment['mode']!),
-                    _buildReceiptRow('Status', 'Completed', isStatus: true),
+                    _buildReceiptRow('Status', payment['statusLabel']!, isStatus: true),
                   ],
                 ),
               ),
