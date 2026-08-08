@@ -16,6 +16,11 @@ class DocumentCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    // Adjust card padding based on screen size
+    final double horizontalPadding = screenWidth > 600 ? 12 : 10;
+    final double verticalPadding = screenWidth > 600 ? 14 : 12;
+
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(16),
@@ -35,24 +40,19 @@ class DocumentCard extends StatelessWidget {
             width: 1,
           ),
         ),
-        // LayoutBuilder reads the ACTUAL box this card is given (by the
-        // GridView's childAspectRatio, the screen width, crossAxisCount,
-        // etc.) instead of assuming a fixed size. Everything below is
-        // sized off `constraints` so the icon/photo square and its
-        // contents always fit the card they're actually drawn in,
-        // whatever that turns out to be on a given device.
         child: LayoutBuilder(
           builder: (context, constraints) {
-            // Icon/photo square: scales with the card, but is clamped so
-            // it never gets so big it crowds out the label on a tall
-            // narrow card, and never shrinks below a size where the
-            // emoji/icon inside it would look cramped.
-            final double shortestSide =
-                math.min(constraints.maxWidth, constraints.maxHeight);
-            final double boxSize = (shortestSide * 0.55).clamp(48.0, 84.0);
+            // Responsive sizing based on available space
+            final double shortestSide = math.min(constraints.maxWidth, constraints.maxHeight);
+            final double boxSize = (shortestSide * 0.50).clamp(44.0, 80.0);
+            final double iconSize = boxSize * 0.5;
+            final double fontSize = screenWidth > 600 ? 13 : 12;
 
             return Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
+              padding: EdgeInsets.symmetric(
+                horizontal: horizontalPadding,
+                vertical: verticalPadding,
+              ),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 mainAxisSize: MainAxisSize.min,
@@ -74,9 +74,6 @@ class DocumentCard extends StatelessWidget {
                           width: 1,
                         ),
                       ),
-                      // FittedBox guarantees the emoji glyph itself scales
-                      // down along with the box on small cards instead of
-                      // being clipped/overflowing at a fixed 32px.
                       child: Center(
                         child: FittedBox(
                           fit: BoxFit.scaleDown,
@@ -84,7 +81,7 @@ class DocumentCard extends StatelessWidget {
                             padding: const EdgeInsets.all(8.0),
                             child: Text(
                               doc['icon']!,
-                              style: const TextStyle(fontSize: 32),
+                              style: TextStyle(fontSize: iconSize.clamp(24.0, 36.0)),
                             ),
                           ),
                         ),
@@ -113,7 +110,7 @@ class DocumentCard extends StatelessWidget {
                               Icon(
                                 Icons.cloud_upload_rounded,
                                 color: kLivinkeyGreen.withOpacity(0.5),
-                                size: 28,
+                                size: iconSize.clamp(20.0, 28.0),
                               ),
                               const SizedBox(height: 4),
                               Text(
@@ -135,7 +132,7 @@ class DocumentCard extends StatelessWidget {
                       doc['label']!,
                       style: TextStyle(
                         color: Colors.white.withOpacity(0.8),
-                        fontSize: 12,
+                        fontSize: fontSize,
                         fontWeight: FontWeight.w500,
                       ),
                       textAlign: TextAlign.center,

@@ -26,16 +26,10 @@ class _DocumentsScreenState extends State<DocumentsScreen>
   bool _isInternational = false;
 
   // ---- Selection state -----------------------------------------------
-  // Holds the indices (within the currently visible `_docs` list) that
-  // are selected. Selection mode is simply "is this set non-empty".
   final Set<int> _selectedIndices = {};
   bool get _isSelectionMode => _selectedIndices.isNotEmpty;
 
   // ---- Download / loading state ---------------------------------------
-  // Tracks whether the "Download All" or "Download (n)" action is
-  // in-flight, so the pinned bar can show a spinner in place of its
-  // icon+label and ignore further taps until the (simulated) download
-  // finishes.
   bool _isDownloadingAll = false;
   bool _isDownloadingSelected = false;
 
@@ -82,8 +76,6 @@ class _DocumentsScreenState extends State<DocumentsScreen>
   }
 
   Future<bool> _onWillPop() async {
-    // If the user is mid-selection, back should exit selection mode
-    // first instead of immediately trying to leave/exit the app.
     if (_isSelectionMode) {
       setState(() => _selectedIndices.clear());
       return false;
@@ -185,9 +177,6 @@ class _DocumentsScreenState extends State<DocumentsScreen>
 
   void _handleCardTap(int index) {
     if (_isSelectionMode) {
-      // While in selection mode, a normal tap toggles that card instead
-      // of opening the preview — matches the Gmail/Photos-style pattern
-      // the request asked for.
       _toggleSelection(index);
     } else {
       _showDocumentPreview(_docs[index]['label']!);
@@ -212,11 +201,6 @@ class _DocumentsScreenState extends State<DocumentsScreen>
   }
 
   // ---- Download actions --------------------------------------------------
-  // Both of these flip a loading flag on, simulate the download with a
-  // short delay (swap this for your real download/upload-to-device call),
-  // then flip it back off and surface a confirmation snackbar. The
-  // pinned bar below reads these flags to show a spinner instead of its
-  // normal icon+label while the action is in flight.
 
   Future<void> _handleDownloadAll() async {
     if (_isDownloadingAll) return;
@@ -251,10 +235,6 @@ class _DocumentsScreenState extends State<DocumentsScreen>
   Widget build(BuildContext context) {
     super.build(context);
     final double bottomSafeArea = MediaQuery.of(context).padding.bottom;
-    // Height reserved so content — and our pinned action bar — clears the
-    // TenantScreen's floating glass nav bar (Padding(16) + ~73px bar).
-    // This is what was missing before: the buttons sat inside the
-    // scrolling content and ended up rendered underneath that nav bar.
     const double navBarClearance = 96.0;
 
     return WillPopScope(
@@ -371,8 +351,6 @@ class _DocumentsScreenState extends State<DocumentsScreen>
                     onChanged: (value) {
                       setState(() {
                         _isInternational = value == 'International';
-                        // Document set changed — indices from the old
-                        // list no longer make sense, so drop selection.
                         _selectedIndices.clear();
                       });
                       HapticFeedback.selectionClick();
@@ -403,9 +381,6 @@ class _DocumentsScreenState extends State<DocumentsScreen>
                   position: _slideAnimation,
                   child: SingleChildScrollView(
                     physics: const BouncingScrollPhysics(),
-                    // Extra bottom padding so the last row of documents
-                    // can scroll clear of BOTH the outer floating nav bar
-                    // AND our own pinned action bar sitting above it.
                     padding: EdgeInsets.fromLTRB(
                       20,
                       8,
@@ -470,41 +445,46 @@ class _DocumentsScreenState extends State<DocumentsScreen>
                         _buildSectionHeader('My Documents'),
                         const SizedBox(height: 14),
 
-                        GridView.builder(
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 2,
-                            crossAxisSpacing: 12,
-                            mainAxisSpacing: 12,
-                            // Adjusted to better match portrait document cards
-                            // The document preview inside each card is now a portrait
-                            // rectangle (130px height), so we make the card itself
-                            // appropriately taller than wide.
-                            childAspectRatio: 0.72,
-                          ),
-                          itemCount: _docs.length,
-                          itemBuilder: (context, index) {
-                            final hasPhoto = DateTime.now().millisecondsSinceEpoch % 3 != 0;
-                            final bool isSelected = _selectedIndices.contains(index);
-
-                            return _SelectableDocument(
-                              isSelected: isSelected,
-                              isSelectionMode: _isSelectionMode,
-                              onLongPress: () => _toggleSelection(index),
-                              child: DocumentCard(
-                                doc: _docs[index],
-                                hasPhoto: hasPhoto,
-                                onTap: () => _handleCardTap(index),
+                        // Responsive Grid - adapts to screen size
+                        LayoutBuilder(
+                          builder: (context, constraints) {
+                            // Determine crossAxisCount based on available width
+                            int crossAxisCount = 2;
+                            if (constraints.maxWidth > 600) {
+                              crossAxisCount = 3;
+                            }
+                            if (constraints.maxWidth > 900) {
+                              crossAxisCount = 4;
+                            }
+                            
+                            return GridView.builder(
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: crossAxisCount,
+                                crossAxisSpacing: 12,
+                                mainAxisSpacing: 12,
+                                childAspectRatio: 0.75,
                               ),
+                              itemCount: _docs.length,
+                              itemBuilder: (context, index) {
+                                final hasPhoto = DateTime.now().millisecondsSinceEpoch % 3 != 0;
+                                final bool isSelected = _selectedIndices.contains(index);
+
+                                return _SelectableDocument(
+                                  isSelected: isSelected,
+                                  isSelectionMode: _isSelectionMode,
+                                  onLongPress: () => _toggleSelection(index),
+                                  child: DocumentCard(
+                                    doc: _docs[index],
+                                    hasPhoto: hasPhoto,
+                                    onTap: () => _handleCardTap(index),
+                                  ),
+                                );
+                              },
                             );
                           },
                         ),
-
-                        // Buttons were removed from here — they now live
-                        // in the pinned bar below, which stays visible
-                        // above the floating nav bar at all times instead
-                        // of scrolling out of view / behind it.
                       ],
                     ),
                   ),
@@ -513,15 +493,9 @@ class _DocumentsScreenState extends State<DocumentsScreen>
             ),
 
             // ---- Pinned action bar --------------------------------------
-            // Always visible regardless of scroll position or document
-            // count. Positioned with enough bottom clearance to sit above
-            // TenantScreen's floating glass nav bar rather than behind it.
             Positioned(
               left: 20,
               right: 20,
-              // Lowered the button by increasing the bottom offset
-              // Changed from navBarClearance + bottomSafeArea to 
-              // navBarClearance + bottomSafeArea - 16
               bottom: navBarClearance + bottomSafeArea - 16,
               child: AnimatedSwitcher(
                 duration: const Duration(milliseconds: 220),
@@ -546,10 +520,7 @@ class _DocumentsScreenState extends State<DocumentsScreen>
     );
   }
 
-  // Bar shown normally (no selection active): "Download All" front and
-  // center, always reachable. While the download is in flight, the
-  // icon+label are swapped for a small spinner and the button ignores
-  // further taps (onPressed: null).
+  // Bar shown normally (no selection active)
   Widget _buildDefaultBar({Key? key}) {
     return _FloatingBarShell(
       key: key,
@@ -591,11 +562,7 @@ class _DocumentsScreenState extends State<DocumentsScreen>
     );
   }
 
-  // Bar shown while one or more documents are selected: lets the user
-  // download just the selection, or bail out back to the default bar.
-  // The Download button shows a spinner in place of its icon+label
-  // while the (simulated) download is running; Cancel is disabled at
-  // the same time so the user can't clear the selection mid-download.
+  // Bar shown while one or more documents are selected
   Widget _buildSelectionBar({Key? key}) {
     return _FloatingBarShell(
       key: key,
@@ -689,12 +656,6 @@ class _DocumentsScreenState extends State<DocumentsScreen>
     );
   }
 
-  // Preview dialog now manages its own tiny bit of loading state via
-  // StatefulBuilder, so tapping "Download" inside it swaps the button's
-  // icon+label for a spinner instead of just firing the snackbar
-  // instantly. The dialog can't use setState() from the parent screen
-  // (it isn't rebuilt with it), so StatefulBuilder's own setState is
-  // what's used here.
   void _showDocumentPreview(String label) {
     showDialog(
       context: context,
@@ -774,9 +735,9 @@ class _DocumentsScreenState extends State<DocumentsScreen>
                     ),
                     child: Center(
                       child: Text(
-                        label == 'e-FRRO' ? '📄' : '📄',
+                        '📄',
                         style: TextStyle(
-                          fontSize: label == 'e-FRRO' ? 60 : 60,
+                          fontSize: 60,
                           color: kLivinkeyGreen.withOpacity(0.4),
                         ),
                       ),
@@ -833,10 +794,7 @@ class _DocumentsScreenState extends State<DocumentsScreen>
   }
 }
 
-/// Frosted-glass shell for the pinned bottom bar, matching the visual
-/// language of TenantScreen's own floating nav bar (blur + translucent
-/// fill + soft shadow) so the action bar reads as part of the same
-/// design system rather than a plain button dropped on the background.
+/// Frosted-glass shell for the pinned bottom bar
 class _FloatingBarShell extends StatelessWidget {
   final Widget child;
 
@@ -872,13 +830,7 @@ class _FloatingBarShell extends StatelessWidget {
   }
 }
 
-/// Wraps a [DocumentCard] (or any card widget) with long-press-to-select
-/// behavior: a checkmark badge and a colored highlight border/scrim when
-/// selected. Doesn't require any changes to DocumentCard itself — the
-/// selection UI is layered on top externally, and the long-press is
-/// caught by this wrapper's own GestureDetector (Flutter's gesture arena
-/// lets it fire as long as DocumentCard's internal InkWell doesn't also
-/// claim long-press).
+/// Wraps a DocumentCard with long-press-to-select behavior
 class _SelectableDocument extends StatelessWidget {
   final Widget child;
   final bool isSelected;
@@ -906,8 +858,6 @@ class _SelectableDocument extends StatelessWidget {
             child: child,
           ),
 
-          // Selection tint + border, drawn on top without needing to
-          // know DocumentCard's internal shape/radius.
           if (isSelected)
             Positioned.fill(
               child: IgnorePointer(
@@ -922,7 +872,6 @@ class _SelectableDocument extends StatelessWidget {
               ),
             ),
 
-          // Checkmark badge, top-right corner.
           Positioned(
             top: 8,
             right: 8,
