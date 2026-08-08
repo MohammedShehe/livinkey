@@ -45,6 +45,7 @@ class _DocumentsScreenState extends State<DocumentsScreen>
     {'label': 'Visa Photo', 'icon': '🛂'},
     {'label': 'Arrival Stamp Photo', 'icon': '📌'},
     {'label': 'C-Form Photo', 'icon': '📋'},
+    {'label': 'e-FRRO', 'icon': '📄'},
     {'label': 'University ID Photo', 'icon': '🎓'},
   ];
 
@@ -773,9 +774,9 @@ class _DocumentsScreenState extends State<DocumentsScreen>
                     ),
                     child: Center(
                       child: Text(
-                        '📄',
+                        label == 'e-FRRO' ? '📄' : '📄',
                         style: TextStyle(
-                          fontSize: 60,
+                          fontSize: label == 'e-FRRO' ? 60 : 60,
                           color: kLivinkeyGreen.withOpacity(0.4),
                         ),
                       ),
